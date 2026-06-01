@@ -577,18 +577,18 @@ footer{background:#0a1228;border-top:none;padding:64px 5% 100px}
       </div>
     </div>
     <div class="hero-right">
-      <div class="worker-card">
+      <div class="worker-card" id="worker-card">
         <div class="card-head">
-          <div class="avatar">MR</div>
+          <div class="avatar" id="wc-avatar">MR</div>
           <div>
-            <div class="cname">Mike Robertson</div>
-            <div class="crole">Journeyman Pipefitter · 12 yrs exp.</div>
-            <div class="cloc">Fort McMurray, AB · Available Now</div>
+            <div class="cname" id="wc-name">Mike Robertson</div>
+            <div class="crole" id="wc-role">Journeyman Pipefitter · 12 yrs exp.</div>
+            <div class="cloc" id="wc-loc">Fort McMurray, AB · Available Now</div>
           </div>
           <div class="ver">✓ Verified</div>
         </div>
         <div class="cert-label">Safety Certifications</div>
-        <div class="certs">
+        <div class="certs" id="wc-certs">
           <div class="cert"><div><div class="cn">H2S Alive</div><div class="cd">Expires Nov 14, 2026</div></div><span class="tag tg">Valid</span></div>
           <div class="cert"><div><div class="cn">First Aid — Level 3</div><div class="cd">Expired Jul 3, 2025</div></div><span class="tag tr">Expired</span></div>
           <div class="cert"><div><div class="cn">WHMIS 2018</div><div class="cd">Expires Aug 19, 2025</div></div><span class="tag ty">Expiring Soon</span></div>
@@ -950,6 +950,102 @@ footer{background:#0a1228;border-top:none;padding:64px 5% 100px}
 </nav>
 
 <script>
+// Worker card rotation
+const workers = [
+  {
+    initials:'MR', avatar:'#1e3a8a',
+    name:'Mike Robertson',
+    role:'Journeyman Pipefitter · 12 yrs exp.',
+    loc:'Fort McMurray, AB · Available Now',
+    certs:[
+      {n:'H2S Alive', d:'Expires Nov 14, 2026', tag:'Valid', cls:'tg'},
+      {n:'First Aid — Level 3', d:'Expired Jul 3, 2025', tag:'Expired', cls:'tr'},
+      {n:'WHMIS 2018', d:'Expires Aug 19, 2025', tag:'Expiring Soon', cls:'ty'},
+      {n:'Confined Space Entry', d:'Expires Mar 28, 2027', tag:'Valid', cls:'tg'},
+      {n:'Ground Disturbance II', d:'Expires Jan 10, 2027', tag:'Valid', cls:'tg'},
+    ]
+  },
+  {
+    initials:'JT', avatar:'#0369a1',
+    name:'Jason Tran',
+    role:'Red Seal Welder · 8 yrs exp.',
+    loc:'Edmonton, AB · Available This Week',
+    certs:[
+      {n:'H2S Alive', d:'Expires Mar 22, 2027', tag:'Valid', cls:'tg'},
+      {n:'WHMIS 2018', d:'Expires Sep 5, 2026', tag:'Valid', cls:'tg'},
+      {n:'First Aid — Level 2', d:'Expires Feb 10, 2026', tag:'Valid', cls:'tg'},
+      {n:'TDG', d:'Expires Oct 12, 2026', tag:'Valid', cls:'tg'},
+      {n:'Fall Protection', d:'Expires Nov 30, 2025', tag:'Expiring Soon', cls:'ty'},
+    ]
+  },
+  {
+    initials:'SP', avatar:'#475569',
+    name:'Sarah Payne',
+    role:'Instrumentation Tech · 6 yrs exp.',
+    loc:'Calgary, AB · Available Now',
+    certs:[
+      {n:'H2S Alive', d:'Expires Jul 8, 2027', tag:'Valid', cls:'tg'},
+      {n:'WHMIS 2018', d:'Expires Apr 19, 2026', tag:'Valid', cls:'tg'},
+      {n:'Confined Space Entry', d:'Expires Jan 15, 2027', tag:'Valid', cls:'tg'},
+      {n:'First Aid — Level 3', d:'Expires Dec 4, 2025', tag:'Expiring Soon', cls:'ty'},
+      {n:'Electrical Safety', d:'Expires Aug 22, 2026', tag:'Valid', cls:'tg'},
+    ]
+  },
+  {
+    initials:'CW', avatar:'#065f46',
+    name:'Craig Wallace',
+    role:'Red Seal Pipefitter · 18 yrs exp.',
+    loc:'Edson, AB · Available Now',
+    certs:[
+      {n:'H2S Alive', d:'Expires Oct 11, 2026', tag:'Valid', cls:'tg'},
+      {n:'WHMIS 2018', d:'Expires May 7, 2026', tag:'Valid', cls:'tg'},
+      {n:'First Aid — Level 3', d:'Expires Mar 15, 2027', tag:'Valid', cls:'tg'},
+      {n:'Rigging & Hoisting', d:'Expires Sep 28, 2026', tag:'Valid', cls:'tg'},
+      {n:'Confined Space Entry', d:'Expires Feb 4, 2027', tag:'Valid', cls:'tg'},
+    ]
+  },
+  {
+    initials:'BK', avatar:'#334155',
+    name:'Brad Kowalski',
+    role:'Journeyman Electrician · 15 yrs exp.',
+    loc:'Grande Prairie, AB · Available Now',
+    certs:[
+      {n:'H2S Alive', d:'Expires Jan 18, 2027', tag:'Valid', cls:'tg'},
+      {n:'WHMIS 2018', d:'Expires Jun 22, 2026', tag:'Valid', cls:'tg'},
+      {n:'First Aid — Level 3', d:'Expires Aug 9, 2026', tag:'Valid', cls:'tg'},
+      {n:'Ground Disturbance II', d:'Expires Nov 14, 2026', tag:'Valid', cls:'tg'},
+      {n:'Energy Isolation', d:'Expires Apr 30, 2027', tag:'Valid', cls:'tg'},
+    ]
+  },
+];
+
+let wIdx = 0;
+function rotateWorker(){
+  wIdx = (wIdx + 1) % workers.length;
+  const w = workers[wIdx];
+  const card = document.getElementById('worker-card');
+  if(!card) return;
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(8px)';
+  setTimeout(() => {
+    document.getElementById('wc-avatar').textContent = w.initials;
+    document.getElementById('wc-avatar').style.background = w.avatar;
+    document.getElementById('wc-name').textContent = w.name;
+    document.getElementById('wc-role').textContent = w.role;
+    document.getElementById('wc-loc').textContent = w.loc;
+    document.getElementById('wc-certs').innerHTML = w.certs.map(c =>
+      `<div class="cert"><div><div class="cn">${c.n}</div><div class="cd">${c.d}</div></div><span class="tag ${c.cls}">${c.tag}</span></div>`
+    ).join('');
+    card.style.opacity = '1';
+    card.style.transform = 'translateY(0)';
+  }, 400);
+}
+const wCard = document.getElementById('worker-card');
+if(wCard){
+  wCard.style.transition = 'opacity .4s ease, transform .4s ease';
+  setInterval(rotateWorker, 15000);
+}
+
 // Billing toggle
 let isAnnual = false;
 function toggleBilling(){
