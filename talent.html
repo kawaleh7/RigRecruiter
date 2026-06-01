@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — Find Workers</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f1f5f9;color:#0f172a;display:flex;min-height:100vh;overflow-x:hidden}
+:root{
+  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
+  --navy:#0f172a;--border:#cbd5e1;--text:#0f172a;--muted:#475569;--light:#94a3b8;
+  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--red-bg:#fef2f2;
+  --amber:#92400e;--amber-bg:#fefce8;--gold:#b8923a;--gold-border:#d4b06a;
+  --shadow:0 2px 8px rgba(15,23,42,.08);--shadow-md:0 6px 20px rgba(15,23,42,.12);--shadow-lg:0 12px 40px rgba(15,23,42,.18);
+}
+
+/* ── SIDEBAR ─────────────────────────── */
+.sidebar{width:224px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sb-logo{padding:18px 16px 0;display:flex;align-items:center;gap:9px;text-decoration:none;margin-bottom:24px}
+.logo-mark{width:32px;height:32px;background:var(--blue);border-radius:7px;display:grid;place-items:center;flex-shrink:0}
+.logo-mark svg{width:15px;height:15px;fill:#fff}
+.logo-name{font-size:1.1rem;font-weight:800;color:var(--text)}
+.logo-name span{color:var(--blue-mid)}
+.sb-section{padding:0 10px;margin-bottom:4px}
+.sb-label{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--light);padding:0 8px;margin-bottom:5px}
+.sb-link{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:.845rem;font-weight:500;color:var(--muted);text-decoration:none;transition:all .15s;margin-bottom:2px;cursor:pointer}
+.sb-link:hover{background:#f1f5f9;color:var(--text)}
+.sb-link.active{background:var(--blue-lt);color:var(--blue);font-weight:600}
+.sb-link svg{width:16px;height:16px;flex-shrink:0}
+.sb-divider{height:1px;background:var(--border);margin:10px 18px}
+.sb-bottom{margin-top:auto;padding:14px 10px}
+.sb-user{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:background .15s}
+.sb-user:hover{background:#f1f5f9}
+.sb-avatar{width:32px;height:32px;border-radius:8px;background:var(--navy);display:grid;place-items:center;font-weight:800;font-size:.68rem;color:#fff;flex-shrink:0}
+.sb-uname{font-size:.82rem;font-weight:600;color:var(--text)}
+.sb-urole{font-size:.7rem;color:var(--muted)}
+.plan-chip{background:var(--gold-border);color:#6b4200;border-radius:4px;padding:1px 6px;font-size:.62rem;font-weight:700;text-transform:uppercase}
+
+/* ── MAIN ────────────────────────────── */
+.main{margin-left:224px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* ── TOPBAR ──────────────────────────── */
+.topbar{
+  background:#fff;border-bottom:1px solid var(--border);
+  padding:0 24px;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:90;
+}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar-title{font-size:1rem;font-weight:700;color:var(--text)}
+.results-pill{background:#f1f5f9;border:1px solid var(--border);border-radius:100px;padding:3px 10px;font-size:.75rem;font-weight:600;color:var(--muted)}
+
+/* Shortlist button */
+.shortlist-btn{
+  position:relative;display:flex;align-items:center;gap:8px;
+  padding:9px 20px;border-radius:8px;
+  background:var(--navy);color:#fff;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;font-weight:700;
+  cursor:pointer;border:none;transition:all .2s;
+}
+.shortlist-btn:hover{background:#1e2d45}
+.shortlist-badge{
+  position:absolute;top:-7px;right:-7px;
+  width:20px;height:20px;border-radius:50%;
+  background:#dc2626;color:#fff;
+  font-size:.65rem;font-weight:800;
+  display:none;place-items:center;
+  border:2px solid #fff;
+}
+.shortlist-badge.show{display:grid}
+
+/* ── LAYOUT ──────────────────────────── */
+.portal-body{display:flex;flex:1;overflow:hidden}
+
+/* ── FILTER PANEL ────────────────────── */
+.filter-panel{
+  width:236px;flex-shrink:0;background:#fff;
+  border-right:1px solid var(--border);
+  padding:18px 14px;overflow-y:auto;
+}
+.fp-head{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:14px}
+.search-box{
+  display:flex;align-items:center;gap:8px;
+  border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;
+  margin-bottom:14px;transition:border-color .15s;
+}
+.search-box:focus-within{border-color:var(--blue)}
+.search-box input{border:none;outline:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;color:var(--text);width:100%}
+.search-box input::placeholder{color:var(--light)}
+.fp-section{margin-bottom:16px}
+.fp-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin-bottom:9px}
+.fp-check{display:flex;align-items:center;gap:8px;margin-bottom:7px;cursor:pointer}
+.fp-check input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
+.fp-check span{font-size:.82rem;color:var(--text)}
+.fp-count{font-size:.72rem;color:var(--light);margin-left:auto}
+.fp-divider{height:1px;background:var(--border);margin:12px 0}
+.range-wrap{padding:0 2px}
+.range-labels{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);margin-bottom:6px}
+.range-val{font-weight:700;color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.fp-apply{width:100%;padding:9px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;margin-top:6px;transition:background .15s}
+.fp-apply:hover{background:var(--blue-mid)}
+.fp-clear{width:100%;padding:8px;background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;margin-top:6px}
+
+/* ── WORKER GRID ─────────────────────── */
+.workers-wrap{flex:1;overflow-y:auto;padding:20px}
+.grid-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.grid-head-left{display:flex;align-items:center;gap:10px}
+.sort-select{padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;color:var(--text);outline:none;background:#fff;cursor:pointer}
+
+/* AVAILABILITY TABS */
+.avail-tabs{display:flex;gap:6px;margin-bottom:18px}
+.atab{
+  padding:6px 14px;border-radius:100px;border:1.5px solid var(--border);
+  background:#fff;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.78rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.atab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.atab-count{
+  display:inline-block;margin-left:5px;
+  background:rgba(255,255,255,.25);border-radius:100px;
+  padding:0 6px;font-size:.65rem;
+}
+.atab:not(.on) .atab-count{background:var(--border);color:var(--muted)}
+
+.workers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+
+/* ── WORKER CARD ─────────────────────── */
+.wcard{
+  background:#fff;border-radius:12px;
+  border:1.5px solid var(--gold-border);
+  padding:18px;
+  transition:transform .2s,box-shadow .2s,border-color .2s;
+  position:relative;
+  cursor:pointer;
+}
+.wcard:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.wcard.added{border-color:var(--blue);background:#fafcff}
+
+/* Availability ribbon */
+.avail-ribbon{
+  position:absolute;top:14px;right:14px;
+  border-radius:6px;padding:3px 9px;
+  font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;
+}
+.avail-now{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
+.avail-soon{background:var(--amber-bg);color:var(--amber);border:1px solid #fcd34d}
+.avail-no{background:#f1f5f9;color:var(--muted);border:1px solid var(--border)}
+
+.wcard-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;padding-right:80px}
+.wavatar{
+  width:44px;height:44px;border-radius:10px;
+  background:var(--blue);display:grid;place-items:center;
+  font-weight:800;font-size:.85rem;color:#fff;flex-shrink:0;
+}
+.wname{font-weight:700;font-size:.9rem;color:var(--text)}
+.wrole{font-size:.75rem;color:var(--muted);margin-top:2px}
+.wloc{font-size:.7rem;color:var(--light);margin-top:2px}
+.wexp{font-size:.7rem;color:var(--muted);margin-top:2px;font-weight:600}
+
+/* Cert chips */
+.cert-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px}
+.chip{
+  display:inline-flex;align-items:center;gap:3px;
+  border-radius:100px;padding:2px 8px;
+  font-size:.67rem;font-weight:700;
+}
+.chip-ok{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
+.chip-exp{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
+.chip-warn{background:var(--amber-bg);color:var(--amber);border:1px solid #fcd34d}
+.chip-na{background:#f1f5f9;color:var(--light);border:1px solid var(--border)}
+
+/* Card actions */
+.wcard-actions{display:flex;gap:7px;padding-top:12px;border-top:1px solid #f1f5f9}
+.btn-view{
+  flex:1;padding:8px;border-radius:7px;border:1.5px solid var(--border);
+  background:#fff;color:var(--muted);font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s;
+}
+.btn-view:hover{color:var(--text);border-color:#94a3b8}
+.btn-add{
+  flex:2;padding:8px 14px;border-radius:7px;border:none;
+  background:var(--blue);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-add:hover{background:var(--blue-mid)}
+.btn-add.added-state{background:var(--green-bg);color:var(--green);border:1.5px solid #86efac}
+.btn-add.added-state:hover{background:#dcfce7}
+
+/* ── SHORTLIST DRAWER ────────────────── */
+.drawer-overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,.35);
+  z-index:199;opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.drawer-overlay.open{opacity:1;pointer-events:all}
+
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;
+  width:400px;background:#fff;
+  border-left:1px solid var(--border);
+  z-index:200;
+  transform:translateX(100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+  box-shadow:var(--shadow-lg);
+}
+.drawer.open{transform:translateX(0)}
+
+.drawer-head{
+  padding:20px 22px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.drawer-title{font-size:1rem;font-weight:800;color:var(--text)}
+.drawer-sub{font-size:.78rem;color:var(--muted);margin-top:2px}
+.close-btn{
+  width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);
+  background:#fff;display:grid;place-items:center;cursor:pointer;
+  transition:all .15s;flex-shrink:0;
+}
+.close-btn:hover{background:#f1f5f9}
+
+.drawer-body{flex:1;overflow-y:auto;padding:16px 22px}
+
+/* Drawer worker row */
+.dl-row{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 0;border-bottom:1px solid #f8fafc;
+}
+.dl-row:last-child{border-bottom:none}
+.dl-avatar{
+  width:42px;height:42px;border-radius:10px;
+  background:var(--blue);display:grid;place-items:center;
+  font-weight:800;font-size:.82rem;color:#fff;flex-shrink:0;
+}
+.dl-name{font-size:.875rem;font-weight:700;color:var(--text)}
+.dl-role{font-size:.75rem;color:var(--muted);margin-top:1px}
+.dl-avail{font-size:.68rem;font-weight:700;color:var(--green);margin-top:2px}
+.dl-actions{margin-left:auto;display:flex;gap:6px;flex-shrink:0}
+.dl-btn{
+  width:30px;height:30px;border-radius:7px;border:1.5px solid var(--border);
+  background:#fff;display:grid;place-items:center;cursor:pointer;
+  transition:all .15s;
+}
+.dl-btn:hover{background:#f1f5f9}
+.dl-btn.remove:hover{background:var(--red-bg);border-color:#fda4af}
+
+/* Cert summary in drawer */
+.dl-certs{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+
+/* Empty state */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 20px;text-align:center;
+  flex:1;
+}
+.empty-icon{width:56px;height:56px;background:#f1f5f9;border-radius:12px;display:grid;place-items:center;margin:0 auto 14px}
+.empty-title{font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.empty-sub{font-size:.82rem;color:var(--muted);line-height:1.6;max-width:240px}
+
+.drawer-foot{
+  padding:16px 22px;border-top:1px solid var(--border);
+  flex-shrink:0;background:#fff;
+}
+.drawer-foot-actions{display:flex;gap:8px}
+.btn-contact-all{
+  flex:1;padding:11px;background:var(--blue);color:#fff;
+  border:none;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.875rem;font-weight:700;cursor:pointer;transition:background .15s;
+}
+.btn-contact-all:hover{background:var(--blue-mid)}
+.btn-contact-all:disabled{background:#e2e8f0;color:var(--light);cursor:not-allowed}
+.btn-clear-all{
+  padding:11px 16px;background:#fff;color:var(--muted);
+  border:1.5px solid var(--border);border-radius:8px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;font-weight:600;
+  cursor:pointer;transition:all .15s;
+}
+.btn-clear-all:hover{color:var(--red);border-color:#fda4af}
+
+/* ── TAGS ────────────────────────────── */
+.tag{display:inline-flex;align-items:center;gap:4px;border-radius:100px;padding:3px 9px;font-size:.67rem;font-weight:700;text-transform:uppercase;flex-shrink:0}
+.tag::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.tg{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
+.tr{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
+.ty{background:var(--amber-bg);color:var(--amber);border:1px solid #fcd34d}
+
+/* ── RESPONSIVE ──────────────────────── */
+@media(max-width:900px){.filter-panel{display:none}}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.drawer{width:100%}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a class="sb-logo" href="index.html">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <span class="logo-name">Rig<span>Pass</span></span>
+  </a>
+  <div class="sb-section">
+    <div class="sb-label">Hiring</div>
+    <a class="sb-link active" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Browse Workers
+    </a>
+    <div class="sb-link" onclick="openDrawer()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      Shortlist
+      <span id="sb-count" style="margin-left:auto;background:var(--blue);color:#fff;border-radius:100px;padding:1px 8px;font-size:.65rem;font-weight:800;display:none">0</span>
+    </div>
+    <a class="sb-link" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Roster
+    </a>
+    <a class="sb-link" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages
+    </a>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Account</div>
+    <a class="sb-link" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Billing
+    </a>
+    <a class="sb-link" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83"/></svg>Settings
+    </a>
+  </div>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-avatar">SC</div>
+      <div>
+        <div class="sb-uname">Suncor Energy</div>
+        <div class="sb-urole">Employer · <span class="plan-chip">Pro</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Worker Pool</div>
+      <div class="results-pill" id="results-pill">1,240 available</div>
+    </div>
+    <button class="shortlist-btn" onclick="openDrawer()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      Shortlist
+      <div class="shortlist-badge" id="top-badge">0</div>
+    </button>
+  </div>
+
+  <div class="portal-body">
+
+    <!-- FILTERS -->
+    <div class="filter-panel">
+      <div class="fp-head">Filter Workers</div>
+      <div class="search-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--light)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Trade, name, location...">
+      </div>
+
+      <div class="fp-section">
+        <div class="fp-label">Province</div>
+        <label class="fp-check"><input type="checkbox" checked><span>Alberta</span><span class="fp-count">842</span></label>
+        <label class="fp-check"><input type="checkbox"><span>BC</span><span class="fp-count">198</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Saskatchewan</span><span class="fp-count">134</span></label>
+        <label class="fp-check"><input type="checkbox"><span>NWT</span><span class="fp-count">66</span></label>
+      </div>
+
+      <div class="fp-divider"></div>
+      <div class="fp-section">
+        <div class="fp-label">Trade</div>
+        <label class="fp-check"><input type="checkbox" checked><span>Pipefitter</span><span class="fp-count">310</span></label>
+        <label class="fp-check"><input type="checkbox" checked><span>Welder</span><span class="fp-count">285</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Electrician</span><span class="fp-count">201</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Instrumentation</span><span class="fp-count">143</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Heavy Equipment</span><span class="fp-count">178</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Millwright</span><span class="fp-count">123</span></label>
+      </div>
+
+      <div class="fp-divider"></div>
+      <div class="fp-section">
+        <div class="fp-label">Must Have</div>
+        <label class="fp-check"><input type="checkbox" checked><span>H2S Alive</span></label>
+        <label class="fp-check"><input type="checkbox" checked><span>WHMIS 2018</span></label>
+        <label class="fp-check"><input type="checkbox"><span>First Aid Level 3</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Confined Space</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Ground Disturbance II</span></label>
+        <label class="fp-check"><input type="checkbox"><span>TDG</span></label>
+      </div>
+
+      <div class="fp-divider"></div>
+      <div class="fp-section">
+        <div class="fp-label">Min. Experience</div>
+        <div class="range-wrap">
+          <div class="range-labels"><span>0 yrs</span><span class="range-val" id="exp-val">5 yrs</span></div>
+          <input type="range" min="0" max="20" value="5" oninput="document.getElementById('exp-val').textContent=this.value+' yrs'">
+        </div>
+      </div>
+
+      <div class="fp-divider"></div>
+      <div class="fp-section">
+        <div class="fp-label">Availability</div>
+        <label class="fp-check"><input type="checkbox" checked><span>Available Now</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Within 2 Weeks</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Within 30 Days</span></label>
+      </div>
+
+      <button class="fp-apply">Apply Filters</button>
+      <button class="fp-clear">Clear All</button>
+    </div>
+
+    <!-- WORKER GRID -->
+    <div class="workers-wrap">
+      <div class="grid-head">
+        <div class="grid-head-left">
+          <div class="avail-tabs">
+            <button class="atab on">All Workers<span class="atab-count">48</span></button>
+            <button class="atab">Available Now<span class="atab-count">31</span></button>
+            <button class="atab">This Week<span class="atab-count">9</span></button>
+          </div>
+        </div>
+        <select class="sort-select">
+          <option>Best Match</option>
+          <option>Most Experience</option>
+          <option>Recently Active</option>
+          <option>Nearest</option>
+        </select>
+      </div>
+
+      <div class="workers-grid" id="workers-grid">
+        <!-- Cards injected by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+
+<!-- SHORTLIST DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div>
+      <div class="drawer-title">Shortlist</div>
+      <div class="drawer-sub" id="drawer-sub">No workers added yet</div>
+    </div>
+    <button class="close-btn" onclick="closeDrawer()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawer-body">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--light)" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="empty-title">Your shortlist is empty</div>
+      <div class="empty-sub">Browse the worker pool and click "Add to Shortlist" to save workers here.</div>
+    </div>
+    <div id="drawer-list"></div>
+  </div>
+  <div class="drawer-foot">
+    <div class="drawer-foot-actions">
+      <button class="btn-contact-all" id="contact-all-btn" disabled onclick="alert('Opening message thread with all shortlisted workers...')">
+        Contact All
+      </button>
+      <button class="btn-clear-all" onclick="clearAll()">Clear</button>
+    </div>
+    <button id="training-req-btn" disabled onclick="openTrainingModal()" style="width:100%;margin-top:8px;padding:10px;background:#fff;color:var(--blue);border:1.5px solid var(--blue-border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Send Training Requirements
+    </button>
+  </div>
+</div>
+
+<!-- TRAINING REQUIREMENTS MODAL -->
+<div id="tr-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:300;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;box-shadow:0 24px 60px rgba(0,0,0,.2);display:flex;flex-direction:column;max-height:90vh">
+    <div style="padding:22px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:1rem;font-weight:800;color:var(--text)">Send Training Requirements</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Workers will be notified and can acknowledge from their dashboard</div>
+      </div>
+      <button onclick="closeTrainingModal()" style="width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="padding:20px 24px;overflow-y:auto;flex:1">
+      <!-- Recipients -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin-bottom:8px">Sending To</div>
+        <div id="tr-recipients" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <!-- Required certs -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:.72px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin-bottom:8px;font-size:.72rem">Required Certifications</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="cert-checkboxes">
+          <!-- injected by JS -->
+        </div>
+      </div>
+      <!-- Deadline -->
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:6px">Deadline</label>
+        <input type="date" id="tr-deadline" style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;color:var(--text);outline:none">
+      </div>
+      <!-- Job name -->
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:6px">Job / Project Name</label>
+        <input type="text" id="tr-job" placeholder="e.g. Fort Hills Turnaround — May 2025" style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;color:var(--text);outline:none">
+      </div>
+      <!-- Note -->
+      <div style="margin-bottom:4px">
+        <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:6px">Note to Workers (optional)</label>
+        <textarea id="tr-note" rows="3" placeholder="Add any additional instructions or site-specific requirements..." style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;color:var(--text);outline:none;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px">
+      <button onclick="sendTrainingReq()" style="flex:1;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;font-weight:700;cursor:pointer">Send Requirements</button>
+      <button onclick="closeTrainingModal()" style="padding:11px 18px;background:#fff;color:var(--muted);border:1.5px solid var(--border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CERTS = ['H2S Alive','WHMIS 2018','First Aid Level 1','First Aid Level 3','TDG','Confined Space Entry','Ground Disturbance II','Fall Protection','Rigging & Hoisting','Scaffold Builder','Energy Isolation / LOTO','Atmospheric Testing','Fire Watch'];
+
+function openTrainingModal(){
+  const overlay = document.getElementById('tr-overlay');
+  overlay.style.display='flex';
+  // Recipients
+  const recip = document.getElementById('tr-recipients');
+  recip.innerHTML = shortlist.map(w=>`<span style="display:inline-flex;align-items:center;gap:6px;background:var(--blue-lt);border:1px solid var(--blue-border);border-radius:100px;padding:4px 11px;font-size:.75rem;font-weight:600;color:var(--blue)">${w.name}</span>`).join('');
+  // Cert checkboxes
+  const cb = document.getElementById('cert-checkboxes');
+  cb.innerHTML = CERTS.map((c,i)=>`
+    <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;font-size:.82rem;font-weight:500;color:var(--text);transition:border-color .15s" onmouseover="this.style.borderColor='#93c5fd'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--border)'">
+      <input type="checkbox" style="accent-color:var(--blue)" id="tc-${i}"> ${c}
+    </label>`).join('');
+}
+function closeTrainingModal(){
+  document.getElementById('tr-overlay').style.display='none';
+}
+function sendTrainingReq(){
+  const selected = CERTS.filter((_,i)=>document.getElementById('tc-'+i)?.checked);
+  if(!selected.length){alert('Please select at least one required certification.');return}
+  const job = document.getElementById('tr-job').value||'Upcoming Project';
+  alert(`Training requirements sent to ${shortlist.length} worker${shortlist.length>1?'s':''}!\n\nJob: ${job}\nRequired: ${selected.join(', ')}`);
+  closeTrainingModal();
+}
+</script>
+
+<script>
+// ── WORKER DATA ──────────────────────────
+const workers = [
+  {id:1, initials:'MR', bg:'#1e3a8a', name:'Mike Robertson', role:'Journeyman Pipefitter', loc:'Fort McMurray, AB', exp:'12 yrs', avail:'now', certs:[{label:'H2S',ok:'ok'},{label:'WHMIS',ok:'ok'},{label:'Confined Space',ok:'ok'},{label:'First Aid',ok:'exp'}]},
+  {id:2, initials:'JT', bg:'#374151', name:'Jason Tran', role:'Red Seal Welder', loc:'Edmonton, AB', exp:'8 yrs', avail:'now', certs:[{label:'H2S',ok:'ok'},{label:'WHMIS',ok:'ok'},{label:'First Aid',ok:'ok'},{label:'TDG',ok:'ok'}]},
+  {id:3, initials:'SP', bg:'#0369a1', name:'Sarah Payne', role:'Instrumentation Tech', loc:'Calgary, AB', exp:'6 yrs', avail:'now', certs:[{label:'H2S',ok:'ok'},{label:'WHMIS',ok:'ok'},{label:'First Aid',ok:'warn'},{label:'Confined Space',ok:'ok'}]},
+  {id:4, initials:'BK', bg:'#475569', name:'Brad Kowalski', role:'Journeyman Electrician', loc:'Grande Prairie, AB', exp:'15 yrs', avail:'now', certs:[{label:'H2S',ok:'ok'},{label:'WHMIS',ok:'ok'},{label:'First Aid',ok:'ok'},{label:'Ground Dist.',ok:'ok'}]},
+  {id:5, initials:'DL', bg:'#1e40af', name:'Danny Lam', role:'Heavy Equipment Operator', loc:'Fort McMurray, AB', exp:'10 yrs', avail:'soon', certs:[{label:'H2S',ok:'ok'},{label:'WHMIS',ok:'ok'},{label:'First Aid',ok:'ok'},{label:'TDG',ok:'ok'}]},
+  {id:6, initials:'RN', bg:'#334155', name:'Rita Noori', role:'Millwright', loc:'Lloydminster, SK', exp:'9 yrs', avail:'now', certs:[{label:'H2S',ok:'ok'},{label:'WHMIS',ok:'ok'},{label:'Confined Space',ok:'ok'},{label:'Ground Dist.',ok:'ok'}]},
+  {id:7, initials:'CW', bg:'#065f46', name:'Craig Wallace', role:'Red Seal Pipefitter', loc:'Edson, AB', exp:'18 yrs', avail:'now', certs:[{label:'H2S',ok:'ok'},{label:'WHMIS',ok:'ok'},{label:'First Aid',ok:'ok'},{label:'TDG',ok:'warn'}]},
+  {id:8, initials:'AM', bg:'#7c3aed', name:'Amir Malik', role:'Instrumentation Tech', loc:'Nisku, AB', exp:'7 yrs', avail:'later', certs:[{label:'H2S',ok:'ok'},{label:'WHMIS',ok:'warn'},{label:'First Aid',ok:'ok'},{label:'Confined Space',ok:'ok'}]},
+  {id:9, initials:'TF', bg:'#b45309', name:'Tyler Forde', role:'Journeyman Electrician', loc:'Fort McMurray, AB', exp:'11 yrs', avail:'now', certs:[{label:'H2S',ok:'ok'},{label:'WHMIS',ok:'ok'},{label:'First Aid',ok:'ok'},{label:'Ground Dist.',ok:'ok'}]},
+];
+
+let shortlist = [];
+
+// ── RENDER CARDS ─────────────────────────
+function renderCards(){
+  const grid = document.getElementById('workers-grid');
+  grid.innerHTML = workers.map(w => {
+    const isAdded = shortlist.some(s=>s.id===w.id);
+    const availClass = w.avail==='now' ? 'avail-now' : w.avail==='soon' ? 'avail-soon' : 'avail-no';
+    const availLabel = w.avail==='now' ? 'Available Now' : w.avail==='soon' ? 'This Week' : '30 Days';
+    const certChips = w.certs.map(c=>`<span class="chip chip-${c.ok}">${c.label}</span>`).join('');
+    const btnState = isAdded ? 'added-state' : '';
+    const btnTxt = isAdded
+      ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Added`
+      : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Add to Shortlist`;
+    return `
+      <div class="wcard ${isAdded?'added':''}" id="card-${w.id}">
+        <div class="avail-ribbon ${availClass}">${availLabel}</div>
+        <div class="wcard-top">
+          <div class="wavatar" style="background:${w.bg}">${w.initials}</div>
+          <div>
+            <div class="wname">${w.name}</div>
+            <div class="wrole">${w.role}</div>
+            <div class="wloc">${w.loc}</div>
+            <div class="wexp">${w.exp} experience</div>
+          </div>
+        </div>
+        <div class="cert-chips">${certChips}</div>
+        <div class="wcard-actions">
+          <button class="btn-view" onclick="window.location='profile.html'">View</button>
+          <button class="btn-add ${btnState}" onclick="toggleShortlist(${w.id})">${btnTxt}</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── SHORTLIST LOGIC ───────────────────────
+function toggleShortlist(id){
+  const worker = workers.find(w=>w.id===id);
+  const idx = shortlist.findIndex(s=>s.id===id);
+  if(idx>-1) shortlist.splice(idx,1);
+  else shortlist.push(worker);
+  updateBadges();
+  renderCards();
+  renderDrawer();
+}
+
+function updateBadges(){
+  const n = shortlist.length;
+  const badge = document.getElementById('top-badge');
+  const sbCount = document.getElementById('sb-count');
+  badge.textContent = n;
+  badge.classList.toggle('show', n>0);
+  sbCount.textContent = n;
+  sbCount.style.display = n>0 ? 'inline' : 'none';
+  document.getElementById('contact-all-btn').disabled = n===0;
+  const trBtn = document.getElementById('training-req-btn');
+  if(trBtn) trBtn.disabled = n===0;
+  document.getElementById('drawer-sub').textContent = n===0 ? 'No workers added yet' : `${n} worker${n>1?'s':''} selected`;
+}
+
+function renderDrawer(){
+  const list = document.getElementById('drawer-list');
+  const empty = document.getElementById('empty-state');
+  empty.style.display = shortlist.length===0 ? 'flex' : 'none';
+  list.innerHTML = shortlist.map(w=>{
+    const certChips = w.certs.map(c=>`<span class="chip chip-${c.ok}" style="font-size:.63rem;padding:2px 7px">${c.label}</span>`).join('');
+    const availLabel = w.avail==='now'?'Available Now':w.avail==='soon'?'This Week':'30 Days';
+    return `
+      <div class="dl-row" id="dl-${w.id}">
+        <div class="dl-avatar" style="background:${w.bg}">${w.initials}</div>
+        <div style="flex:1;min-width:0">
+          <div class="dl-name">${w.name}</div>
+          <div class="dl-role">${w.role} · ${w.exp}</div>
+          <div class="dl-avail">${availLabel}</div>
+          <div class="dl-certs">${certChips}</div>
+        </div>
+        <div class="dl-actions">
+          <button class="dl-btn" onclick="window.location='profile.html'" title="View profile">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button class="dl-btn" onclick="contactWorker(${w.id})" title="Contact">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </button>
+          <button class="dl-btn remove" onclick="toggleShortlist(${w.id})" title="Remove">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function clearAll(){
+  shortlist=[];
+  updateBadges();
+  renderCards();
+  renderDrawer();
+}
+
+function contactWorker(id){
+  const w = workers.find(w=>w.id===id);
+  alert(`Opening message thread with ${w.name}...`);
+}
+
+// ── DRAWER OPEN/CLOSE ─────────────────────
+function openDrawer(){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ── AVAILABILITY TABS ─────────────────────
+document.querySelectorAll('.atab').forEach(tab=>{
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.atab').forEach(t=>t.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+
+// ── INIT ──────────────────────────────────
+renderCards();
+renderDrawer();
+</script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — Mike Robertson</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f1f5f9;color:#0f172a;min-height:100vh}
+:root{
+  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
+  --navy:#0f172a;--border:#cbd5e1;--text:#0f172a;--muted:#475569;--light:#94a3b8;
+  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--red-bg:#fef2f2;
+  --amber:#92400e;--amber-bg:#fefce8;--gold:#b8923a;--gold-border:#d4b06a;
+  --shadow:0 2px 8px rgba(15,23,42,.08);--shadow-md:0 4px 16px rgba(15,23,42,.1);
+}
+/* TOPBAR */
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 5%;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.logo-mark{width:32px;height:32px;background:var(--blue);border-radius:7px;display:grid;place-items:center}
+.logo-mark svg{width:15px;height:15px;fill:#fff}
+.logo-name{font-size:1.1rem;font-weight:800;color:var(--text)}
+.logo-name span{color:var(--blue-mid)}
+.back-link{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted);text-decoration:none}
+.back-link:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 18px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:all .15s;white-space:nowrap}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:var(--blue-mid)}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border)}
+.btn-ghost:hover{color:var(--text)}
+/* LAYOUT */
+.profile-layout{max-width:960px;margin:32px auto;padding:0 5%;display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
+/* CARDS */
+.card{background:#fff;border-radius:14px;border:1.5px solid var(--gold-border);padding:28px;margin-bottom:18px}
+/* HERO CARD */
+.hero-card{background:#fff;border-radius:14px;border:1.5px solid var(--gold-border);padding:28px;margin-bottom:18px}
+.profile-hero{display:flex;align-items:flex-start;gap:20px;margin-bottom:22px}
+.big-avatar{width:72px;height:72px;border-radius:14px;background:var(--blue);display:grid;place-items:center;font-weight:800;font-size:1.4rem;color:#fff;flex-shrink:0}
+.pname{font-size:1.4rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:4px}
+.prole{font-size:.95rem;color:var(--muted);margin-bottom:6px}
+.pmeta{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;color:var(--light)}
+.pmeta span{display:flex;align-items:center;gap:5px}
+.ver-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-bg);color:var(--green);border:1px solid #bbf7d0;border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:700;text-transform:uppercase}
+.profile-actions{display:flex;gap:10px;flex-wrap:wrap;padding-top:18px;border-top:1px solid #f1f5f9}
+/* SECTION TITLE */
+.sec-title{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+/* CERT TABLE */
+.cert-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f1f5f9}
+.cert-row:last-child{border-bottom:none;padding-bottom:0}
+.cert-ico{width:34px;height:34px;border-radius:8px;background:var(--blue-lt);display:grid;place-items:center;flex-shrink:0;margin-right:12px}
+.cert-name{font-size:.875rem;font-weight:600;color:var(--text)}
+.cert-date{font-size:.73rem;color:var(--muted);margin-top:2px}
+.tag{display:inline-flex;align-items:center;gap:4px;border-radius:100px;padding:3px 10px;font-size:.68rem;font-weight:700;text-transform:uppercase;flex-shrink:0}
+.tag::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.tg{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
+.tr{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
+.ty{background:var(--amber-bg);color:var(--amber);border:1px solid #fcd34d}
+/* WORK HISTORY */
+.job-row{padding:14px 0;border-bottom:1px solid #f1f5f9}
+.job-row:last-child{border-bottom:none}
+.job-title{font-size:.9rem;font-weight:700;color:var(--text)}
+.job-co{font-size:.82rem;color:var(--muted);margin-top:2px}
+.job-date{font-size:.75rem;color:var(--light);margin-top:2px}
+.job-desc{font-size:.82rem;color:var(--muted);margin-top:6px;line-height:1.6}
+/* SKILLS */
+.skills-wrap{display:flex;flex-wrap:wrap;gap:7px}
+.skill-chip{background:#f8fafc;border:1.5px solid var(--border);border-radius:100px;padding:5px 13px;font-size:.78rem;font-weight:600;color:var(--muted)}
+/* RIGHT SIDEBAR */
+.contact-card{background:var(--navy);border-radius:14px;padding:24px;margin-bottom:16px;border:none}
+.cc-title{font-size:.9rem;font-weight:700;color:#fff;margin-bottom:4px}
+.cc-sub{font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:18px}
+.cc-stat{display:flex;justify-content:space-between;margin-bottom:8px}
+.cc-label{font-size:.75rem;color:rgba(255,255,255,.4)}
+.cc-val{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.8)}
+.cc-divider{height:1px;background:rgba(255,255,255,.08);margin:14px 0}
+.btn-full{width:100%;margin-bottom:8px}
+.btn-white{background:#fff;color:var(--blue)}
+.btn-white:hover{background:#f1f5f9}
+.btn-outline-white{background:transparent;color:rgba(255,255,255,.7);border:1.5px solid rgba(255,255,255,.2)}
+.btn-outline-white:hover{border-color:rgba(255,255,255,.5);color:#fff}
+/* SHARE CARD */
+.share-card{background:#fff;border-radius:14px;border:1.5px solid var(--gold-border);padding:20px}
+.sc-title{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:14px}
+.sc-row{display:flex;gap:8px}
+.sc-row .btn{flex:1;font-size:.75rem;padding:7px 10px}
+@media(max-width:768px){.profile-layout{grid-template-columns:1fr}.topbar-nav{display:none}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="logo" href="index.html">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <span class="logo-name">Rig<span>Pass</span></span>
+  </a>
+  <a class="back-link" href="talent.html">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>Back to Search
+  </a>
+  <div style="display:flex;gap:10px">
+    <a href="#" class="btn btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save
+    </a>
+    <a href="#" class="btn btn-blue">Contact Worker</a>
+  </div>
+</div>
+
+<div class="profile-layout">
+  <!-- LEFT -->
+  <div>
+    <!-- HERO -->
+    <div class="hero-card">
+      <div class="profile-hero">
+        <div class="big-avatar">MR</div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+            <div class="pname">Mike Robertson</div>
+            <div class="ver-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>Verified</div>
+          </div>
+          <div class="prole">Journeyman Pipefitter · 12 years experience</div>
+          <div class="pmeta">
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Fort McMurray, AB</span>
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Available Now</span>
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Pro Member</span>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:.875rem;color:var(--muted);line-height:1.7;margin-bottom:18px">Journeyman Pipefitter with 12 years experience in upstream oil and gas. Specialized in high-pressure piping systems, turnarounds, and plant maintenance across Northern Alberta. Strong safety record with zero lost-time incidents.</p>
+      <div class="profile-actions">
+        <a href="#" class="btn btn-blue">Contact Worker</a>
+        <a href="#" class="btn btn-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Download Resume
+        </a>
+        <a href="#" class="btn btn-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Save to Shortlist
+        </a>
+      </div>
+    </div>
+
+    <!-- SAFETY TICKETS -->
+    <div class="card">
+      <div class="sec-title">Safety Certifications</div>
+      <div class="cert-row">
+        <div class="cert-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div style="flex:1"><div class="cert-name">H2S Alive</div><div class="cert-date">Issued May 2024 · Expires Nov 14, 2026</div></div>
+        <span class="tag tg">Valid</span>
+      </div>
+      <div class="cert-row">
+        <div class="cert-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div style="flex:1"><div class="cert-name">First Aid — Level 3</div><div class="cert-date">Issued Jul 2022 · Expired Jul 3, 2025</div></div>
+        <span class="tag tr">Expired</span>
+      </div>
+      <div class="cert-row">
+        <div class="cert-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div style="flex:1"><div class="cert-name">WHMIS 2018</div><div class="cert-date">Issued Aug 2023 · Expires Aug 19, 2025</div></div>
+        <span class="tag ty">Expiring Soon</span>
+      </div>
+      <div class="cert-row">
+        <div class="cert-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div style="flex:1"><div class="cert-name">Confined Space Entry</div><div class="cert-date">Issued Mar 2025 · Expires Mar 28, 2027</div></div>
+        <span class="tag tg">Valid</span>
+      </div>
+      <div class="cert-row">
+        <div class="cert-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div style="flex:1"><div class="cert-name">Ground Disturbance Level II</div><div class="cert-date">Issued Jan 2024 · Expires Jan 10, 2027</div></div>
+        <span class="tag tg">Valid</span>
+      </div>
+      <div class="cert-row">
+        <div class="cert-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div style="flex:1"><div class="cert-name">TDG</div><div class="cert-date">Issued Sep 2022 · Expires Sep 5, 2025</div></div>
+        <span class="tag ty">Expiring Soon</span>
+      </div>
+    </div>
+
+    <!-- WORK HISTORY -->
+    <div class="card">
+      <div class="sec-title">Work History</div>
+      <div class="job-row">
+        <div class="job-title">Journeyman Pipefitter</div>
+        <div class="job-co">Suncor Energy — Fort McMurray, AB</div>
+        <div class="job-date">Mar 2020 – Present · 5 years</div>
+        <div class="job-desc">Maintenance and installation of high-pressure piping systems at Oil Sands Base Plant. Turnaround work, new construction tie-ins, and equipment maintenance.</div>
+      </div>
+      <div class="job-row">
+        <div class="job-title">Pipefitter — Journeyman</div>
+        <div class="job-co">PCL Industrial Construction — Edmonton, AB</div>
+        <div class="job-date">Jun 2016 – Feb 2020 · 3.7 years</div>
+        <div class="job-desc">New construction on oil sands processing facilities. Fabrication and installation of process piping, hydrostatic testing, and code welding support.</div>
+      </div>
+      <div class="job-row">
+        <div class="job-title">Apprentice Pipefitter</div>
+        <div class="job-co">Bantrel Constructors — Fort McMurray, AB</div>
+        <div class="job-date">Jan 2013 – May 2016 · 3.4 years</div>
+        <div class="job-desc">Apprenticeship training across 4 periods. Gained experience in pipe fabrication, blueprint reading, and field installation on major capital projects.</div>
+      </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div class="card">
+      <div class="sec-title">Skills & Qualifications</div>
+      <div class="skills-wrap">
+        <span class="skill-chip">High-Pressure Piping</span>
+        <span class="skill-chip">Pipe Fabrication</span>
+        <span class="skill-chip">Blueprint Reading</span>
+        <span class="skill-chip">Hydrostatic Testing</span>
+        <span class="skill-chip">Code Welding</span>
+        <span class="skill-chip">Turnaround Work</span>
+        <span class="skill-chip">ASME B31.3</span>
+        <span class="skill-chip">Field Tie-Ins</span>
+        <span class="skill-chip">Rigging & Hoisting</span>
+        <span class="skill-chip">Scaffold Erection</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div>
+    <div class="contact-card">
+      <div class="cc-title">Contact Mike</div>
+      <div class="cc-sub">Send a direct message or request an interview</div>
+      <div class="cc-stat"><span class="cc-label">Availability</span><span class="cc-val" style="color:#6ee7b7">Available Now</span></div>
+      <div class="cc-stat"><span class="cc-label">Response Time</span><span class="cc-val">Usually within 24hrs</span></div>
+      <div class="cc-stat"><span class="cc-label">Profile Views</span><span class="cc-val">34 this month</span></div>
+      <div class="cc-divider"></div>
+      <a href="#" class="btn btn-white btn-full">Send Message</a>
+      <a href="#" class="btn btn-outline-white btn-full">Request Interview</a>
+    </div>
+
+    <div class="share-card">
+      <div class="sc-title">Quick Actions</div>
+      <div class="sc-row" style="margin-bottom:8px">
+        <a href="#" class="btn btn-ghost" style="font-size:.78rem">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>Resume
+        </a>
+        <a href="#" class="btn btn-ghost" style="font-size:.78rem">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Shortlist
+        </a>
+      </div>
+      <div style="display:flex;gap:8px">
+        <a href="#" class="btn btn-ghost" style="font-size:.78rem;flex:1">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share Profile
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

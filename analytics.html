@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — Platform Data</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f1f5f9;color:#0f172a;min-height:100vh}
+:root{
+  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
+  --navy:#0f172a;--border:#cbd5e1;--text:#0f172a;--muted:#475569;--light:#94a3b8;
+  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--amber:#92400e;
+  --gold:#b8923a;--gold-border:#d4b06a;--off:#f8fafc;
+  --shadow-md:0 6px 24px rgba(15,23,42,.1);
+}
+
+nav{background:#fff;border-bottom:1px solid var(--border);padding:0 5%;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.logo-mark{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center}
+.logo-mark svg{width:16px;height:16px;fill:#fff}
+.logo-name{font-size:1.15rem;font-weight:800;color:var(--text)}
+.logo-name span{color:var(--blue-mid)}
+.nav-back{font-size:.85rem;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px}
+.nav-back:hover{color:var(--text)}
+
+.hero{background:var(--navy);padding:72px 5% 64px;position:relative;overflow:hidden}
+.hero-grid{position:absolute;inset:0;opacity:.05;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:48px 48px}
+.hero-inner{position:relative;z-index:2;max-width:600px}
+.hero-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);border-radius:100px;padding:5px 14px;font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px}
+.hero h1{font-size:clamp(2rem,4vw,3rem);font-weight:800;color:#fff;letter-spacing:-.6px;line-height:1.1;margin-bottom:12px}
+.hero h1 span{color:#93c5fd}
+.hero p{font-size:.95rem;color:rgba(255,255,255,.5);line-height:1.7}
+
+.content{padding:60px 5%;max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+
+.card{background:#fff;border-radius:14px;border:1.5px solid var(--gold-border);padding:28px}
+.card-title{font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:4px}
+.card-sub{font-size:.8rem;color:var(--muted);margin-bottom:24px}
+.chart-wrap{position:relative;width:100%}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:20px}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:.8rem;font-weight:600;color:var(--muted)}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+@media(max-width:640px){.content{padding:32px 5%}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <span class="logo-name">Rig<span>Pass</span></span>
+  </a>
+  <a class="nav-back" href="index.html">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    All Pages
+  </a>
+</nav>
+
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-tag">Platform Data</div>
+    <h1>The numbers behind<br><span>RigPass.</span></h1>
+    <p>Certification coverage and platform growth across the Western Canadian oil patch.</p>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- CHART 1: CERTIFICATIONS -->
+  <div class="card">
+    <div class="card-title">Most Held Certifications</div>
+    <div class="card-sub">Number of workers on the platform holding each safety certification</div>
+    <div class="chart-wrap" style="height:320px">
+      <canvas id="certsChart"></canvas>
+    </div>
+  </div>
+
+  <!-- CHART 2: PLATFORM GROWTH -->
+  <div class="card">
+    <div class="card-title">Platform Growth</div>
+    <div class="card-sub">Workers and employers joining RigPass month over month</div>
+    <div class="chart-wrap" style="height:300px">
+      <canvas id="growthChart"></canvas>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#1e3a8a"></div>Workers</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d4b06a"></div>Employers</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+Chart.defaults.color = '#94a3b8';
+
+// CERTIFICATIONS BAR
+new Chart(document.getElementById('certsChart'), {
+  type: 'bar',
+  data: {
+    labels: ['H2S Alive','WHMIS 2018','First Aid','Fall Protection','Confined Space','TDG','Ground Dist. II','Rigging & Hoisting','Energy Isolation','Scaffold Builder'],
+    datasets: [{
+      data: [11840, 11200, 9640, 8320, 7180, 6940, 6120, 5480, 4860, 3920],
+      backgroundColor: '#1e3a8a',
+      borderRadius: 6,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { maxRotation: 30, font: { size: 12 } } },
+      y: { grid: { color: '#f1f5f9' }, ticks: { callback: v => v.toLocaleString() } }
+    }
+  }
+});
+
+// GROWTH LINE
+new Chart(document.getElementById('growthChart'), {
+  type: 'line',
+  data: {
+    labels: ['Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan'],
+    datasets: [
+      {
+        label: 'Workers',
+        data: [480, 1240, 2180, 3640, 5120, 6840, 8200, 9480, 10600, 11400, 12000, 12400],
+        borderColor: '#1e3a8a',
+        backgroundColor: 'rgba(30,58,138,.06)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: .4,
+        pointBackgroundColor: '#1e3a8a',
+        pointRadius: 4,
+        pointHoverRadius: 6
+      },
+      {
+        label: 'Employers',
+        data: [12, 48, 98, 162, 240, 340, 460, 580, 680, 760, 820, 862],
+        borderColor: '#d4b06a',
+        backgroundColor: 'rgba(212,176,106,.06)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: .4,
+        pointBackgroundColor: '#d4b06a',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        yAxisID: 'y2'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: '#f1f5f9' }, ticks: { callback: v => v.toLocaleString() }, position: 'left' },
+      y2: { grid: { display: false }, ticks: { callback: v => v.toLocaleString() }, position: 'right' }
+    }
+  }
+});
+</script>
+</body>
+</html>
