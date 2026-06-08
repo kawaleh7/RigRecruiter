@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FSL 8 Comment Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5f5f6;--paper-2:#ffffff;--ink:#1a2740;--ink-soft:#5a6373;
+    --navy:#16203a;--ochre:#b3842b;--ochre-soft:#cda85a;--line:#e4e5e8;
+    --line-soft:#eef0f1;--good:#2f7d57;--good-bg:#eaf3ee;--warn:#b3402e;
+    --shadow:0 1px 2px rgba(22,32,58,.05),0 10px 28px rgba(22,32,58,.08);
+  }
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);color:var(--ink);font-family:'Public Sans',sans-serif;
+    font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 80px;}
+  header.top{border-bottom:2px solid var(--ink);padding-bottom:18px;margin-bottom:24px;}
+  .kicker{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ochre);font-weight:700;margin:0 0 6px;}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,46px);line-height:1.02;margin:0;letter-spacing:-.01em;color:var(--navy);}
+  h1 em{font-style:italic;color:var(--ochre);}
+  .sub{margin:10px 0 0;color:var(--ink-soft);max-width:62ch;font-size:14px;}
+  .layout{display:grid;grid-template-columns:1fr 420px;gap:30px;align-items:start;}
+  @media(max-width:940px){.layout{grid-template-columns:1fr;}}
+  section.block{margin-bottom:28px;}
+  .step{display:flex;align-items:baseline;gap:10px;margin:0 0 13px;}
+  .step .num{font-family:'Fraunces',serif;font-style:italic;font-weight:600;color:var(--ochre);font-size:22px;line-height:1;flex:none;}
+  .step h2{font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin:0;color:var(--navy);letter-spacing:-.01em;}
+  .step .hint{font-size:12.5px;color:var(--ink-soft);margin-left:auto;}
+  .lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--ink-soft);margin:0 0 8px;}
+  .levels{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+  .lvl{border:1.5px solid var(--line);background:var(--paper-2);color:var(--ink-soft);border-radius:999px;
+    padding:9px 16px;font-family:'Public Sans';font-weight:600;font-size:13.5px;cursor:pointer;transition:all .15s ease;}
+  .lvl:hover{border-color:var(--ochre-soft);color:var(--ink);}
+  .lvl.on{background:var(--navy);border-color:var(--navy);color:#ffffff;box-shadow:0 4px 14px rgba(22,32,58,.22);}
+  .lvl.prog.on{background:var(--ochre);border-color:var(--ochre);color:#2a2008;}
+  .lvl[disabled]{opacity:.35;cursor:not-allowed;}
+  .notebar{font-size:12.5px;color:var(--warn);background:#f7e9e6;border-left:3px solid var(--warn);padding:8px 12px;border-radius:0 7px 7px 0;margin:-6px 0 14px;}
+  .chips{display:flex;flex-wrap:wrap;gap:10px;}
+  .chip{border:1.5px solid var(--line);background:var(--paper-2);border-radius:12px;padding:12px 14px;cursor:pointer;max-width:260px;transition:all .15s ease;}
+  .chip:hover{border-color:var(--ochre-soft);}
+  .chip .ct{font-weight:700;font-size:14px;color:var(--navy);display:flex;align-items:center;gap:8px;}
+  .chip .cd{font-size:12px;color:var(--ink-soft);margin-top:4px;line-height:1.4;}
+  .chip .dot{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--line);flex:none;display:grid;place-items:center;}
+  .chip.on{border-color:var(--navy);background:#fff;box-shadow:var(--shadow);}
+  .chip.on .dot{background:var(--navy);border-color:var(--navy);}
+  .chip.on .dot::after{content:"";width:5px;height:9px;border:solid #ffffff;border-width:0 2px 2px 0;transform:rotate(45deg);margin-top:-2px;}
+  .opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{display:flex;gap:11px;align-items:flex-start;border:1.5px solid var(--line-soft);background:var(--paper-2);border-radius:11px;padding:11px 13px;cursor:pointer;transition:all .13s ease;}
+  .opt:hover{border-color:var(--ochre-soft);background:#fff;}
+  .opt.on{border-color:var(--navy);background:#fff;box-shadow:var(--shadow);}
+  .opt .box{width:17px;height:17px;border-radius:5px;border:1.6px solid var(--line);flex:none;margin-top:1px;display:grid;place-items:center;transition:all .13s;}
+  .opt.on .box{background:var(--navy);border-color:var(--navy);}
+  .opt.on .box::after{content:"";width:4px;height:8px;border:solid #ffffff;border-width:0 2px 2px 0;transform:rotate(45deg);margin-top:-1px;}
+  .opt .txt{font-size:13.5px;line-height:1.42;color:var(--ink);}
+  .opt .tag{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--ochre);text-transform:uppercase;display:block;margin-bottom:3px;}
+  .sugg{margin-left:8px;font-size:9.5px;font-weight:700;letter-spacing:.05em;background:var(--good-bg);color:var(--good);padding:2px 7px;border-radius:999px;text-transform:uppercase;white-space:nowrap;}
+  .gcat{margin-bottom:18px;}
+  .gcat h3{font-family:'Public Sans';font-weight:700;font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 9px;padding-bottom:6px;border-bottom:1px solid var(--line-soft);}
+  .toggle-row{display:flex;gap:8px;margin-bottom:12px;}
+  .seg{border:1.5px solid var(--line);background:var(--paper-2);color:var(--ink-soft);padding:6px 14px;border-radius:8px;font-weight:600;font-size:12.5px;cursor:pointer;transition:all .13s;}
+  .seg.on{background:var(--ink);color:#ffffff;border-color:var(--ink);}
+  .ctx{border:1.5px dashed var(--line);border-radius:13px;padding:16px;background:rgba(245,245,246,.7);}
+  .ctx.req{border-style:solid;border-color:var(--ochre-soft);background:#fff;box-shadow:var(--shadow);}
+  .field{margin-bottom:14px;}.field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:5px;}
+  .field .desc{font-size:11.5px;color:var(--ink-soft);margin:-2px 0 7px;}
+  input[type=text],textarea{width:100%;border:1.5px solid var(--line);background:#ffffff;border-radius:9px;padding:9px 11px;font-family:'Public Sans';font-size:13.5px;color:var(--ink);resize:vertical;}
+  input[type=text]:focus,textarea:focus{outline:none;border-color:var(--ochre);}
+  textarea{min-height:78px;line-height:1.5;}
+  .ublock{margin-bottom:12px;}
+  .accChips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .accChip{border:1px solid var(--line);background:var(--paper-2);color:var(--ink-soft);border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:500;cursor:pointer;transition:all .12s;}
+  .accChip:hover{border-color:var(--ochre);color:var(--ink);background:#fff;}
+  .accChip.on{background:var(--navy);border-color:var(--navy);color:#ffffff;}
+  .incrow{display:flex;gap:8px;align-items:center;margin-top:6px;font-size:12.5px;color:var(--ink-soft);cursor:pointer;}
+  .preview-wrap{position:sticky;top:20px;}
+  .preview{background:#ffffff;border:1.5px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;}
+  .pv-head{background:var(--navy);color:#ffffff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
+  .pv-head .pt{font-family:'Fraunces',serif;font-weight:600;font-size:16px;}
+  .pv-head .lvlbadge{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.14);padding:4px 10px;border-radius:999px;}
+  .pv-body{padding:18px 20px 8px;max-height:60vh;overflow-y:auto;}
+  .pv-body h4{font-family:'Public Sans';font-weight:700;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ochre);margin:16px 0 7px;}
+  .pv-body h4:first-child{margin-top:0;}
+  .pv-body ul{margin:0;padding-left:0;list-style:none;}
+  .pv-body li{font-size:13px;line-height:1.5;color:var(--ink);margin-bottom:7px;padding-left:16px;position:relative;}
+  .pv-body li::before{content:"\2022";position:absolute;left:2px;color:var(--ochre);font-weight:700;}
+  .pv-body .stmt{font-size:12.8px;font-style:italic;color:var(--ink-soft);background:#f5f5f6;border-left:3px solid var(--ochre);padding:9px 12px;border-radius:0 8px 8px 0;margin-bottom:9px;}
+  .empty{color:var(--ink-soft);font-style:italic;font-size:13px;}
+  .pv-foot{border-top:1px solid var(--line-soft);padding:13px 18px;display:flex;align-items:center;gap:10px;}
+  .count{font-size:11.5px;color:var(--ink-soft);}
+  .btn{margin-left:auto;border:none;background:var(--ochre);color:#2a2008;font-family:'Public Sans';font-weight:700;font-size:13px;letter-spacing:.02em;padding:9px 18px;border-radius:9px;cursor:pointer;transition:all .15s;}
+  .btn:hover{background:var(--ochre-soft);}
+  .btn.done{background:var(--good);color:#fff;}
+  .btn.ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);margin-left:0;padding:9px 14px;}
+  .btn.ghost:hover{border-color:var(--ochre-soft);color:var(--ink);}
+  .footnote{margin-top:34px;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:14px;line-height:1.55;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="kicker">Alberta French as a Second Language · Grade 8 (Nine-Year)</p>
+    <h1>Report Comment <em>Builder</em></h1>
+    <p class="sub">Set the programming type and grade, choose the general outcomes (Focus of instruction), then pick strengths and growth areas. Statements are taken word-for-word from the Grade 8 program of studies — wording is only shortened to match the level, never changed. FSL is not a core subject, so no at/above/below grade-level line is added.</p>
+  </header>
+
+  <div class="layout">
+    <div class="builder">
+      <section class="block">
+        <div class="step"><span class="num">1</span><h2>Course &amp; units</h2><span class="hint">optional · adds a short title</span></div>
+        <div id="units"></div>
+        <label class="incrow"><input type="checkbox" id="incTitle" checked> Include unit title line in the comment</label>
+      </section>
+
+      <section class="block">
+        <div class="step"><span class="num">2</span><h2>Programming &amp; grade</h2></div>
+        <p class="lbl">Programming type</p>
+        <div class="levels" id="prog"></div>
+        <p class="lbl">Achievement grade</p>
+        <div class="levels" id="grade"></div>
+        <div class="notebar" id="gradeNote" style="display:none"></div>
+      </section>
+
+      <section class="block">
+        <div class="step"><span class="num">3</span><h2>Student context</h2><span class="hint">accommodations &amp; programming</span></div>
+        <div class="ctx" id="ctx">
+          <div class="field" id="glpField">
+            <label>Grade level of programming (optional)</label>
+            <p class="desc">Only if different from the enrolment grade. Adds: "^He/She is learning grade __ content."</p>
+            <input type="text" id="glp" placeholder="e.g. 6">
+          </div>
+          <div class="field">
+            <label>Accommodations to support ^Name's success</label>
+            <p class="desc">Required for Adapted, Modified and Limited comments. Tap to add common ones, or type your own — one per line.</p>
+            <div class="accChips" id="accChips"></div>
+            <textarea id="accom" placeholder="One accommodation per line, e.g.
+Extra time to complete assessments.
+Pairing written instructions with oral instructions."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="step"><span class="num">4</span><h2>Focus of instruction</h2><span class="hint">general outcomes · quote 3–5</span></div>
+        <div class="chips" id="focus"></div>
+      </section>
+
+      <section class="block">
+        <div class="step"><span class="num">5</span><h2>Areas of strength</h2><span class="hint">specific outcomes · 1–3</span></div>
+        <div class="toggle-row" id="prodtoggle">
+          <button class="seg on" data-mode="oral">Oral production</button>
+          <button class="seg" data-mode="written">Written production</button>
+        </div>
+        <div class="opts" id="strengths"></div>
+      </section>
+
+      <section class="block">
+        <div class="step"><span class="num">6</span><h2>Areas for growth</h2><span class="hint">specific outcomes · 1–3</span></div>
+        <div id="growth"></div>
+      </section>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="preview">
+        <div class="pv-head"><span class="pt">Comment preview</span><span class="lvlbadge" id="lvlbadge">Adequate</span></div>
+        <div class="pv-body" id="pvbody"></div>
+        <div class="pv-foot">
+          <span class="count" id="count"></span>
+          <button class="btn ghost" id="clearbtn">Reset</button>
+          <button class="btn" id="copybtn">Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const COURSE="FSL 8";
+const PROGRAMMING=[{id:'regular',label:'Regular'},{id:'adapted',label:'Adapted'},{id:'modified',label:'Modified'}];
+const GRADES=[{id:'exemplary',label:'Exemplary'},{id:'proficient',label:'Proficient'},{id:'adequate',label:'Adequate'},{id:'limited',label:'Limited'}];
+
+const GENERAL=[
+  {id:'communication',tab:'Communication',focus:'Use knowledge of French to understand and/or to express a message effectively in various situations for a variety of purposes.'},
+  {id:'strategies',tab:'Strategies',focus:'Use their knowledge of strategies to enhance learning and to communicate in French.'},
+  {id:'culture',tab:'Culture',focus:'Use knowledge of different Francophone cultures and their own culture to be able to interact appropriately within these cultures.'},
+  {id:'language',tab:'Language',focus:'Use, with accuracy, knowledge of linguistic elements of the French language to fulfill their communicative intents.'}
+];
+const FOCUS_ORDER=['communication','strategies','culture','language'];
+
+const UNITS=[
+  {tf:'September–October',items:['Welcome Back to French Class']},
+  {tf:'October–January',items:['C’est mon style','Donne-moi des conseils']},
+  {tf:'January–May',items:['Mes goûts','Je fais de la cuisine']},
+  {tf:'May–June',items:['Mes animaux']}
+];
+
+const ORAL={
+  exemplary:'Name, list, encourage, describe, explain, ask and answer questions, give simple commands, directions, instructions or advice, express needs, desires, wishes and preferences, make suggestions, give compliments, orally, providing some details, in a defined, structured and modelled fashion, with limited spontaneity, resulting in a prepared message expressed in the present, that is comprehensible and accurate.',
+  proficient:'Name, list, describe, explain, ask and answer questions, give simple commands, directions or advice, express needs, desires, wishes and preferences, make suggestions, orally, providing some details, in a defined, structured and modelled fashion, with limited spontaneity, resulting in a prepared message expressed in the present, that is comprehensible and accurate.',
+  adequate:'Name, list, describe, ask and answer questions, express needs, desires, wishes and preferences, orally, providing some details, in a defined, structured and modelled fashion, resulting in a prepared message expressed in the present, that is comprehensible.',
+  limited:'Name, list, describe, ask and answer questions, orally, in a defined, structured and modelled fashion, resulting in a prepared message expressed in the present, that is comprehensible.',
+  modified:'Name, list, describe, orally, in a defined, structured and modelled fashion, resulting in a prepared message expressed in the present.'
+};
+const WRITTEN={
+  exemplary:'Name, label, list, encourage, describe, explain, ask and answer questions, give simple commands, directions, instructions or advice, express needs, desires, wishes and preferences, make suggestions, in written form, providing some details, in a defined, structured and modelled fashion, resulting in a prepared message expressed in the present, that is comprehensible and accurate.',
+  proficient:'Name, label, list, describe, explain, ask and answer questions, give simple commands, directions or advice, express needs, desires, wishes and preferences, make suggestions, in written form, providing some details, in a defined, structured and modelled fashion, resulting in a prepared message expressed in the present, that is comprehensible and accurate.',
+  adequate:'Name, label, list, describe, ask and answer questions, express needs, desires and preferences, in written form, providing some details, in a defined, structured and modelled fashion, resulting in a prepared message expressed in the present, that is comprehensible.',
+  limited:'Name, label, list, describe, ask and answer questions, in written form, in a defined, structured and modelled fashion, resulting in a prepared message expressed in the present, that is comprehensible.',
+  modified:'Name, label, list, describe, in written form, in a defined, structured and modelled fashion, resulting in a prepared message expressed in the present.'
+};
+const CONCEPTS={
+  exemplary:'Continue to develop knowledge of the following concepts: adjectives, adjectival agreements, possessive adjectives, personal subject pronouns, verbs, conjugation, the present tense, conjugation pattern of regular –er verbs in the present tense, negation, the interrogative.',
+  proficient:'Continue to develop knowledge of the following concepts: adjectives, adjectival agreements, possessive adjectives, personal subject pronouns, verbs, the present tense, conjugation pattern of regular –er verbs in the present tense, negation.',
+  adequate:'Continue to develop knowledge of the following concepts: adjectives, adjectival agreements, personal subject pronouns, verbs, the present tense.',
+  limited:'Continue to develop knowledge of the following concepts: nouns, gender, number, adjectives.',
+  modified:'Continue to develop knowledge of the following concepts: nouns, gender, number.'
+};
+const ACQUIRE={
+  exemplary:'Acquire knowledge of the following concepts: demonstrative adjectives, exclamatory adjectives, the partitive, quantity, adverbs and adverbial expressions, different verb groupings (–er, –ir, –re), irregular verb conjugation patterns in the present tense, verb + infinitive, the imperative, negative expressions.',
+  proficient:'Acquire knowledge of the following concepts: demonstrative adjectives, the partitive, adverbs and adverbial expressions, different verb groupings (–er, –ir, –re), irregular verb conjugation patterns in the present tense, the imperative.',
+  adequate:'Acquire knowledge of the following concepts: demonstrative adjectives, the partitive, the imperative.',
+  limited:'Acquire knowledge of the following concepts: demonstrative adjectives.',
+  modified:'Acquire knowledge of the following concepts: demonstrative adjectives.'
+};
+const VERBS={
+  exemplary:'Use, with some consistency, in oral and written form, the present tense of regular and irregular –er, –ir, –re verbs with all personal subject pronouns in affirmative and negative sentences.',
+  proficient:'Use, with some consistency, in oral and written form, the present tense of regular and irregular –er, –ir, –re verbs with all personal subject pronouns in affirmative sentences.',
+  adequate:'Use the present tense of regular –er verbs.',
+  limited:'Use the present tense of regular –er verbs.',
+  modified:'Use the present tense of regular –er verbs.'
+};
+const PARTITIVE='Use, with some consistency, in oral and written form, the partitive articles—du, de la, de l’, des.';
+const QUANTITY='Use, with some consistency, in oral and written form, expressions of quantity.';
+const IMPER='Use, with some consistency, in oral and written form, the imperative in the affirmative and in the negative with regular and irregular –er, –ir, –re verbs.';
+const FAIRE='Use, with some consistency, in oral and written form, expressions with faire.';
+const VOCAB='Use, with some consistency, in oral and written form, vocabulary associated with the fields of experience and their subfields.';
+const PRIOR='Use, with a higher level of accuracy, in oral and written form, linguistic elements defined in grades 4–7, needed to communicate a message.';
+const STRENGTH=[
+  {id:'comm',tag:'Communication',comm:true,def:true},
+  {id:'concepts',tag:'Language',lvl:CONCEPTS,def:true},
+  {id:'verbs',tag:'Language',lvl:VERBS,def:true},
+  {id:'partitive',tag:'Language',text:PARTITIVE,def:false},
+  {id:'imper',tag:'Language',text:IMPER,def:false},
+  {id:'quantity',tag:'Language',text:QUANTITY,def:false},
+  {id:'faire',tag:'Language',text:FAIRE,def:false},
+  {id:'acquire',tag:'Language',lvl:ACQUIRE,def:'hi'},
+  {id:'vocab',tag:'Language',text:VOCAB,def:false},
+  {id:'prior',tag:'Language',text:PRIOR,def:'hi'}
+];
+
+function strengthOptions(key,mode){
+  return STRENGTH.map(o=>{
+    const text=o.comm?(mode==='oral'?ORAL[key]:WRITTEN[key]):(o.lvl?o.lvl[key]:o.text);
+    const def=o.def==='hi'?(key==='exemplary'||key==='proficient'):!!o.def;
+    return {id:o.id,tag:o.tag,text,def};
+  });
+}
+
+const GROWTH=[
+  {cat:'Culture',text:'Identify, with teacher assistance, concrete facts that reflect the way of life of various Francophone peoples.',levels:['adequate','limited','modified']},
+  {cat:'Culture',text:'Recognize and understand how the French language has evolved and is evolving.',levels:['proficient','exemplary']},
+  {cat:'Culture',text:'Recognize regional variations in expressions used by different Francophone groups in a similar context.',levels:['proficient','adequate']},
+  {cat:'Culture',text:'Seek out information about Francophone cultures from authentic sources.',levels:['adequate','proficient']},
+  {cat:'Culture',text:'Compare and contrast, with teacher assistance, their own way of life with the way of life of individuals or groups from various Francophone cultures.',levels:['proficient','exemplary']},
+  {cat:'Culture',text:'Compare and contrast, with teacher assistance, the way of life of individuals or groups from various Francophone cultures.',levels:['exemplary','proficient']},
+  {cat:'Culture',text:'Reflect, with teacher assistance, upon the way of life of individuals or groups from various Francophone cultures.',levels:['exemplary']},
+  {cat:'Culture',text:'Access appropriate Web sites using French language search engines.',levels:['adequate','limited']},
+  {cat:'Comprehension strategies',text:'Guess the meaning of an unknown word or expression.',levels:['limited','modified']},
+  {cat:'Comprehension strategies',text:'Identify cognates and word families.',levels:['adequate','limited']},
+  {cat:'Comprehension strategies',text:'Use contextual clues relating to who, what, where, when and why.',levels:['adequate','proficient']},
+  {cat:'Comprehension strategies',text:'Use a bilingual dictionary to verify word meaning or find unknown words.',levels:['adequate','limited']},
+  {cat:'Comprehension strategies',text:'Tolerate ambiguity—accept that it is not necessary to understand every word in order to glean meaning.',levels:['proficient','exemplary']},
+  {cat:'Production strategies',text:'Identify patterns or language features, such as verb endings or gender.',levels:['adequate','proficient']},
+  {cat:'Production strategies',text:'Use models to create a similar text.',levels:['adequate','proficient']},
+  {cat:'Production strategies',text:'Create simple personal reference materials.',levels:['adequate','limited']},
+  {cat:'Production strategies',text:'Use reference materials to improve the message.',levels:['proficient','adequate']},
+  {cat:'Production strategies',text:'Take the risk to say or write something in French.',levels:['limited','modified']},
+  {cat:'Production strategies',text:'Reflect on and articulate what they have learned and can demonstrate in French.',levels:['exemplary','proficient']},
+  {cat:'Production strategies',text:'Use a learning log to monitor and evaluate their own learning.',levels:['exemplary','proficient']},
+  {cat:'Memory strategies',text:'Use rehearsal techniques to learn, recall or retain vocabulary or grammatical structures.',levels:['limited','modified','adequate']},
+  {cat:'Memory strategies',text:'Use organizational techniques to learn, recall or retain vocabulary or grammatical structures.',levels:['adequate','proficient']},
+  {cat:'Memory strategies',text:'Use elaboration techniques to learn, recall or retain vocabulary or grammatical structures.',levels:['proficient','exemplary']}
+].map((g,i)=>({...g,id:'g'+i}));
+
+const ADAPTED_STMT="^Name is receiving adapted programming.";
+const MODIFIED_STMT="^Name is receiving modified programming; the curricular outcomes have been significantly modified to support ^his/her learning needs.";
+const NGC_STMT="A grade or mark is not provided for students receiving modified programming. The code NGC (Not on Graded Curriculum) is used.";
+const COMMON_ACC=["Extra time to complete assessments.","Breaking instruction into smaller steps.","Pairing written instructions with oral instructions.","Offering alternative ways to show learning (e.g., oral discussions and scribed assignments).","Using visuals to support vocabulary.","Using a personal word list.","Providing graphic organizers.","Audio accommodations such as text-to-speech to assist with reading.","Using a bilingual dictionary.","Access to a quiet working space when needed."];
+
+const state={programming:'regular',grade:'adequate',mode:'oral',focus:{communication:true,strategies:true,culture:true,language:true},strengths:new Set(),growth:new Set(),glp:'',accom:'',units:new Set(),includeTitle:true};
+const contentKey=()=>state.programming==='modified'?'modified':state.grade;
+function defaultStrengths(){state.strengths=new Set(strengthOptions(contentKey(),state.mode).filter(o=>o.def).map(o=>o.id));}
+defaultStrengths();
+
+const $=s=>document.querySelector(s);
+function titleLine(){const u=[...state.units];return (state.includeTitle&&u.length)?`${COURSE} — ${u.join(', ')}`:'';}
+function renderUnits(){$('#units').innerHTML=UNITS.map(u=>`<div class="ublock"><p class="lbl">${u.tf}</p><div class="accChips">${u.items.map(it=>`<span class="accChip ${state.units.has(it)?'on':''}" data-u="${it.replace(/"/g,'&quot;')}">${it}</span>`).join('')}</div></div>`).join('');}
+function renderProg(){$('#prog').innerHTML=PROGRAMMING.map(p=>`<button class="lvl prog ${state.programming===p.id?'on':''}" data-p="${p.id}">${p.label}</button>`).join('');}
+function renderGrade(){
+  const mod=state.programming==='modified';
+  $('#grade').innerHTML=GRADES.map(g=>`<button class="lvl ${state.grade===g.id&&!mod?'on':''}" data-g="${g.id}" ${mod?'disabled':''}>${g.label}</button>`).join('');
+  const note=$('#gradeNote');
+  if(mod){note.style.display='block';note.textContent='Modified programming receives no grade — the code NGC (Not on Graded Curriculum) is used.';}
+  else if(state.programming==='adapted'&&state.grade==='limited'){note.style.display='block';note.textContent='Adapted programming is reported in the Adequate–Exemplary range; Limited is not typically used for adapted programming.';}
+  else note.style.display='none';
+}
+function renderCtx(){
+  const need=state.programming!=='regular'||state.grade==='limited';
+  $('#ctx').classList.toggle('req',need);
+  $('#glpField').style.display=(state.programming!=='regular')?'block':'none';
+  $('#accChips').innerHTML=COMMON_ACC.map(a=>`<span class="accChip" data-a="${a.replace(/"/g,'&quot;')}">+ ${a.replace(/\.$/,'')}</span>`).join('');
+}
+function renderFocus(){$('#focus').innerHTML=GENERAL.map(g=>`<div class="chip ${state.focus[g.id]?'on':''}" data-g="${g.id}"><div class="ct"><span class="dot"></span>${g.tab}</div><div class="cd">${g.focus}</div></div>`).join('');}
+function renderStrengths(){
+  const opts=strengthOptions(contentKey(),state.mode);
+  $('#strengths').innerHTML=opts.map(o=>`<div class="opt ${state.strengths.has(o.id)?'on':''}" data-s="${o.id}"><span class="box"></span><span class="txt"><span class="tag">${o.tag}</span>${o.text}</span></div>`).join('');
+  document.querySelectorAll('#prodtoggle .seg').forEach(b=>b.classList.toggle('on',b.dataset.mode===state.mode));
+}
+function renderGrowth(){
+  const lv=contentKey();const cats=[...new Set(GROWTH.map(g=>g.cat))];
+  $('#growth').innerHTML=cats.map(cat=>{
+    const items=GROWTH.filter(g=>g.cat===cat).map(g=>{const sugg=g.levels.includes(lv)?'<span class="sugg">suggested</span>':'';return `<div class="opt ${state.growth.has(g.id)?'on':''}" data-gr="${g.id}"><span class="box"></span><span class="txt">${g.text}${sugg}</span></div>`;}).join('');
+    return `<div class="gcat"><h3>${cat}</h3><div class="opts">${items}</div></div>`;
+  }).join('');
+}
+function accomList(){return state.accom.split('\n').map(s=>s.trim()).filter(Boolean);}
+function renderPreview(){
+  const mod=state.programming==='modified';
+  $('#lvlbadge').textContent=mod?'NGC':GRADES.find(g=>g.id===state.grade).label;
+  const focusLines=FOCUS_ORDER.filter(id=>state.focus[id]).map(id=>GENERAL.find(g=>g.id===id).focus);
+  const strengthLines=strengthOptions(contentKey(),state.mode).filter(o=>state.strengths.has(o.id)).map(o=>o.text);
+  const growthLines=GROWTH.filter(g=>state.growth.has(g.id)).map(g=>g.text);
+  const acc=accomList();const tl=titleLine();
+  let html='';
+  if(tl)html+=`<div class="stmt" style="font-style:normal;font-weight:700;color:var(--navy)">${tl}</div>`;
+  if(state.programming==='adapted')html+=`<div class="stmt">${ADAPTED_STMT}</div>`;
+  if(state.programming==='modified')html+=`<div class="stmt">${MODIFIED_STMT}</div>`;
+  if(state.programming!=='regular'&&state.glp.trim())html+=`<div class="stmt">^He/She is learning grade ${state.glp.trim()} content.</div>`;
+  if(acc.length){html+=`<h4>Accommodations to support ^Name's success</h4><ul>${acc.map(a=>`<li>${a}</li>`).join('')}</ul>`;}
+  html+=section('Focus of instruction',focusLines);
+  html+=section('Areas of strength',strengthLines);
+  html+=section('Areas for growth',growthLines);
+  if(state.programming==='modified')html+=`<div class="stmt" style="margin-top:12px">${NGC_STMT}</div>`;
+  $('#pvbody').innerHTML=html;
+  const text=buildText(focusLines,strengthLines,growthLines,acc,tl);
+  const words=text.trim()?text.trim().split(/\s+/).length:0;
+  let warn='';if(strengthLines.length>3)warn=' · strength over 3';else if(growthLines.length>3)warn=' · growth over 3';
+  $('#count').textContent=`${words} words · ${text.length} characters${warn}`;
+}
+function section(title,lines){if(!lines.length)return `<h4>${title}</h4><p class="empty">— none selected —</p>`;return `<h4>${title}</h4><ul>${lines.map(l=>`<li>${l}</li>`).join('')}</ul>`;}
+function buildText(f,s,g,acc,tl){
+  let out=[];
+  if(tl)out.push(tl);
+  if(state.programming==='adapted')out.push(ADAPTED_STMT);
+  if(state.programming==='modified')out.push(MODIFIED_STMT);
+  if(state.programming!=='regular'&&state.glp.trim())out.push(`^He/She is learning grade ${state.glp.trim()} content.`);
+  if(acc.length){out.push("Accommodations to support ^Name's success:");acc.forEach(a=>out.push('• '+a));}
+  if(out.length)out.push('');
+  const add=(t,lines)=>{if(lines.length){out.push(t);lines.forEach(l=>out.push('• '+l));out.push('');}};
+  add('Focus of instruction:',f);add('Areas of strength:',s);add('Areas for growth:',g);
+  if(state.programming==='modified')out.push(NGC_STMT);
+  return out.join('\n').trim();
+}
+function renderAll(){renderUnits();renderProg();renderGrade();renderCtx();renderFocus();renderStrengths();renderGrowth();renderPreview();}
+renderAll();
+
+$('#units').addEventListener('click',e=>{const c=e.target.closest('.accChip');if(!c)return;const v=c.dataset.u;state.units.has(v)?state.units.delete(v):state.units.add(v);renderUnits();renderPreview();});
+$('#incTitle').addEventListener('change',e=>{state.includeTitle=e.target.checked;renderPreview();});
+$('#prog').addEventListener('click',e=>{const b=e.target.closest('.lvl');if(!b)return;state.programming=b.dataset.p;defaultStrengths();state.growth=new Set();renderAll();});
+$('#grade').addEventListener('click',e=>{const b=e.target.closest('.lvl');if(!b||b.disabled)return;state.grade=b.dataset.g;defaultStrengths();state.growth=new Set();renderAll();});
+$('#focus').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;const id=c.dataset.g;state.focus[id]=!state.focus[id];renderFocus();renderPreview();});
+$('#prodtoggle').addEventListener('click',e=>{const b=e.target.closest('.seg');if(!b)return;state.mode=b.dataset.mode;renderStrengths();renderPreview();});
+$('#strengths').addEventListener('click',e=>{const o=e.target.closest('.opt');if(!o)return;const id=o.dataset.s;state.strengths.has(id)?state.strengths.delete(id):state.strengths.add(id);renderStrengths();renderPreview();});
+$('#growth').addEventListener('click',e=>{const o=e.target.closest('.opt');if(!o)return;const id=o.dataset.gr;state.growth.has(id)?state.growth.delete(id):state.growth.add(id);renderGrowth();renderPreview();});
+$('#glp').addEventListener('input',e=>{state.glp=e.target.value;renderPreview();});
+$('#accom').addEventListener('input',e=>{state.accom=e.target.value;renderPreview();});
+$('#accChips').addEventListener('click',e=>{const c=e.target.closest('.accChip');if(!c)return;const val=c.dataset.a;const cur=state.accom.trim();if(cur.split('\n').map(s=>s.trim()).includes(val))return;state.accom=(cur?cur+'\n':'')+val;$('#accom').value=state.accom;renderPreview();});
+$('#copybtn').addEventListener('click',()=>{
+  const f=FOCUS_ORDER.filter(id=>state.focus[id]).map(id=>GENERAL.find(g=>g.id===id).focus);
+  const s=strengthOptions(contentKey(),state.mode).filter(o=>state.strengths.has(o.id)).map(o=>o.text);
+  const g=GROWTH.filter(x=>state.growth.has(x.id)).map(x=>x.text);
+  const text=buildText(f,s,g,accomList(),titleLine());
+  const done=()=>{const b=$('#copybtn');b.textContent='Copied ✓';b.classList.add('done');setTimeout(()=>{b.textContent='Copy';b.classList.remove('done');},1400);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(fb);}else fb();
+  function fb(){const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}document.body.removeChild(ta);}
+});
+$('#clearbtn').addEventListener('click',()=>{
+  state.programming='regular';state.grade='adequate';state.mode='oral';
+  state.focus={communication:true,strategies:true,culture:true,language:true};
+  state.glp='';state.accom='';state.units=new Set();state.includeTitle=true;
+  $('#glp').value='';$('#accom').value='';$('#incTitle').checked=true;
+  defaultStrengths();state.growth=new Set();renderAll();
+});
+</script>
+</body>
+</html>

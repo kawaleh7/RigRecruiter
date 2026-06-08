@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report Comment Builders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5f5f6;--paper-2:#ffffff;--ink:#1a2740;--ink-soft:#5a6373;
+    --navy:#16203a;--ochre:#b3842b;--ochre-soft:#cda85a;--line:#e4e5e8;
+    --line-soft:#eef0f1;--shadow:0 1px 2px rgba(22,32,58,.05),0 10px 28px rgba(22,32,58,.08);
+  }
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Public Sans',sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px;margin:0 auto;padding:54px 22px 90px;}
+  header.top{border-bottom:2px solid var(--ink);padding-bottom:22px;margin-bottom:30px;}
+  .kicker{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ochre);font-weight:700;margin:0 0 8px;}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(32px,6vw,52px);line-height:1.02;margin:0;letter-spacing:-.01em;color:var(--navy);}
+  h1 em{font-style:italic;color:var(--ochre);}
+  .sub{margin:12px 0 0;color:var(--ink-soft);max-width:60ch;font-size:14.5px;}
+  .group-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--ink-soft);margin:30px 0 14px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+  a.card{display:flex;flex-direction:column;text-decoration:none;background:var(--paper-2);border:1.5px solid var(--line);border-radius:14px;padding:20px 20px 18px;transition:all .16s ease;position:relative;overflow:hidden;}
+  a.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ochre);opacity:0;transition:opacity .16s ease;}
+  a.card:hover{border-color:var(--navy);box-shadow:var(--shadow);transform:translateY(-2px);}
+  a.card:hover::before{opacity:1;}
+  .tag{align-self:flex-start;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ochre);background:#faf4e6;border:1px solid #ecdcb4;padding:3px 9px;border-radius:999px;margin-bottom:12px;}
+  .ctitle{font-family:'Fraunces',serif;font-weight:600;font-size:21px;color:var(--navy);line-height:1.1;margin:0 0 4px;}
+  .cdesc{font-size:12.5px;color:var(--ink-soft);margin:0;}
+  .go{margin-top:14px;font-size:12.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;}
+  .go .arrow{transition:transform .16s ease;}
+  a.card:hover .go .arrow{transform:translateX(4px);color:var(--ochre);}
+  .foot{margin-top:46px;border-top:1px solid var(--line-soft);padding-top:16px;font-size:12px;color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="kicker">Alberta Junior High · Progress Reports</p>
+    <h1>Report Comment <em>Builders</em></h1>
+    <p class="sub">Pick a subject and grade. Choose an achievement level, programming type and the outcomes taught, and the tool assembles a copy-ready progress-report comment with verbatim curriculum wording.</p>
+  </header>
+
+  <p class="group-label">French as a Second Language</p>
+  <div class="grid">
+    <a class="card" href="fsl7.html">
+      <span class="tag">FSL · Grade 7</span>
+      <p class="ctitle">FSL 7</p>
+      <p class="cdesc">Welcome Back · Mon école · Ma famille &amp; communauté · La météo</p>
+      <span class="go">Open builder <span class="arrow">→</span></span>
+    </a>
+    <a class="card" href="fsl8.html">
+      <span class="tag">FSL · Grade 8</span>
+      <p class="ctitle">FSL 8</p>
+      <p class="cdesc">C'est mon style · Mes goûts · Je fais de la cuisine · Mes animaux</p>
+      <span class="go">Open builder <span class="arrow">→</span></span>
+    </a>
+    <a class="card" href="fsl9.html">
+      <span class="tag">FSL · Grade 9</span>
+      <p class="ctitle">FSL 9</p>
+      <p class="cdesc">Ma communauté · On fait du sport · Chez moi · Mes plans</p>
+      <span class="go">Open builder <span class="arrow">→</span></span>
+    </a>
+  </div>
+
+  <p class="group-label">Physical Education</p>
+  <div class="grid">
+    <a class="card" href="pe7.html">
+      <span class="tag">PE · Grade 7</span>
+      <p class="ctitle">Physical Education 7</p>
+      <p class="cdesc">Activity · Benefits Health · Cooperation · Do it Daily — with level cascade</p>
+      <span class="go">Open builder <span class="arrow">→</span></span>
+    </a>
+  </div>
+
+  <p class="foot">Outcome wording is quoted verbatim from the Alberta programs of study. Give each comment a final read before submitting.</p>
+</div>
+</body>
+</html>
