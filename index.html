@@ -4,83 +4,84 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Report Comment Builders</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#ffffff;--paper-2:#ffffff;--ink:#1f2733;--ink-soft:#5a6373;
-    --navy:#16203a;--ochre:#5c1f2a;--ochre-soft:#7a2c39;--line:#e1e3e6;
-    --line-soft:#eef0f1;--shadow:0 1px 2px rgba(22,32,58,.05),0 10px 28px rgba(22,32,58,.08);
+    --bg:#ffffff;--card:#ffffff;--ink:#1f2733;--ink-soft:#5a6373;
+    --navy:#16203a;--gold:#b8860b;--gold-soft:#d4a017;--line:#e6e7ea;--line-soft:#eef0f1;
+    --shadow:0 1px 2px rgba(22,32,58,.05),0 14px 34px rgba(22,32,58,.10);
   }
   *{box-sizing:border-box;}html,body{margin:0;padding:0;}
-  body{background:var(--paper);color:var(--ink);font-family:'Times New Roman',Times,serif;font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased;}
-  .wrap{max-width:920px;margin:0 auto;padding:54px 22px 90px;}
-  header.top{border-bottom:2px solid var(--ink);padding-bottom:22px;margin-bottom:30px;}
-  .kicker{font-size:16px;letter-spacing:.1em;text-transform:uppercase;color:var(--ochre);font-weight:700;margin:0 0 8px;}
-  h1{font-family:'Times New Roman',Times,serif;font-weight:600;font-size:clamp(32px,6vw,52px);line-height:1.02;margin:0;letter-spacing:-.01em;color:var(--navy);}
-  h1 em{font-style:italic;color:var(--ochre);}
-  .sub{margin:12px 0 0;color:var(--ink-soft);max-width:60ch;font-size:17px;}
-  .group-label{font-size:16px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--ink-soft);margin:30px 0 14px;}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
-  a.card{display:flex;flex-direction:column;text-decoration:none;background:var(--paper-2);border:1.5px solid var(--line);border-radius:14px;padding:20px 20px 18px;transition:all .16s ease;position:relative;overflow:hidden;}
-  a.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ochre);opacity:0;transition:opacity .16s ease;}
-  a.card:hover{border-color:var(--navy);box-shadow:var(--shadow);transform:translateY(-2px);}
-  a.card:hover::before{opacity:1;}
-  .tag{align-self:flex-start;font-size:16px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ochre);background:#f2e7e9;border:1px solid #d8bcc2;padding:3px 9px;border-radius:999px;margin-bottom:12px;}
-  .ctitle{font-family:'Times New Roman',Times,serif;font-weight:600;font-size:24px;color:var(--navy);line-height:1.1;margin:0 0 4px;}
-  .cdesc{font-size:16px;color:var(--ink-soft);margin:0;}
-  .go{margin-top:14px;font-size:16px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;}
-  .go .arrow{transition:transform .16s ease;}
-  a.card:hover .go .arrow{transform:translateX(4px);color:var(--ochre);}
-  .foot{margin-top:46px;border-top:1px solid var(--line-soft);padding-top:16px;font-size:16px;color:var(--ink-soft);}
+  body{background:var(--bg);color:var(--ink);font-family:'Times New Roman',Times,serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1060px;margin:0 auto;padding:56px 24px 96px;}
 
-  .group-label{color:var(--navy);display:flex;align-items:center;gap:10px;}
-  .group-label::before{content:"";width:20px;height:2px;background:var(--ochre);display:inline-block;}
-  .ctitle{color:var(--navy);}
-  .kicker{display:inline-flex;align-items:center;gap:10px;color:var(--ochre);font-weight:bold;}
-  .kicker::before{content:"";width:26px;height:2px;background:var(--ochre);display:inline-block;border-radius:2px;}
+  header.top{margin-bottom:42px;}
+  .eyebrow{display:inline-flex;align-items:center;gap:11px;font-size:16px;font-weight:bold;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 14px;}
+  .eyebrow::before{content:"";width:30px;height:2px;background:var(--gold);border-radius:2px;display:inline-block;}
+  h1{font-weight:bold;font-size:clamp(40px,6vw,60px);line-height:1.02;margin:0;letter-spacing:-.01em;color:var(--navy);}
+  .sub{margin:16px 0 0;color:var(--ink-soft);max-width:62ch;font-size:18px;}
+
+  .section{margin-top:44px;}
+  .section-label{display:flex;align-items:center;gap:12px;font-size:17px;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);margin:0 0 18px;}
+  .section-label::before{content:"";width:22px;height:3px;background:var(--gold);border-radius:2px;display:inline-block;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;}
+  a.card{position:relative;display:flex;flex-direction:column;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;}
+  a.card::before{content:"";height:4px;width:100%;background:linear-gradient(90deg,var(--gold),var(--gold-soft));}
+  a.card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#cfd3da;}
+  .card-body{padding:22px 24px 20px;display:flex;flex-direction:column;height:100%;}
+  .meta{font-size:16px;font-weight:bold;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);margin:0 0 8px;}
+  .ctitle{font-size:30px;font-weight:bold;line-height:1.05;color:var(--navy);margin:0 0 10px;}
+  .cdesc{font-size:16px;color:var(--ink-soft);margin:0 0 18px;line-height:1.5;flex:1;}
+  .open{font-size:17px;font-weight:bold;color:var(--navy);display:inline-flex;align-items:center;gap:8px;}
+  .open .arrow{transition:transform .16s ease,color .16s ease;}
+  a.card:hover .open .arrow{transform:translateX(5px);color:var(--gold);}
+
+  .foot{margin-top:52px;border-top:1px solid var(--line-soft);padding-top:18px;font-size:15px;color:var(--ink-soft);max-width:70ch;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <p class="kicker">Alberta Junior High · Progress Reports</p>
-    <h1>Report Comment <em>Builders</em></h1>
-    <p class="sub">Pick a subject and grade. Choose an achievement level, programming type and the outcomes taught, and the tool assembles a copy-ready progress-report comment with verbatim curriculum wording.</p>
+    <p class="eyebrow">Alberta · Progress Reports</p>
+    <h1>Report Comment Builders</h1>
+    <p class="sub">Choose a subject and grade. Pick an achievement level, programming type and the outcomes taught, and the tool assembles a copy-ready comment in verbatim curriculum wording.</p>
   </header>
 
-  <p class="group-label">French as a Second Language</p>
-  <div class="grid">
-    <a class="card" href="fsl7.html">
-      <span class="tag">FSL · Grade 7</span>
-      <p class="ctitle">FSL 7</p>
-      <p class="cdesc">Welcome Back · Mon école · Ma famille &amp; communauté · La météo</p>
-      <span class="go">Open builder <span class="arrow">→</span></span>
-    </a>
-    <a class="card" href="fsl8.html">
-      <span class="tag">FSL · Grade 8</span>
-      <p class="ctitle">FSL 8</p>
-      <p class="cdesc">C'est mon style · Mes goûts · Je fais de la cuisine · Mes animaux</p>
-      <span class="go">Open builder <span class="arrow">→</span></span>
-    </a>
-    <a class="card" href="fsl9.html">
-      <span class="tag">FSL · Grade 9</span>
-      <p class="ctitle">FSL 9</p>
-      <p class="cdesc">Ma communauté · On fait du sport · Chez moi · Mes plans</p>
-      <span class="go">Open builder <span class="arrow">→</span></span>
-    </a>
-  </div>
+  <section class="section">
+    <p class="section-label">French as a Second Language</p>
+    <div class="grid">
+      <a class="card" href="fsl7.html"><div class="card-body">
+        <p class="meta">FSL · Grade 7</p>
+        <p class="ctitle">FSL 7</p>
+        <p class="cdesc">Welcome Back · Mon école · Ma famille &amp; communauté · La météo</p>
+        <span class="open">Open builder <span class="arrow">→</span></span>
+      </div></a>
+      <a class="card" href="fsl8.html"><div class="card-body">
+        <p class="meta">FSL · Grade 8</p>
+        <p class="ctitle">FSL 8</p>
+        <p class="cdesc">C'est mon style · Mes goûts · Je fais de la cuisine · Mes animaux</p>
+        <span class="open">Open builder <span class="arrow">→</span></span>
+      </div></a>
+      <a class="card" href="fsl9.html"><div class="card-body">
+        <p class="meta">FSL · Grade 9</p>
+        <p class="ctitle">FSL 9</p>
+        <p class="cdesc">Ma communauté · On fait du sport · Chez moi · Mes plans</p>
+        <span class="open">Open builder <span class="arrow">→</span></span>
+      </div></a>
+    </div>
+  </section>
 
-  <p class="group-label">Physical Education</p>
-  <div class="grid">
-    <a class="card" href="pe7.html">
-      <span class="tag">PE · Grade 7</span>
-      <p class="ctitle">Physical Education 7</p>
-      <p class="cdesc">Activity · Benefits Health · Cooperation · Do it Daily — with level cascade</p>
-      <span class="go">Open builder <span class="arrow">→</span></span>
-    </a>
-  </div>
+  <section class="section">
+    <p class="section-label">Physical Education</p>
+    <div class="grid">
+      <a class="card" href="pe7.html"><div class="card-body">
+        <p class="meta">PE · Grade 7</p>
+        <p class="ctitle">Physical Education 7</p>
+        <p class="cdesc">Activity · Benefits Health · Cooperation · Do it Daily — with achievement-level cascade</p>
+        <span class="open">Open builder <span class="arrow">→</span></span>
+      </div></a>
+    </div>
+  </section>
 
   <p class="foot">Outcome wording is quoted verbatim from the Alberta programs of study. Give each comment a final read before submitting.</p>
 </div>
