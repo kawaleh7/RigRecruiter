@@ -36,6 +36,10 @@
   .open .arrow{transition:transform .16s ease,color .16s ease;}
   a.card:hover .open .arrow{transform:translateX(5px);color:var(--gold);}
 
+  a.card.tool::before{background:linear-gradient(90deg,#0f6e56,#13a07b);}
+  a.card.tool .meta{color:#0f6e56;}
+  a.card.tool:hover .open .arrow{color:#0f6e56;}
+
   .foot{margin-top:52px;border-top:1px solid var(--line-soft);padding-top:18px;font-size:15px;color:var(--ink-soft);max-width:70ch;}
 </style>
 </head>
@@ -72,7 +76,7 @@
   </section>
 
   <section class="section">
-    <p class="section-label">Physical Education</p>
+    <p class="section-label">Physical Education &amp; Tools</p>
     <div class="grid">
       <a class="card" href="pe7.html"><div class="card-body">
         <p class="meta">PE · Grade 7</p>
@@ -80,14 +84,8 @@
         <p class="cdesc">Activity · Benefits Health · Cooperation · Do it Daily — with achievement-level cascade</p>
         <span class="open">Open builder <span class="arrow">→</span></span>
       </div></a>
-    </div>
-  </section>
-
-  <section class="section">
-    <p class="section-label">Tools</p>
-    <div class="grid">
-      <a class="card" href="checker.html"><div class="card-body">
-        <p class="meta">Quality Check</p>
+      <a class="card tool" href="checker.html"><div class="card-body">
+        <p class="meta">Tool · Quality Check</p>
         <p class="ctitle">Comment Checker</p>
         <p class="cdesc">Paste a finished comment to flag reworded wording, off-curriculum lines, and punctuation issues.</p>
         <span class="open">Open checker <span class="arrow">→</span></span>
