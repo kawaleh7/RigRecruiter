@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;color:#0f172a;min-height:100vh}
+:root{
+  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
+  --navy:#0a1228;--border:#cbd5e1;--text:#0f172a;--muted:#475569;--light:#94a3b8;
+  --green:#166534;--green-bg:#f0fdf4;--gold:#b8923a;--gold-border:#c9963a;
+  --red:#991b1b;--red-bg:#fef2f2;--amber:#92400e;
+  --shadow:0 6px 20px rgba(15,23,42,.08);
+  --shadow-lg:0 20px 60px rgba(15,23,42,.16);
+}
+
+/* LAYOUT */
+.auth-shell{
+  display:grid;grid-template-columns:1fr 1fr;
+  min-height:100vh;
+}
+
+/* ── LEFT SIDE (NAVY SHOWCASE) ── */
+.auth-left{
+  background:var(--navy);
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+  padding:48px 56px;color:#fff;
+}
+.auth-left::before{
+  content:'';position:absolute;inset:0;opacity:.04;
+  background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+.auth-left::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 70% 80%,rgba(30,58,138,.45) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 15% 20%,rgba(30,58,138,.2) 0%,transparent 60%);
+  pointer-events:none;
+}
+.auth-left > *{position:relative;z-index:2}
+
+.al-logo{display:flex;align-items:center;gap:11px;text-decoration:none;margin-bottom:auto}
+.al-logo-mark{width:36px;height:36px;background:var(--blue);border-radius:8px;display:grid;place-items:center;box-shadow:0 6px 14px rgba(30,58,138,.3)}
+.al-logo-mark svg{width:17px;height:17px;fill:#fff}
+.al-logo-name{font-size:1.15rem;font-weight:800;color:#fff}
+.al-logo-name span{color:#93c5fd}
+
+.al-content{padding:60px 0 40px}
+.al-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);border-radius:100px;padding:5px 14px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:24px}
+.al-content h1{font-size:2.2rem;font-weight:800;color:#fff;letter-spacing:-.8px;line-height:1.15;margin-bottom:16px}
+.al-content h1 span{color:#93c5fd}
+.al-content p{font-size:.95rem;color:rgba(255,255,255,.55);line-height:1.72;max-width:380px;margin-bottom:36px}
+
+/* WORKER CARD PREVIEW */
+.preview-card{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(8px);
+  border-radius:14px;padding:20px;
+  max-width:380px;
+  box-shadow:0 20px 50px rgba(0,0,0,.3);
+}
+.pc-head{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:14px}
+.pc-avatar{width:42px;height:42px;border-radius:9px;background:var(--blue);display:grid;place-items:center;font-weight:800;font-size:.85rem;color:#fff;flex-shrink:0}
+.pc-name{font-size:.95rem;font-weight:700;color:#fff;letter-spacing:-.1px}
+.pc-role{font-size:.78rem;color:rgba(255,255,255,.55);margin-top:2px}
+.pc-ver{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3);border-radius:100px;padding:3px 9px;font-size:.65rem;font-weight:700;margin-left:auto;text-transform:uppercase;letter-spacing:.5px}
+.pc-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.pc-row:last-child{border-bottom:none}
+.pc-cn{font-size:.83rem;color:rgba(255,255,255,.85);font-weight:500}
+.pc-cd{font-size:.7rem;color:rgba(255,255,255,.4);margin-top:1px}
+.pc-tag{border-radius:5px;padding:3px 9px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.pc-tg{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3)}
+.pc-ty{background:rgba(251,191,36,.15);color:#fcd34d;border:1px solid rgba(251,191,36,.3)}
+.pc-tr{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+
+.al-trust{display:flex;gap:18px;margin-top:auto;padding-top:32px;border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap}
+.al-trust-item{display:flex;align-items:center;gap:6px;font-size:.72rem;color:rgba(255,255,255,.4);font-weight:600;letter-spacing:.3px}
+
+/* ── RIGHT SIDE (FORM) ── */
+.auth-right{
+  background:#fff;
+  display:flex;flex-direction:column;
+  padding:32px 56px 48px;overflow-y:auto;
+}
+.auth-right-top{display:flex;align-items:center;justify-content:flex-end;margin-bottom:auto}
+.back-home{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:.83rem;color:var(--muted);text-decoration:none;
+  padding:8px 14px;border-radius:7px;transition:all .15s;
+}
+.back-home:hover{background:#f1f5f9;color:var(--text)}
+
+.auth-card{
+  width:100%;max-width:440px;
+  margin:24px auto;
+}
+
+/* TABS */
+.auth-tabs{
+  display:flex;background:#f1f5f9;border-radius:10px;
+  padding:4px;margin-bottom:32px;
+  border:1px solid var(--border);gap:4px;
+}
+.atab{
+  flex:1;padding:11px;border-radius:7px;border:none;
+  background:transparent;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.88rem;font-weight:700;color:var(--muted);
+  cursor:pointer;transition:all .2s;
+}
+.atab.on{
+  background:#fff;color:var(--blue);
+  box-shadow:0 1px 4px rgba(15,23,42,.1),0 0 0 1px var(--blue-border);
+}
+
+/* PANEL */
+.panel{display:none;animation:fadeIn .3s ease}
+.panel.on{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.panel-head{margin-bottom:24px}
+.panel-head h2{font-size:1.7rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:6px}
+.panel-head p{font-size:.88rem;color:var(--muted);line-height:1.5}
+
+/* ROLE TOGGLE */
+.role-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--light);margin-bottom:8px}
+.role-toggle{
+  display:flex;background:#fff;border-radius:10px;
+  padding:4px;margin-bottom:24px;
+  border:1.5px solid var(--border);gap:4px;
+}
+.rtog{
+  flex:1;padding:11px;border-radius:7px;border:none;
+  background:transparent;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.875rem;font-weight:600;color:var(--muted);
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.rtog svg{flex-shrink:0;transition:stroke .2s}
+.rtog.on{
+  background:#fff;color:var(--gold);
+  box-shadow:0 1px 4px rgba(15,23,42,.1),0 0 0 1.5px var(--gold-border);
+}
+.rtog.on svg{stroke:var(--gold)}
+
+/* FORM */
+.field{margin-bottom:16px}
+.field label{display:flex;align-items:center;justify-content:space-between;font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:7px}
+.field label a{font-size:.74rem;color:var(--blue);text-decoration:none;font-weight:600}
+.field label a:hover{text-decoration:underline}
+.field input,.field select{
+  width:100%;padding:12px 14px;border-radius:9px;
+  border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.9rem;color:var(--text);outline:none;
+  transition:all .15s;background:#fff;
+}
+.field input:focus,.field select:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(30,58,138,.08);
+}
+.field input::placeholder{color:var(--light)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* PASSWORD STRENGTH */
+.pwd-strength{display:flex;gap:4px;margin-top:8px}
+.pwd-bar{flex:1;height:3px;background:#f1f5f9;border-radius:2px;transition:background .2s}
+.pwd-bar.weak{background:#ef4444}
+.pwd-bar.medium{background:#f59e0b}
+.pwd-bar.strong{background:var(--green)}
+.pwd-hint{font-size:.7rem;color:var(--muted);margin-top:6px}
+
+/* CHECKBOX */
+.checkbox-row{display:flex;align-items:center;gap:8px;margin:14px 0 20px}
+.checkbox-row input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
+.checkbox-row label{font-size:.8rem;color:var(--muted);cursor:pointer;line-height:1.5}
+
+/* BUTTONS */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:13px;border-radius:9px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.92rem;font-weight:700;
+  cursor:pointer;border:none;text-decoration:none;transition:all .15s;
+}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(30,58,138,.2)}
+.btn-blue:hover{background:var(--blue-mid);transform:translateY(-1px);box-shadow:0 8px 20px rgba(30,58,138,.25)}
+.btn-blue:active{transform:translateY(0)}
+.btn-blue:disabled{opacity:.6;cursor:wait;transform:none}
+
+/* AUTH MESSAGES */
+.auth-msg{
+  padding:10px 13px;border-radius:9px;font-size:.82rem;
+  margin-bottom:14px;line-height:1.5;display:none;
+}
+.auth-msg.show{display:flex;align-items:flex-start;gap:8px}
+.auth-msg svg{flex-shrink:0;margin-top:1px}
+.auth-msg.error{background:#fef2f2;border:1.5px solid #fda4af;color:#991b1b}
+.auth-msg.success{background:#f0fdf4;border:1.5px solid #86efac;color:#166534}
+.auth-msg.info{background:#dbeafe;border:1.5px solid #93c5fd;color:#1e3a8a}
+
+/* SSO */
+.divider{display:flex;align-items:center;gap:14px;margin:24px 0}
+.divider span{font-size:.72rem;color:var(--light);font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.sso-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sso-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px;border-radius:9px;
+  border:1.5px solid var(--border);background:#fff;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:600;color:var(--text);
+  cursor:pointer;transition:all .15s;text-decoration:none;
+}
+.sso-btn:hover{border-color:var(--light);background:#fafbfc}
+
+/* FOOTER LINKS */
+.auth-foot{text-align:center;margin-top:24px}
+.auth-switch{font-size:.85rem;color:var(--muted)}
+.auth-switch a{color:var(--blue);font-weight:600;text-decoration:none}
+.auth-switch a:hover{text-decoration:underline}
+.terms{font-size:.73rem;color:var(--light);margin-top:16px;line-height:1.6}
+.terms a{color:var(--muted);text-decoration:underline}
+.terms a:hover{color:var(--text)}
+
+/* VERIFIED NOTE */
+.verified-note{
+  display:flex;align-items:flex-start;gap:10px;
+  background:var(--green-bg);border:1.5px solid #86efac;
+  border-radius:10px;padding:12px 14px;margin-bottom:20px;
+}
+.verified-note svg{flex-shrink:0;margin-top:1px}
+.verified-note p{font-size:.78rem;color:var(--green);line-height:1.55;font-weight:500}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .auth-shell{grid-template-columns:1fr}
+  .auth-left{display:none}
+  .auth-right{padding:24px 24px 40px}
+  .auth-card{margin:16px auto}
+}
+@media(max-width:480px){
+  .auth-right{padding:20px 18px 32px}
+  .panel-head h2{font-size:1.4rem}
+  .sso-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="auth-shell">
+
+  <!-- ── LEFT SIDE ── -->
+  <div class="auth-left">
+    <a class="al-logo" href="index.html">
+      <div class="al-logo-mark"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+      <span class="al-logo-name">Rig<span>Pass</span></span>
+    </a>
+
+    <div class="al-content">
+      <div class="al-tag">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Trusted by 12,000+ Workers
+      </div>
+      <h1>Your certifications.<br><span>Always job-ready.</span></h1>
+      <p>Store every safety ticket in one place. Get expiry alerts. Apply to oil patch jobs with one click.</p>
+
+      <div class="preview-card">
+        <div class="pc-head">
+          <div class="pc-avatar">MR</div>
+          <div>
+            <div class="pc-name">Mike Robertson</div>
+            <div class="pc-role">Journeyman Pipefitter · 12 yrs</div>
+          </div>
+          <span class="pc-ver">✓ Verified</span>
+        </div>
+        <div class="pc-row">
+          <div><div class="pc-cn">H2S Alive</div><div class="pc-cd">Expires Nov 14, 2026</div></div>
+          <span class="pc-tag pc-tg">Valid</span>
+        </div>
+        <div class="pc-row">
+          <div><div class="pc-cn">WHMIS 2018</div><div class="pc-cd">Expires Aug 19, 2025</div></div>
+          <span class="pc-tag pc-ty">Expiring</span>
+        </div>
+        <div class="pc-row">
+          <div><div class="pc-cn">Confined Space Entry</div><div class="pc-cd">Expires Mar 28, 2027</div></div>
+          <span class="pc-tag pc-tg">Valid</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="al-trust">
+      <div class="al-trust-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>SSL Secured</div>
+      <div class="al-trust-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>PIPEDA Compliant</div>
+      <div class="al-trust-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>5-Min Signup</div>
+    </div>
+  </div>
+
+  <!-- ── RIGHT SIDE ── -->
+  <div class="auth-right">
+    <div class="auth-right-top">
+      <a class="back-home" href="index.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to home
+      </a>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="atab on" onclick="authTab(this,'signin')">Sign In</button>
+        <button class="atab" onclick="authTab(this,'signup')">Create Account</button>
+      </div>
+
+      <!-- SIGN IN -->
+      <div class="panel on" id="signin">
+        <div class="panel-head">
+          <h2>Welcome back</h2>
+          <p>Sign in to access your RigPass account.</p>
+        </div>
+
+        <div class="role-label">Sign in as</div>
+        <div class="role-toggle" id="signin-role">
+          <button class="rtog on" data-role="worker">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Worker
+          </button>
+          <button class="rtog" data-role="employer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Employer
+          </button>
+        </div>
+
+        <div class="auth-msg" id="signin-msg"></div>
+
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="signin-email" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Password <a href="#" onclick="resetPassword(event)">Forgot?</a></label>
+          <input type="password" id="signin-password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn btn-blue" id="signin-btn" style="margin-top:8px;width:100%" onclick="signIn()">
+          <span id="signin-btn-text">Sign In</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <div class="divider"><span>or continue with</span></div>
+        <div class="sso-row">
+          <button type="button" class="sso-btn" onclick="signInWithGoogle()">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google
+          </button>
+          <a href="#" class="sso-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#0a1228"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+            Apple
+          </a>
+        </div>
+
+        <div class="auth-foot">
+          <div class="auth-switch">New to RigPass? <a href="#" onclick="authTab(document.querySelectorAll('.atab')[1],'signup')">Create an account</a></div>
+          <div class="terms">By signing in you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>.</div>
+        </div>
+      </div>
+
+      <!-- SIGN UP -->
+      <div class="panel" id="signup">
+        <div class="panel-head">
+          <h2>Create your account</h2>
+          <p>Join thousands of oil patch professionals.</p>
+        </div>
+
+        <div class="role-label">I am a</div>
+        <div class="role-toggle" id="signup-role">
+          <button class="rtog on" data-role="worker">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Worker
+          </button>
+          <button class="rtog" data-role="employer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Employer
+          </button>
+        </div>
+
+        <div class="verified-note">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          <p>Your profile and safety tickets are only visible to verified, paying employers.</p>
+        </div>
+
+        <div class="auth-msg" id="signup-msg"></div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>First Name</label>
+            <input type="text" id="signup-first" placeholder="Mike" autocomplete="given-name">
+          </div>
+          <div class="field">
+            <label>Last Name</label>
+            <input type="text" id="signup-last" placeholder="Robertson" autocomplete="family-name">
+          </div>
+        </div>
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" placeholder="At least 8 characters" autocomplete="new-password" id="signup-password" oninput="checkPwd(this.value)">
+          <div class="pwd-strength" id="pwd-strength">
+            <div class="pwd-bar"></div>
+            <div class="pwd-bar"></div>
+            <div class="pwd-bar"></div>
+          </div>
+          <div class="pwd-hint" id="pwd-hint">Use 8+ characters with letters and numbers.</div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Province</label>
+            <select id="signup-province">
+              <option value="">Select...</option>
+              <option value="AB">Alberta</option><option value="BC">British Columbia</option><option value="SK">Saskatchewan</option><option value="MB">Manitoba</option><option value="NWT">NWT</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Primary Trade</label>
+            <select id="signup-trade">
+              <option value="">Select...</option>
+              <option>Pipefitter</option><option>Welder</option><option>Electrician</option><option>Instrumentation Tech</option><option>Heavy Equipment Op.</option><option>Millwright</option><option>Labourer</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="checkbox-row" style="margin:18px 0 18px;align-items:flex-start">
+          <input type="checkbox" id="agree-terms" style="margin-top:2px" onchange="toggleAgree(this)">
+          <label for="agree-terms">I agree to the <a href="terms.html" target="_blank" style="color:var(--blue);font-weight:600">Terms of Service</a> and <a href="privacy.html" target="_blank" style="color:var(--blue);font-weight:600">Privacy Policy</a></label>
+        </div>
+        <button class="btn btn-blue" id="signup-btn" style="opacity:.5;pointer-events:none;width:100%" onclick="signUp()">
+          <span id="signup-btn-text">Create Account — Free</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+
+        <div class="auth-foot">
+          <div class="auth-switch" style="margin-top:16px">Already have an account? <a href="#" onclick="authTab(document.querySelectorAll('.atab')[0],'signin')">Sign in</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// SUPABASE CONFIGURATION
+// ════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// If user is already logged in, send them to dashboard
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    window.location.href = 'dashboard.html';
+  }
+})();
+
+// ════════════════════════════════════════════════════════════════════
+// UI HELPERS
+// ════════════════════════════════════════════════════════════════════
+function showMsg(panelId, type, text){
+  const el = document.getElementById(panelId + '-msg');
+  const icons = {
+    error: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    success: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
+    info: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+  };
+  el.className = 'auth-msg show ' + type;
+  el.innerHTML = icons[type] + '<span>' + text + '</span>';
+}
+function hideMsg(panelId){
+  document.getElementById(panelId + '-msg').classList.remove('show');
+}
+function setLoading(btnId, isLoading, originalText){
+  const btn = document.getElementById(btnId);
+  const text = document.getElementById(btnId + '-text');
+  if(isLoading){
+    btn.disabled = true;
+    btn.style.pointerEvents = 'none';
+    if(text) text.textContent = 'Please wait...';
+  } else {
+    btn.disabled = false;
+    btn.style.pointerEvents = 'auto';
+    if(text) text.textContent = originalText;
+  }
+}
+function getSelectedRole(panelId){
+  const active = document.querySelector('#' + panelId + '-role .rtog.on');
+  return active ? active.dataset.role : 'worker';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SIGN IN
+// ════════════════════════════════════════════════════════════════════
+async function signIn(){
+  hideMsg('signin');
+  const email = document.getElementById('signin-email').value.trim();
+  const password = document.getElementById('signin-password').value;
+
+  if(!email || !password){
+    showMsg('signin', 'error', 'Please enter both email and password.');
+    return;
+  }
+
+  setLoading('signin-btn', true);
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if(error){
+    setLoading('signin-btn', false, 'Sign In');
+    if(error.message.includes('Invalid login')){
+      showMsg('signin', 'error', 'Wrong email or password. Try again.');
+    } else if(error.message.includes('Email not confirmed')){
+      showMsg('signin', 'error', 'Please confirm your email first. Check your inbox.');
+    } else {
+      showMsg('signin', 'error', error.message);
+    }
+    return;
+  }
+
+  showMsg('signin', 'success', 'Signed in! Redirecting...');
+  setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SIGN UP
+// ════════════════════════════════════════════════════════════════════
+async function signUp(){
+  hideMsg('signup');
+
+  if(!document.getElementById('agree-terms').checked){
+    showMsg('signup', 'error', 'Please accept the Terms of Service to continue.');
+    return;
+  }
+
+  const role = getSelectedRole('signup');
+  const firstName = document.getElementById('signup-first').value.trim();
+  const lastName = document.getElementById('signup-last').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const province = document.getElementById('signup-province').value;
+  const trade = document.getElementById('signup-trade').value;
+
+  // Validation
+  if(!firstName || !lastName){
+    showMsg('signup', 'error', 'Please enter your first and last name.');
+    return;
+  }
+  if(!email){
+    showMsg('signup', 'error', 'Please enter your email.');
+    return;
+  }
+  if(password.length < 8){
+    showMsg('signup', 'error', 'Password must be at least 8 characters.');
+    return;
+  }
+  if(role === 'worker' && !trade){
+    showMsg('signup', 'error', 'Please select your primary trade.');
+    return;
+  }
+
+  setLoading('signup-btn', true);
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        role: role,
+        first_name: firstName,
+        last_name: lastName,
+        trade: role === 'worker' ? trade : null,
+        province: province || null
+      }
+    }
+  });
+
+  if(error){
+    setLoading('signup-btn', false, 'Create Account — Free');
+    if(error.message.includes('already registered') || error.message.includes('already been registered')){
+      showMsg('signup', 'error', 'This email is already registered. Try signing in instead.');
+    } else {
+      showMsg('signup', 'error', error.message);
+    }
+    return;
+  }
+
+  // Check if email confirmation is needed
+  if(data.user && !data.session){
+    showMsg('signup', 'success', '✓ Account created! Please check your email to confirm, then sign in.');
+    setLoading('signup-btn', false, 'Create Account — Free');
+  } else {
+    showMsg('signup', 'success', 'Account created! Redirecting to dashboard...');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// GOOGLE SIGN-IN
+// ════════════════════════════════════════════════════════════════════
+async function signInWithGoogle(){
+  const role = getSelectedRole(document.getElementById('signup').classList.contains('on') ? 'signup' : 'signin');
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + '/dashboard.html',
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent'
+      }
+    }
+  });
+
+  if(error){
+    const panelId = document.getElementById('signup').classList.contains('on') ? 'signup' : 'signin';
+    showMsg(panelId, 'error', 'Google sign-in failed: ' + error.message);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// PASSWORD RESET
+// ════════════════════════════════════════════════════════════════════
+async function resetPassword(e){
+  e.preventDefault();
+  const email = document.getElementById('signin-email').value.trim();
+  if(!email){
+    showMsg('signin', 'info', 'Enter your email above, then click "Forgot?" again.');
+    return;
+  }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/login.html'
+  });
+  if(error){
+    showMsg('signin', 'error', error.message);
+  } else {
+    showMsg('signin', 'success', 'Password reset link sent to ' + email);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ════════════════════════════════════════════════════════════════════
+function authTab(btn,id){
+  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById(id).classList.add('on');
+}
+
+// Role toggle (each row independent)
+document.querySelectorAll('.role-toggle').forEach(tog=>{
+  tog.querySelectorAll('.rtog').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      tog.querySelectorAll('.rtog').forEach(t=>t.classList.remove('on'));
+      this.classList.add('on');
+    });
+  });
+});
+
+// Terms acceptance
+function toggleAgree(cb){
+  const btn = document.getElementById('signup-btn');
+  if(cb.checked){
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  } else {
+    btn.style.opacity = '.5';
+    btn.style.pointerEvents = 'none';
+  }
+}
+function checkAgree(e){
+  if(!document.getElementById('agree-terms').checked){
+    e.preventDefault();
+    alert('Please accept the Terms of Service and Privacy Policy to continue.');
+    return false;
+  }
+  return true;
+}
+
+// Password strength
+function checkPwd(v){
+  const bars = document.querySelectorAll('#pwd-strength .pwd-bar');
+  const hint = document.getElementById('pwd-hint');
+  bars.forEach(b=>b.className='pwd-bar');
+  let score = 0;
+  if(v.length >= 8) score++;
+  if(/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+  if(/[0-9]/.test(v) || /[^a-zA-Z0-9]/.test(v)) score++;
+  if(score === 0){
+    hint.textContent = 'Use 8+ characters with letters and numbers.';
+    hint.style.color = '';
+  } else if(score === 1){
+    bars[0].classList.add('weak');
+    hint.textContent = 'Weak — add letters and numbers.';
+    hint.style.color = '#ef4444';
+  } else if(score === 2){
+    bars[0].classList.add('medium'); bars[1].classList.add('medium');
+    hint.textContent = 'Medium — add a number or symbol.';
+    hint.style.color = '#f59e0b';
+  } else {
+    bars.forEach(b=>b.classList.add('strong'));
+    hint.textContent = 'Strong password ✓';
+    hint.style.color = '#166534';
+  }
+}
+</script>
+</body>
+</html>
