@@ -6,6 +6,7 @@
 <title>RigPass — Safety Tickets</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
@@ -346,13 +347,23 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <button>Upgrade — $7.99/mo</button>
   </div>
   <div class="sb-bottom">
-    <div class="sb-user">
-      <div class="sb-avatar">MR</div>
+    <div class="sb-user" onclick="toggleUserMenu(event)" style="position:relative">
+      <div class="sb-avatar" id="sb-avatar">--</div>
       <div style="min-width:0">
-        <div class="sb-uname">Mike Robertson</div>
-        <div class="sb-urole">Pipefitter · Free Plan</div>
+        <div class="sb-uname" id="sb-uname">Loading...</div>
+        <div class="sb-urole" id="sb-urole">—</div>
       </div>
       <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);overflow:hidden;z-index:200">
+        <a href="profile.html" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--text);text-decoration:none;font-weight:600" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          My Profile
+        </a>
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--red);background:#fff;border:none;border-top:1px solid #f1f5f9;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
     </div>
   </div>
 </aside>
@@ -598,35 +609,126 @@ const presetTickets = [
   {name:'PPE Awareness',cat:'Safety Management'},
 ];
 
-// ── INITIAL TICKETS ──
-let myTickets = [
-  {id:1,name:'H2S Alive',cat:'Gas Safety',issued:'2024-05-10',expiry:'2026-11-14'},
-  {id:2,name:'First Aid Level 3',cat:'Medical',issued:'2022-07-01',expiry:'2025-07-03'},
-  {id:3,name:'WHMIS 2018',cat:'Workplace Safety',issued:'2023-08-19',expiry:'2025-08-19'},
-  {id:4,name:'Confined Space Entry',cat:'Confined Space',issued:'2025-03-01',expiry:'2027-03-28'},
-  {id:5,name:'Ground Disturbance Level II',cat:'Excavation',issued:'2024-01-10',expiry:'2027-01-10'},
-  {id:6,name:'TDG (Transportation of Dangerous Goods)',cat:'Transport',issued:'2022-09-05',expiry:'2025-09-05'},
-  {id:7,name:'Fall Protection',cat:'Working at Heights',issued:'2024-03-20',expiry:'2027-03-20'},
-  {id:8,name:'Rigging & Hoisting Level 1',cat:'Rigging',issued:'2023-11-15',expiry:'2026-11-15'},
-  {id:9,name:'Forklift Operator',cat:'Equipment',issued:'2023-06-01',expiry:'2026-06-01'},
-  {id:10,name:'Energy Isolation / LOTO',cat:'Electrical',issued:'2024-08-22',expiry:'2027-08-22'},
-];
-let nextId = 11;
+// ════════════════════════════════════════════════════════════════════
+// SUPABASE
+// ════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let myTickets = [];
 let currentTab = 'all';
 let currentFilter = '';
 
+// ════════════════════════════════════════════════════════════════════
+// AUTH GUARD + LOAD PROFILE INTO SIDEBAR
+// ════════════════════════════════════════════════════════════════════
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+  currentUser = session.user;
+
+  // Load profile for sidebar
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(profile){
+    const first = profile.first_name || '';
+    const last = profile.last_name || '';
+    const fullName = (first + ' ' + last).trim() || currentUser.email.split('@')[0];
+    const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
+    document.getElementById('sb-avatar').textContent = initials;
+    document.getElementById('sb-uname').textContent = fullName;
+    const roleLabel = profile.role === 'employer' ? 'Employer' : (profile.trade || 'Worker');
+    const planLabel = profile.plan === 'pro' ? 'Pro Plan' : (profile.plan === 'employer_pro' ? 'Employer Pro' : 'Free Plan');
+    document.getElementById('sb-urole').textContent = roleLabel + ' · ' + planLabel;
+  } else {
+    document.getElementById('sb-uname').textContent = currentUser.email.split('@')[0];
+    document.getElementById('sb-urole').textContent = 'Free Plan';
+    document.getElementById('sb-avatar').textContent = currentUser.email.substring(0,2).toUpperCase();
+  }
+
+  await loadTickets();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// LOAD CERTS FROM SUPABASE
+// ════════════════════════════════════════════════════════════════════
+async function loadTickets(){
+  const { data, error } = await sb
+    .from('certifications')
+    .select('*')
+    .eq('worker_id', currentUser.id)
+    .order('expiry_date', { ascending: true });
+
+  if(error){ console.error(error); return; }
+  myTickets = (data || []).map(c => ({
+    id: c.id,
+    name: c.name,
+    cat: c.category || 'Other',
+    issued: c.issued_date,
+    expiry: c.expiry_date
+  }));
+  updateStats();
+  updateTabCounts();
+  render();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// UPDATE STATS CARDS
+// ════════════════════════════════════════════════════════════════════
+function updateStats(){
+  let valid = 0, expiring = 0, expired = 0;
+  myTickets.forEach(t => {
+    const s = statusOf(daysUntil(t.expiry));
+    if(s === 'valid') valid++;
+    else if(s === 'expiring') expiring++;
+    else expired++;
+  });
+  const cards = document.querySelectorAll('.sc-num');
+  if(cards.length >= 4){
+    cards[0].textContent = valid;
+    cards[1].textContent = expiring;
+    cards[2].textContent = expired;
+    cards[3].textContent = myTickets.length;
+  }
+  // Update card-sub
+  const sub = document.querySelector('.card-head .card-sub');
+  if(sub) sub.textContent = myTickets.length + ' tickets · Last updated today';
+}
+
+function updateTabCounts(){
+  let valid=0, expiring=0, expired=0;
+  myTickets.forEach(t=>{
+    const s = statusOf(daysUntil(t.expiry));
+    if(s==='valid') valid++;
+    else if(s==='expiring') expiring++;
+    else expired++;
+  });
+  const counts = document.querySelectorAll('.tab .count');
+  if(counts.length >= 4){
+    counts[0].textContent = myTickets.length;
+    counts[1].textContent = valid;
+    counts[2].textContent = expiring;
+    counts[3].textContent = expired;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════════════════
 function daysUntil(d){return Math.ceil((new Date(d)-new Date())/(1000*60*60*24))}
 function statusOf(days){return days<0?'expired':days<=60?'expiring':'valid'}
-
 function iconFor(status){
   if(status==='valid') return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`;
   if(status==='expiring') return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
   return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
 }
 function bgFor(status){return status==='valid'?'var(--green-bg)':status==='expiring'?'var(--amber-bg)':'var(--red-bg)'}
+function fmtDate(s){return s ? new Date(s).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}) : 'N/A'}
 
-function fmtDate(s){return new Date(s).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'})}
-
+// ════════════════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════════════════
 function render(){
   const list = document.getElementById('tickets-list');
   let arr = myTickets.filter(t=>{
@@ -636,10 +738,18 @@ function render(){
     return true;
   });
   if(currentFilter){
-    arr = arr.filter(t=>t.name.toLowerCase().includes(currentFilter.toLowerCase())||t.cat.toLowerCase().includes(currentFilter.toLowerCase()));
+    arr = arr.filter(t=>t.name.toLowerCase().includes(currentFilter.toLowerCase())||(t.cat||'').toLowerCase().includes(currentFilter.toLowerCase()));
   }
   if(!arr.length){
-    list.innerHTML = `<div style="padding:40px 22px;text-align:center;color:var(--light);font-size:.85rem">No certifications match your filter.</div>`;
+    if(myTickets.length === 0){
+      list.innerHTML = `<div style="padding:50px 22px;text-align:center;color:var(--muted)">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;opacity:.3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <p style="font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:4px">No safety tickets yet</p>
+        <p style="font-size:.82rem">Add your first certification below to get started.</p>
+      </div>`;
+    } else {
+      list.innerHTML = `<div style="padding:40px 22px;text-align:center;color:var(--light);font-size:.85rem">No certifications match your filter.</div>`;
+    }
     return;
   }
   list.innerHTML = arr.map(t=>{
@@ -649,6 +759,7 @@ function render(){
     const tagLabel = status==='valid'?'Valid':status==='expiring'?'Expiring':'Expired';
     const daysCls = status==='valid'?'days-ok':status==='expiring'?'days-warn':'days-exp';
     const daysLabel = days<0?`${Math.abs(days)}d ago`:days===0?'Today':`${days} days`;
+    const safeName = String(t.name).replace(/"/g,'&quot;');
     return `<div class="ticket-row">
       <div class="ticket-ico" style="background:${bgFor(status)}">${iconFor(status)}</div>
       <div class="ticket-info">
@@ -661,6 +772,9 @@ function render(){
       </div>
       <span class="days-left ${daysCls}">${daysLabel}</span>
       <span class="tag ${tagCls}">${tagLabel}</span>
+      <button onclick="deleteTicket('${t.id}','${safeName}')" title="Delete" style="background:transparent;border:none;cursor:pointer;color:var(--light);padding:6px;border-radius:6px;transition:all .15s" onmouseover="this.style.color='var(--red)';this.style.background='var(--red-bg)'" onmouseout="this.style.color='var(--light)';this.style.background='transparent'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
     </div>`;
   }).join('');
 }
@@ -671,10 +785,11 @@ function setTab(btn,tab){
   currentTab = tab;
   render();
 }
-
 function filterTickets(val){currentFilter = val; render();}
 
-// ── SEARCH DROPDOWN ──
+// ════════════════════════════════════════════════════════════════════
+// SEARCH DROPDOWN
+// ════════════════════════════════════════════════════════════════════
 function searchPreset(val){
   const dd = document.getElementById('ticket-dd');
   if(!val.trim()){dd.classList.remove('open');return}
@@ -692,10 +807,17 @@ function selectPreset(name){
   document.getElementById('ticket-dd').classList.remove('open');
 }
 document.addEventListener('click',e=>{
-  if(!e.target.closest('.search-wrap')) document.getElementById('ticket-dd').classList.remove('open');
+  if(!e.target.closest('.search-wrap')) {
+    const dd = document.getElementById('ticket-dd');
+    if(dd) dd.classList.remove('open');
+  }
+  const menu = document.getElementById('user-menu');
+  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
 });
 
-// ── FILE UPLOAD ──
+// ════════════════════════════════════════════════════════════════════
+// FILE UPLOAD (currently just visual — storage wiring later)
+// ════════════════════════════════════════════════════════════════════
 function handleFile(input){
   const file = input.files[0];
   if(!file) return;
@@ -709,21 +831,44 @@ function removeFile(){
   document.getElementById('upload-zone').style.display='block';
 }
 
-// ── ADD TICKET ──
-function addTicket(){
+// ════════════════════════════════════════════════════════════════════
+// ADD TICKET — saves to Supabase
+// ════════════════════════════════════════════════════════════════════
+async function addTicket(){
   const name = document.getElementById('ticket-name-input').value.trim();
   const issued = document.getElementById('date-issued').value;
   const expiry = document.getElementById('date-expiry').value;
   if(!name){alert('Please enter a certification name.');return}
-  if(!issued||!expiry){alert('Please enter both issue and expiry dates.');return}
-  if(new Date(expiry)<new Date(issued)){alert('Expiry date must be after issue date.');return}
+  if(!expiry){alert('Please enter an expiry date.');return}
+  if(issued && new Date(expiry) < new Date(issued)){
+    alert('Expiry date must be after issue date.'); return;
+  }
   const preset = presetTickets.find(t=>t.name===name);
-  const cat = preset?preset.cat:'Other';
-  myTickets.unshift({id:nextId++,name,cat,issued,expiry});
+  const cat = preset ? preset.cat : 'Other';
+
+  const btn = document.querySelector('.btn.btn-blue[onclick="addTicket()"]');
+  if(btn){ btn.disabled = true; btn.style.opacity = '.6'; }
+
+  const { data, error } = await sb.from('certifications').insert({
+    worker_id: currentUser.id,
+    name,
+    category: cat,
+    issued_date: issued || null,
+    expiry_date: expiry
+  }).select().single();
+
+  if(btn){ btn.disabled = false; btn.style.opacity = '1'; }
+
+  if(error){
+    alert('Error saving ticket: ' + error.message);
+    return;
+  }
+
   clearForm();
-  render();
+  await loadTickets();
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
 function clearForm(){
   document.getElementById('ticket-name-input').value='';
   document.getElementById('date-issued').value='';
@@ -731,7 +876,30 @@ function clearForm(){
   removeFile();
 }
 
-render();
+// ════════════════════════════════════════════════════════════════════
+// DELETE TICKET
+// ════════════════════════════════════════════════════════════════════
+async function deleteTicket(id, name){
+  if(!confirm(`Delete "${name}"?`)) return;
+  const { error } = await sb.from('certifications').delete().eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadTickets();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// USER MENU + SIGN OUT
+// ════════════════════════════════════════════════════════════════════
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+
+init();
 </script>
 </body>
 </html>

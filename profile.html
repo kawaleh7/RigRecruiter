@@ -6,6 +6,7 @@
 <title>RigPass — My Profile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
@@ -240,10 +241,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <button>Upgrade — $7.99/mo</button>
   </div>
   <div class="sb-bottom">
-    <div class="sb-user">
-      <div class="sb-avatar">MR</div>
-      <div style="min-width:0"><div class="sb-uname">Mike Robertson</div><div class="sb-urole">Pipefitter · Free Plan</div></div>
+    <div class="sb-user" onclick="toggleUserMenu(event)" style="position:relative">
+      <div class="sb-avatar" id="sb-avatar">--</div>
+      <div style="min-width:0"><div class="sb-uname" id="sb-uname">Loading...</div><div class="sb-urole" id="sb-urole">—</div></div>
       <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);overflow:hidden;z-index:200">
+        <a href="dashboard.html" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--text);text-decoration:none;font-weight:600" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--red);background:#fff;border:none;border-top:1px solid #f1f5f9;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
     </div>
   </div>
 </aside>
@@ -281,39 +292,38 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <!-- HERO PROFILE -->
     <div class="profile-hero">
       <div class="ph-top">
-        <div class="ph-avatar">MR</div>
+        <div class="ph-avatar" id="ph-avatar">--</div>
         <div class="ph-info">
           <div class="ph-name-row">
-            <h1 class="ph-name">Mike Robertson</h1>
-            <span class="ph-verified">✓ Verified</span>
+            <h1 class="ph-name" id="ph-name">Loading...</h1>
+            <span class="ph-verified" id="ph-verified" style="display:none">✓ Verified</span>
           </div>
-          <div class="ph-role">Journeyman Pipefitter · 12 years experience</div>
+          <div class="ph-role" id="ph-role">—</div>
           <div class="ph-meta">
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Fort McMurray, AB</span>
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Available Now</span>
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Open to 14/7, 21/7 rotation</span>
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>$55–65/hr expected</span>
+            <span id="ph-location"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Location not set</span>
+            <span id="ph-availability"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Availability not set</span>
+            <span id="ph-pay" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
           </div>
         </div>
       </div>
       <div class="ph-actions">
-        <button class="btn btn-white">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-          Share Profile Link
+        <button class="btn btn-white" onclick="openEditModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit Profile
         </button>
         <button class="btn btn-outline-w">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
-          Download as PDF
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share Profile Link
         </button>
       </div>
     </div>
 
     <!-- QUICK STATS -->
     <div class="quick-stats">
-      <div class="qs-card"><div class="qs-num">7</div><div class="qs-label">Valid Tickets</div></div>
-      <div class="qs-card"><div class="qs-num">12</div><div class="qs-label">Years Experience</div></div>
-      <div class="qs-card"><div class="qs-num">142</div><div class="qs-label">Profile Views</div></div>
-      <div class="qs-card"><div class="qs-num" style="color:var(--green)">100%</div><div class="qs-label">ISN-Ready</div></div>
+      <div class="qs-card"><div class="qs-num" id="qs-valid">0</div><div class="qs-label">Valid Tickets</div></div>
+      <div class="qs-card"><div class="qs-num" id="qs-experience">0</div><div class="qs-label">Years Experience</div></div>
+      <div class="qs-card"><div class="qs-num" id="qs-views">0</div><div class="qs-label">Profile Views</div></div>
+      <div class="qs-card"><div class="qs-num" id="qs-isn" style="color:var(--green)">—</div><div class="qs-label">ISN-Ready</div></div>
     </div>
 
     <!-- ── MAIN GRID ── -->
@@ -329,7 +339,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
               Edit
             </button>
           </div>
-          <p class="about-text">Journeyman Pipefitter with 12 years of high-pressure piping experience across Alberta's oil sands. Specialized in turnarounds at Suncor Fort Hills, Imperial Oil Kearl, and Cenovus Foster Creek. Comfortable in fast-paced safety-critical environments, comfortable with FIFO and rotational work. Holds a clean safety record across all sites with zero LTI incidents.</p>
+          <p class="about-text" id="profile-bio">No bio added yet. Click <strong>Edit Profile</strong> to add a description that helps employers find you.</p>
         </div>
 
         <!-- CERTIFICATIONS -->
@@ -341,42 +351,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
               Manage
             </a>
           </div>
-          <div class="cert-table">
-            <div class="cert-row">
-              <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
-              <div class="cert-info"><div class="cert-name">H2S Alive</div><div class="cert-meta">Issued May 2024 · Expires Nov 14, 2026</div></div>
-              <span class="tag tg">Valid</span>
-            </div>
-            <div class="cert-row">
-              <div class="cert-ico" style="background:var(--red-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
-              <div class="cert-info"><div class="cert-name">First Aid — Level 3</div><div class="cert-meta">Issued Jul 2022 · Expired Jul 3, 2025</div></div>
-              <span class="tag tr-tag">Expired</span>
-            </div>
-            <div class="cert-row">
-              <div class="cert-ico" style="background:var(--amber-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg></div>
-              <div class="cert-info"><div class="cert-name">WHMIS 2018</div><div class="cert-meta">Issued Aug 2023 · Expires Aug 19, 2025</div></div>
-              <span class="tag ty">Expiring</span>
-            </div>
-            <div class="cert-row">
-              <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
-              <div class="cert-info"><div class="cert-name">Confined Space Entry</div><div class="cert-meta">Issued Mar 2025 · Expires Mar 28, 2027</div></div>
-              <span class="tag tg">Valid</span>
-            </div>
-            <div class="cert-row">
-              <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
-              <div class="cert-info"><div class="cert-name">Ground Disturbance Level II</div><div class="cert-meta">Issued Jan 2024 · Expires Jan 10, 2027</div></div>
-              <span class="tag tg">Valid</span>
-            </div>
-            <div class="cert-row">
-              <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
-              <div class="cert-info"><div class="cert-name">Fall Protection</div><div class="cert-meta">Issued Mar 2024 · Expires Mar 20, 2027</div></div>
-              <span class="tag tg">Valid</span>
-            </div>
-            <div class="cert-row">
-              <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
-              <div class="cert-info"><div class="cert-name">Rigging & Hoisting Level 1</div><div class="cert-meta">Issued Nov 2023 · Expires Nov 15, 2026</div></div>
-              <span class="tag tg">Valid</span>
-            </div>
+          <div class="cert-table" id="profile-cert-list">
+            <div style="padding:24px;text-align:center;color:var(--light);font-size:.85rem">Loading certifications...</div>
           </div>
         </div>
 
@@ -518,6 +494,366 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     </div>
   </div>
 </div>
+
+<!-- ── EDIT PROFILE MODAL ── -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:300;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.2)">
+    <div style="padding:22px 26px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.2px">Edit Profile</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Make sure your details are accurate for employer searches.</div>
+      </div>
+      <button onclick="closeEditModal()" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--muted)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="padding:20px 26px">
+      <div id="edit-msg" style="display:none;padding:10px 13px;border-radius:9px;font-size:.82rem;margin-bottom:14px;line-height:1.5"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">First Name</label>
+          <input type="text" id="edit-first" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
+        </div>
+        <div>
+          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Last Name</label>
+          <input type="text" id="edit-last" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Phone Number</label>
+        <input type="tel" id="edit-phone" placeholder="+1 587 555 0123" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">City</label>
+          <input type="text" id="edit-city" placeholder="Fort McMurray" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
+        </div>
+        <div>
+          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Province</label>
+          <select id="edit-province" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none;background:#fff">
+            <option value="">Select...</option>
+            <option value="AB">Alberta</option><option value="BC">British Columbia</option><option value="SK">Saskatchewan</option><option value="MB">Manitoba</option><option value="NWT">NWT</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="worker-only-fields">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+          <div>
+            <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Trade</label>
+            <select id="edit-trade" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none;background:#fff">
+              <option value="">Select...</option>
+              <option>Pipefitter</option><option>Welder</option><option>Electrician</option><option>Instrumentation Tech</option><option>Heavy Equipment Op.</option><option>Millwright</option><option>Labourer</option><option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Experience (years)</label>
+            <input type="number" id="edit-experience" min="0" max="60" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Availability</label>
+          <select id="edit-availability" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none;background:#fff">
+            <option value="">Not set</option>
+            <option value="available_now">Available now</option>
+            <option value="within_2_weeks">Within 2 weeks</option>
+            <option value="within_30_days">Within 30 days</option>
+            <option value="not_available">Not available</option>
+          </select>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+          <div>
+            <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Pay min ($/hr)</label>
+            <input type="number" id="edit-pay-min" min="0" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
+          </div>
+          <div>
+            <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Pay max ($/hr)</label>
+            <input type="number" id="edit-pay-max" min="0" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
+          </div>
+        </div>
+      </div>
+
+      <div id="employer-only-fields" style="display:none;margin-bottom:14px">
+        <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Company Name</label>
+        <input type="text" id="edit-company" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Bio / About</label>
+        <textarea id="edit-bio" rows="4" placeholder="Tell employers about your experience, specializations, and what makes you a great hire..." style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div style="padding:18px 26px;border-top:1px solid var(--border);display:flex;gap:10px">
+      <button class="btn btn-blue" style="flex:1" onclick="saveProfile()" id="save-btn">Save Changes</button>
+      <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// SUPABASE
+// ════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+
+// ════════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════════
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+  currentUser = session.user;
+
+  await loadProfile();
+  await loadCerts();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// LOAD PROFILE
+// ════════════════════════════════════════════════════════════════════
+async function loadProfile(){
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(error || !profile){
+    console.error(error);
+    return;
+  }
+  currentProfile = profile;
+
+  // Sidebar
+  const first = profile.first_name || '';
+  const last = profile.last_name || '';
+  const fullName = (first + ' ' + last).trim() || currentUser.email.split('@')[0];
+  const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-uname').textContent = fullName;
+  const roleLabel = profile.role === 'employer' ? 'Employer' : (profile.trade || 'Worker');
+  const planLabel = profile.plan === 'pro' ? 'Pro Plan' : (profile.plan === 'employer_pro' ? 'Employer Pro' : 'Free Plan');
+  document.getElementById('sb-urole').textContent = roleLabel + ' · ' + planLabel;
+
+  // Hero
+  document.getElementById('ph-avatar').textContent = initials;
+  document.getElementById('ph-name').textContent = fullName;
+  if(profile.is_verified){
+    document.getElementById('ph-verified').style.display = 'inline-flex';
+  }
+
+  // Role line
+  if(profile.role === 'worker'){
+    const exp = profile.experience_years ? `${profile.experience_years} year${profile.experience_years === 1 ? '' : 's'} experience` : 'New on RigPass';
+    document.getElementById('ph-role').textContent = `${profile.trade || 'Worker'} · ${exp}`;
+  } else {
+    document.getElementById('ph-role').textContent = profile.company_name || 'Employer';
+  }
+
+  // Location
+  const locParts = [profile.city, profile.province].filter(Boolean);
+  if(locParts.length){
+    document.getElementById('ph-location').innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${locParts.join(', ')}`;
+  }
+
+  // Availability
+  const availMap = {
+    'available_now': 'Available Now',
+    'within_2_weeks': 'Available in 2 weeks',
+    'within_30_days': 'Available in 30 days',
+    'not_available': 'Not currently available'
+  };
+  if(profile.availability && availMap[profile.availability]){
+    document.getElementById('ph-availability').innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${availMap[profile.availability]}`;
+  }
+
+  // Pay
+  if(profile.expected_pay_min || profile.expected_pay_max){
+    const min = profile.expected_pay_min || '?';
+    const max = profile.expected_pay_max || '?';
+    const payEl = document.getElementById('ph-pay');
+    payEl.style.display = 'inline-flex';
+    payEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>$${min}–$${max}/hr expected`;
+  }
+
+  // Bio
+  if(profile.bio && profile.bio.trim()){
+    document.getElementById('profile-bio').textContent = profile.bio;
+  }
+
+  // Quick stats — experience
+  document.getElementById('qs-experience').textContent = profile.experience_years || 0;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// LOAD CERTS
+// ════════════════════════════════════════════════════════════════════
+async function loadCerts(){
+  const { data: certs } = await sb.from('certifications').select('*').eq('worker_id', currentUser.id).order('expiry_date', { ascending: true });
+  const list = document.getElementById('profile-cert-list');
+
+  function daysUntil(d){return Math.ceil((new Date(d)-new Date())/(1000*60*60*24))}
+  function statusOf(days){return days<0?'expired':days<=60?'expiring':'valid'}
+  function fmtDate(s){return s ? new Date(s).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}) : 'N/A'}
+
+  if(!certs || certs.length === 0){
+    list.innerHTML = `<div style="padding:30px 0;text-align:center;color:var(--muted)">
+      <p style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:6px">No certifications added yet</p>
+      <p style="font-size:.78rem;margin-bottom:14px">Add your safety tickets to attract more employers.</p>
+      <a href="certifications.html" class="btn btn-blue" style="display:inline-flex">Add Certifications</a>
+    </div>`;
+    document.getElementById('qs-valid').textContent = 0;
+    document.getElementById('qs-isn').textContent = '0%';
+    return;
+  }
+
+  let validCount = 0;
+  list.innerHTML = certs.map(c => {
+    const days = daysUntil(c.expiry_date);
+    const status = statusOf(days);
+    if(status === 'valid') validCount++;
+    const cls = status==='valid'?'tg':status==='expiring'?'ty':'tr-tag';
+    const label = status==='valid'?'Valid':status==='expiring'?'Expiring':'Expired';
+    const bg = status==='valid'?'var(--green-bg)':status==='expiring'?'var(--amber-bg)':'var(--red-bg)';
+    const iconColor = status==='valid'?'var(--green)':status==='expiring'?'var(--amber)':'var(--red)';
+    const icon = status==='valid'
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`
+      : status==='expiring'
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+    return `<div class="cert-row">
+      <div class="cert-ico" style="background:${bg}">${icon}</div>
+      <div class="cert-info"><div class="cert-name">${c.name}</div><div class="cert-meta">${c.issued_date ? 'Issued ' + fmtDate(c.issued_date) + ' · ' : ''}Expires ${fmtDate(c.expiry_date)}</div></div>
+      <span class="tag ${cls}">${label}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('qs-valid').textContent = validCount;
+
+  // ISN-Ready = % of core safety certs (H2S, WHMIS, First Aid, Confined Space) that are valid
+  const coreCerts = ['H2S', 'WHMIS', 'First Aid', 'Confined Space'];
+  const validNames = certs.filter(c => statusOf(daysUntil(c.expiry_date)) === 'valid').map(c => c.name.toLowerCase());
+  const coverage = coreCerts.filter(core => validNames.some(n => n.includes(core.toLowerCase()))).length;
+  const isnPct = Math.round((coverage / coreCerts.length) * 100);
+  document.getElementById('qs-isn').textContent = isnPct + '%';
+  document.getElementById('qs-isn').style.color = isnPct >= 75 ? 'var(--green)' : isnPct >= 50 ? 'var(--amber)' : 'var(--red)';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// EDIT MODAL
+// ════════════════════════════════════════════════════════════════════
+function openEditModal(){
+  if(!currentProfile) return;
+  // Pre-fill
+  document.getElementById('edit-first').value = currentProfile.first_name || '';
+  document.getElementById('edit-last').value = currentProfile.last_name || '';
+  document.getElementById('edit-phone').value = currentProfile.phone || '';
+  document.getElementById('edit-city').value = currentProfile.city || '';
+  document.getElementById('edit-province').value = currentProfile.province || '';
+  document.getElementById('edit-bio').value = currentProfile.bio || '';
+
+  if(currentProfile.role === 'worker'){
+    document.getElementById('worker-only-fields').style.display = 'block';
+    document.getElementById('employer-only-fields').style.display = 'none';
+    document.getElementById('edit-trade').value = currentProfile.trade || '';
+    document.getElementById('edit-experience').value = currentProfile.experience_years || '';
+    document.getElementById('edit-availability').value = currentProfile.availability || '';
+    document.getElementById('edit-pay-min').value = currentProfile.expected_pay_min || '';
+    document.getElementById('edit-pay-max').value = currentProfile.expected_pay_max || '';
+  } else {
+    document.getElementById('worker-only-fields').style.display = 'none';
+    document.getElementById('employer-only-fields').style.display = 'block';
+    document.getElementById('edit-company').value = currentProfile.company_name || '';
+  }
+
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function closeEditModal(){
+  document.getElementById('edit-modal').style.display = 'none';
+  document.getElementById('edit-msg').style.display = 'none';
+}
+
+async function saveProfile(){
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.style.opacity = '.6';
+
+  const updates = {
+    first_name: document.getElementById('edit-first').value.trim() || null,
+    last_name: document.getElementById('edit-last').value.trim() || null,
+    phone: document.getElementById('edit-phone').value.trim() || null,
+    city: document.getElementById('edit-city').value.trim() || null,
+    province: document.getElementById('edit-province').value || null,
+    bio: document.getElementById('edit-bio').value.trim() || null
+  };
+
+  if(currentProfile.role === 'worker'){
+    updates.trade = document.getElementById('edit-trade').value || null;
+    const exp = document.getElementById('edit-experience').value;
+    updates.experience_years = exp ? parseInt(exp) : null;
+    updates.availability = document.getElementById('edit-availability').value || null;
+    const payMin = document.getElementById('edit-pay-min').value;
+    const payMax = document.getElementById('edit-pay-max').value;
+    updates.expected_pay_min = payMin ? parseInt(payMin) : null;
+    updates.expected_pay_max = payMax ? parseInt(payMax) : null;
+  } else {
+    updates.company_name = document.getElementById('edit-company').value.trim() || null;
+  }
+
+  const { error } = await sb.from('profiles').update(updates).eq('id', currentUser.id);
+
+  btn.disabled = false;
+  btn.style.opacity = '1';
+
+  const msg = document.getElementById('edit-msg');
+  if(error){
+    msg.style.display = 'block';
+    msg.style.background = '#fef2f2';
+    msg.style.border = '1.5px solid #fda4af';
+    msg.style.color = '#991b1b';
+    msg.textContent = 'Error: ' + error.message;
+    return;
+  }
+
+  msg.style.display = 'block';
+  msg.style.background = '#f0fdf4';
+  msg.style.border = '1.5px solid #86efac';
+  msg.style.color = '#166534';
+  msg.textContent = '✓ Profile saved!';
+
+  // Reload profile data
+  await loadProfile();
+
+  setTimeout(() => {
+    closeEditModal();
+  }, 1000);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// USER MENU + SIGN OUT
+// ════════════════════════════════════════════════════════════════════
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('user-menu');
+  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
+});
+
+init();
+</script>
 
 </body>
 </html>
