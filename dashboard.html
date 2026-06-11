@@ -651,6 +651,12 @@ async function loadDashboard(){
     return;
   }
 
+  // Admins belong on the admin console
+  if(profile && profile.is_admin){
+    window.location.href = 'admin.html';
+    return;
+  }
+
   if(error || !profile){
     console.error('Profile load error:', error);
     // Fallback display with email only

@@ -485,8 +485,10 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // Redirect logged-in user to the right dashboard for their role
 async function redirectToDashboard(userId){
   if(userId){
-    const { data: profile } = await sb.from('profiles').select('role').eq('id', userId).single();
-    const dest = profile?.role === 'employer' ? 'employer-dashboard.html' : 'dashboard.html';
+    const { data: profile } = await sb.from('profiles').select('role, is_admin').eq('id', userId).single();
+    let dest = 'dashboard.html';
+    if(profile?.is_admin) dest = 'admin.html';
+    else if(profile?.role === 'employer') dest = 'employer-dashboard.html';
     window.location.href = dest;
   } else {
     window.location.href = 'dashboard.html';

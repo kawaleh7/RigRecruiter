@@ -383,6 +383,12 @@ async function init(){
     return;
   }
 
+  // Admins go to admin console
+  if(profile.is_admin){
+    window.location.href = 'admin.html';
+    return;
+  }
+
   // Sidebar
   const companyName = profile.company_name || ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim();
   const display = companyName || currentUser.email.split('@')[0];

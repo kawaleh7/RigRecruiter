@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — Verification Queue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;min-height:100vh;display:flex}
+:root{
+  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
+  --navy:#0a1228;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#94a3b8;
+  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--red-bg:#fef2f2;
+  --amber:#92400e;--amber-bg:#fefce8;--gold:#b8923a;--gold-border:#c9963a;
+  --off:#f8fafc;--shadow-lg:0 12px 28px rgba(15,23,42,.1);
+}
+
+.sidebar{width:240px;flex-shrink:0;background:var(--navy);color:#fff;display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sb-top{padding:22px 22px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:11px}
+.sb-logo{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+.sb-logo svg{width:16px;height:16px;fill:#fff}
+.sb-brand{font-size:1.05rem;font-weight:800;color:#fff;letter-spacing:-.2px;line-height:1.1}
+.sb-brand span{color:#93c5fd}
+.sb-tag{display:inline-block;font-size:.58rem;font-weight:800;color:var(--red);background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.7px;margin-top:3px}
+
+.sb-nav{flex:1;padding:14px 0}
+.sb-section{padding:0 12px;margin-bottom:6px}
+.sb-title{font-size:.66rem;font-weight:800;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1.2px;padding:8px 10px 4px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:7px;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.65);text-decoration:none;margin-bottom:2px;position:relative;transition:all .15s}
+.sb-link:hover{background:rgba(255,255,255,.05);color:#fff}
+.sb-link.active{background:rgba(30,58,138,.4);color:#fff;font-weight:700}
+.sb-link.active::before{content:'';position:absolute;left:-12px;top:6px;bottom:6px;width:3px;background:var(--gold);border-radius:0 3px 3px 0}
+.sb-link svg{width:17px;height:17px;flex-shrink:0;stroke-width:2}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;font-weight:800;padding:1px 7px;border-radius:100px;min-width:18px;text-align:center}
+
+.sb-bottom{padding:14px;border-top:1px solid rgba(255,255,255,.08)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;position:relative}
+.sb-user:hover{background:rgba(255,255,255,.05)}
+.sb-avatar{width:34px;height:34px;border-radius:8px;background:var(--gold);display:grid;place-items:center;color:var(--navy);font-size:.74rem;font-weight:800;flex-shrink:0}
+.sb-uname{font-size:.86rem;font-weight:700;color:#fff;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-urole{font-size:.7rem;color:rgba(255,255,255,.5);margin-top:2px}
+
+.main{flex:1;padding:32px 40px;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.tb-title{font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-.5px}
+.tb-sub{font-size:.78rem;color:var(--muted);margin-top:3px}
+
+.tabs{display:flex;gap:6px;margin-bottom:20px;border-bottom:1.5px solid var(--border)}
+.tab{padding:11px 18px;border:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;display:flex;align-items:center;gap:7px}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--blue);border-color:var(--blue)}
+.tab .count{background:var(--off);color:var(--muted);font-size:.7rem;padding:1px 7px;border-radius:5px;font-weight:800}
+.tab.on .count{background:var(--blue-lt);color:var(--blue)}
+
+.card{background:#fff;border-radius:12px;border:1.5px solid var(--gold-border);overflow:hidden;margin-bottom:18px}
+
+/* Employer review card */
+.review-card{background:#fff;border:1.5px solid var(--gold-border);border-radius:12px;padding:22px 24px;margin-bottom:14px;transition:all .2s}
+.review-card:hover{box-shadow:var(--shadow-lg)}
+.rc-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+.rc-avatar{width:50px;height:50px;border-radius:11px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:1rem;font-weight:800;flex-shrink:0}
+.rc-info{flex:1;min-width:0}
+.rc-company{font-size:1.1rem;font-weight:800;color:var(--text);letter-spacing:-.2px;margin-bottom:3px}
+.rc-name{font-size:.85rem;color:var(--muted);margin-bottom:8px}
+.rc-tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:5px;font-size:.66rem;font-weight:800;letter-spacing:.3px;text-transform:uppercase}
+.tag-employer{background:#fdf8ee;color:var(--gold);border:1px solid #f3e3b8}
+.tag-pending{background:var(--amber-bg);color:var(--amber);border:1px solid #fde047}
+.tag-time{background:var(--off);color:var(--muted);border:1px solid var(--border)}
+
+.rc-details{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:14px 16px;background:var(--off);border-radius:9px;border:1px solid var(--border);margin-bottom:18px}
+.rc-detail-row{}
+.rc-d-label{font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.rc-d-value{font-size:.88rem;color:var(--text);font-weight:600;word-break:break-word}
+.rc-d-value.empty{color:var(--light);font-weight:400;font-style:italic}
+
+.rc-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.84rem;font-weight:700;cursor:pointer;border:1.5px solid transparent;text-decoration:none;transition:all .15s}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:#15803d}
+.btn-red{background:#fff;color:var(--red);border-color:var(--red)}
+.btn-red:hover{background:var(--red-bg)}
+.btn-ghost{background:#fff;color:var(--muted);border-color:var(--border)}
+.btn-ghost:hover{border-color:var(--light);color:var(--text)}
+
+.empty-state{padding:60px 22px;text-align:center;color:var(--muted);background:#fff;border-radius:12px;border:1.5px dashed var(--border)}
+.empty-state svg{margin:0 auto 14px;opacity:.4}
+.empty-state p{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:6px}
+.empty-state span{font-size:.85rem;color:var(--muted)}
+
+@media(max-width:1000px){
+  .rc-details{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .sidebar{width:64px}
+  .sb-brand,.sb-link span:not(.sb-badge),.sb-uname,.sb-urole,.sb-title,.sb-tag{display:none}
+  .sb-link{justify-content:center;padding:9px 0}
+  .sb-user{justify-content:center;padding:0}
+  .main{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <div>
+      <div class="sb-brand">Rig<span>Pass</span></div>
+      <span class="sb-tag">Admin Console</span>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section">
+      <a class="sb-link" href="admin.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="sb-link active" href="admin-verification.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Verification</span>
+        <span class="sb-badge" id="nav-verify-count">0</span>
+      </a>
+      <a class="sb-link" href="admin-users.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        <span>All Users</span>
+      </a>
+      <a class="sb-link" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>All Postings</span>
+      </a>
+      <a class="sb-link" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Analytics</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="sb-bottom">
+    <div class="sb-user" onclick="toggleUserMenu(event)">
+      <div class="sb-avatar" id="sb-avatar">--</div>
+      <div style="min-width:0">
+        <div class="sb-uname" id="sb-uname">Loading...</div>
+        <div class="sb-urole">Platform Admin</div>
+      </div>
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.4);overflow:hidden;z-index:200">
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--red);background:#fff;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title">Employer Verification</div>
+      <div class="tb-sub">Review and approve new employer accounts before they can post jobs</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" onclick="setTab(this,'pending')">Pending <span class="count" id="count-pending">0</span></button>
+    <button class="tab" onclick="setTab(this,'approved')">Approved <span class="count" id="count-approved">0</span></button>
+    <button class="tab" onclick="setTab(this,'rejected')">Rejected <span class="count" id="count-rejected">0</span></button>
+  </div>
+
+  <div id="employer-list">
+    <div class="empty-state"><p style="color:var(--muted);font-weight:500">Loading...</p></div>
+  </div>
+
+</main>
+
+<script>
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allEmployers = [];
+let currentTab = 'pending';
+
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+  if(!profile || !profile.is_admin){
+    alert('Admin access only.');
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  const display = ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || session.user.email.split('@')[0];
+  const initials = display.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || 'AD';
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-uname').textContent = display;
+
+  await loadEmployers();
+}
+
+async function loadEmployers(){
+  const { data, error } = await sb
+    .from('profiles')
+    .select('*')
+    .eq('role', 'employer')
+    .order('created_at', { ascending: false });
+
+  if(error){ console.error(error); return; }
+
+  allEmployers = data || [];
+  updateCounts();
+  render();
+}
+
+function updateCounts(){
+  const pending = allEmployers.filter(e => e.verification_status === 'pending').length;
+  const approved = allEmployers.filter(e => e.verification_status === 'approved').length;
+  const rejected = allEmployers.filter(e => e.verification_status === 'rejected').length;
+  document.getElementById('count-pending').textContent = pending;
+  document.getElementById('count-approved').textContent = approved;
+  document.getElementById('count-rejected').textContent = rejected;
+  document.getElementById('nav-verify-count').textContent = pending;
+  if(pending === 0) document.getElementById('nav-verify-count').style.display = 'none';
+}
+
+function setTab(btn, tab){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+  currentTab = tab;
+  render();
+}
+
+function render(){
+  const filtered = allEmployers.filter(e => e.verification_status === currentTab);
+  const list = document.getElementById('employer-list');
+
+  if(filtered.length === 0){
+    const msg = currentTab === 'pending'
+      ? { p: 'No pending employers', s: 'All new employers will appear here for review.' }
+      : currentTab === 'approved'
+      ? { p: 'No approved employers yet', s: 'Approved employers will appear here.' }
+      : { p: 'No rejected employers', s: 'Rejected employers will appear here.' };
+    list.innerHTML = `<div class="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <p>${msg.p}</p>
+      <span>${msg.s}</span>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(e => {
+    const first = e.first_name || '';
+    const last = e.last_name || '';
+    const personName = (first + ' ' + last).trim() || e.email.split('@')[0];
+    const company = e.company_name || '— No company name —';
+    const initials = (company === '— No company name —' ? personName : company).split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const loc = [e.city, e.province].filter(Boolean).join(', ') || 'Not set';
+    const ago = timeAgo(e.created_at);
+
+    const actions = currentTab === 'pending'
+      ? `<button class="btn btn-green" onclick="approveEmployer('${e.id}','${(e.company_name || personName).replace(/'/g,"\\'")}'); ">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Approve
+        </button>
+        <button class="btn btn-red" onclick="rejectEmployer('${e.id}','${(e.company_name || personName).replace(/'/g,"\\'")}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Reject
+        </button>`
+      : currentTab === 'rejected'
+      ? `<button class="btn btn-green" onclick="approveEmployer('${e.id}','${(e.company_name || personName).replace(/'/g,"\\'")}')">Reverse to Approved</button>`
+      : `<button class="btn btn-red" onclick="revokeEmployer('${e.id}','${(e.company_name || personName).replace(/'/g,"\\'")}')">Revoke Approval</button>`;
+
+    const statusTag = currentTab === 'pending' ? '<span class="tag tag-pending">Pending Review</span>'
+      : currentTab === 'approved' ? '<span class="tag tag-pending" style="background:var(--green-bg);color:var(--green);border-color:#86efac">Approved</span>'
+      : '<span class="tag tag-pending" style="background:var(--red-bg);color:var(--red);border-color:#fda4af">Rejected</span>';
+
+    return `<div class="review-card">
+      <div class="rc-head">
+        <div class="rc-avatar">${initials}</div>
+        <div class="rc-info">
+          <div class="rc-company">${company}</div>
+          <div class="rc-name">Contact: ${personName} · ${e.email}</div>
+          <div class="rc-tags">
+            <span class="tag tag-employer">Employer</span>
+            ${statusTag}
+            <span class="tag tag-time">Signed up ${ago}</span>
+          </div>
+        </div>
+      </div>
+      <div class="rc-details">
+        <div class="rc-detail-row">
+          <div class="rc-d-label">Phone</div>
+          <div class="rc-d-value ${!e.phone ? 'empty' : ''}">${e.phone || 'Not provided'}</div>
+        </div>
+        <div class="rc-detail-row">
+          <div class="rc-d-label">Location</div>
+          <div class="rc-d-value">${loc}</div>
+        </div>
+        <div class="rc-detail-row">
+          <div class="rc-d-label">Industry</div>
+          <div class="rc-d-value ${!e.industry ? 'empty' : ''}">${e.industry || 'Not provided'}</div>
+        </div>
+        <div class="rc-detail-row">
+          <div class="rc-d-label">Company Size</div>
+          <div class="rc-d-value ${!e.company_size ? 'empty' : ''}">${e.company_size || 'Not provided'}</div>
+        </div>
+        <div class="rc-detail-row" style="grid-column:1/-1">
+          <div class="rc-d-label">Bio</div>
+          <div class="rc-d-value ${!e.bio ? 'empty' : ''}">${e.bio || 'Not provided'}</div>
+        </div>
+        ${e.verification_note ? `<div class="rc-detail-row" style="grid-column:1/-1">
+          <div class="rc-d-label">Admin Note</div>
+          <div class="rc-d-value">${e.verification_note}</div>
+        </div>` : ''}
+      </div>
+      <div class="rc-actions">
+        ${actions}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function approveEmployer(id, name){
+  if(!confirm(`Approve "${name}"? They will be able to post jobs immediately.`)) return;
+  const { error } = await sb.from('profiles').update({
+    verification_status: 'approved',
+    is_verified: true,
+    verification_note: 'Approved by admin'
+  }).eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadEmployers();
+}
+
+async function rejectEmployer(id, name){
+  const reason = prompt(`Reject "${name}"?\n\nOptional reason (visible to admins only):`);
+  if(reason === null) return;
+  const { error } = await sb.from('profiles').update({
+    verification_status: 'rejected',
+    is_verified: false,
+    verification_note: reason || 'Rejected by admin'
+  }).eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadEmployers();
+}
+
+async function revokeEmployer(id, name){
+  if(!confirm(`Revoke approval for "${name}"? They will no longer be able to post jobs.`)) return;
+  const { error } = await sb.from('profiles').update({
+    verification_status: 'pending',
+    is_verified: false,
+    verification_note: 'Revoked by admin — needs re-review'
+  }).eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadEmployers();
+}
+
+function timeAgo(dateStr){
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if(mins < 1) return 'just now';
+  if(mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if(hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  return days + 'd ago';
+}
+
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('user-menu');
+  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
+});
+
+init();
+</script>
+</body>
+</html>
