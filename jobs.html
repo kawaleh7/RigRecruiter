@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — Job Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
+:root{
+  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
+  --navy:#0a1228;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#94a3b8;
+  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--red-bg:#fef2f2;
+  --amber:#92400e;--amber-bg:#fefce8;--gold:#b8923a;--gold-border:#c9963a;
+  --off:#f8fafc;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
+  --shadow:0 4px 14px rgba(15,23,42,.08);
+  --shadow-lg:0 16px 40px rgba(15,23,42,.12);
+}
+
+/* ── SIDEBAR ── */
+.sidebar{width:248px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sb-logo{padding:22px 22px 0;display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:32px}
+.logo-mark{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 10px rgba(30,58,138,.25)}
+.logo-mark svg{width:16px;height:16px;fill:#fff}
+.logo-name{font-size:1.12rem;font-weight:800;color:var(--text)}
+.logo-name span{color:var(--blue-mid)}
+.sb-section{padding:0 12px;margin-bottom:6px}
+.sb-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--light);padding:0 12px;margin-bottom:8px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;font-size:.88rem;font-weight:500;color:var(--muted);text-decoration:none;transition:all .15s;margin-bottom:2px;position:relative}
+.sb-link:hover{background:#f1f5f9;color:var(--text)}
+.sb-link.active{background:var(--blue-lt);color:var(--blue);font-weight:700}
+.sb-link.active::before{content:'';position:absolute;left:-12px;top:8px;bottom:8px;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
+.sb-link svg{width:17px;height:17px;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:100px}
+.sb-divider{height:1px;background:var(--border);margin:14px 22px}
+.pro-card{margin:0 16px 12px;padding:16px;background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);border-radius:11px;color:#fff;position:relative;overflow:hidden}
+.pro-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(147,197,253,.15)}
+.pro-card-title{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#93c5fd;margin-bottom:6px;position:relative}
+.pro-card p{font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.5;margin-bottom:12px;position:relative}
+.pro-card button{width:100%;padding:8px;background:#fff;color:var(--blue);border:none;border-radius:7px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;position:relative}
+.pro-card button:hover{background:#f1f5f9}
+.sb-bottom{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:11px;padding:10px;border-radius:9px;cursor:pointer;transition:background .15s}
+.sb-user:hover{background:#f1f5f9}
+.sb-avatar{width:36px;height:36px;border-radius:9px;background:var(--blue);display:grid;place-items:center;font-weight:800;font-size:.78rem;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(30,58,138,.25)}
+.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2}
+.sb-urole{font-size:.7rem;color:var(--muted);margin-top:2px}
+.sb-arrow{margin-left:auto;color:var(--light)}
+
+/* ── MAIN ── */
+.main{margin-left:248px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:1.02rem;font-weight:800;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.search-bar{position:relative;width:320px}
+.search-bar input{width:100%;padding:8px 12px 8px 36px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;color:var(--text);outline:none;background:var(--off);transition:all .15s}
+.search-bar input:focus{background:#fff;border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,58,138,.08)}
+.search-bar svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--light)}
+.icon-btn{width:38px;height:38px;border-radius:9px;border:1.5px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer;position:relative;transition:all .15s}
+.icon-btn:hover{border-color:var(--light);background:var(--off)}
+.notif-dot{position:absolute;top:7px;right:7px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid #fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:700;cursor:pointer;border:none;text-decoration:none;transition:all .15s;white-space:nowrap}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 10px rgba(30,58,138,.2)}
+.btn-blue:hover{background:var(--blue-mid);transform:translateY(-1px);box-shadow:0 8px 16px rgba(30,58,138,.25)}
+.btn-ghost{background:#fff;color:var(--muted);border:1.5px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--light)}
+.btn-sm{padding:7px 14px;font-size:.78rem}
+.btn-applied{background:var(--green-bg);color:var(--green);border:1.5px solid #86efac;cursor:default}
+
+.content{display:flex;flex:1;overflow:hidden}
+
+/* ── FILTER COL ── */
+.filter-col{width:240px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);padding:24px 18px;overflow-y:auto}
+.fp-head{font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:18px;letter-spacing:-.1px;display:flex;align-items:center;justify-content:space-between}
+.fp-clear{font-size:.74rem;color:var(--blue);font-weight:600;text-decoration:none;cursor:pointer;background:none;border:none;font-family:'Plus Jakarta Sans',sans-serif}
+.fp-section{margin-bottom:20px}
+.fp-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--light);margin-bottom:10px}
+.fp-check{display:flex;align-items:center;gap:9px;margin-bottom:8px;cursor:pointer;padding:5px 0;border-radius:5px;transition:background .1s}
+.fp-check:hover{padding-left:5px}
+.fp-check input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
+.fp-check span{font-size:.83rem;color:var(--text);font-weight:500}
+.fp-check .fp-count{margin-left:auto;font-size:.72rem;color:var(--light);font-weight:600}
+.fp-divider{height:1px;background:var(--border);margin:14px 0}
+
+/* ── JOBS COL ── */
+.jobs-col{flex:1;overflow-y:auto;padding:24px 32px;background:var(--off)}
+
+/* MATCH BANNER */
+.match-banner{
+  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
+  border-radius:14px;padding:20px 24px;
+  display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;
+  margin-bottom:20px;position:relative;overflow:hidden;color:#fff;
+}
+.match-banner::before{content:'';position:absolute;inset:0;opacity:.05;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:36px 36px}
+.mb-ico{width:46px;height:46px;background:rgba(147,197,253,.15);border:1px solid rgba(147,197,253,.3);border-radius:11px;display:grid;place-items:center;flex-shrink:0;position:relative;z-index:2}
+.mb-content{position:relative;z-index:2}
+.mb-title{font-size:1rem;font-weight:800;color:#fff;letter-spacing:-.2px;margin-bottom:3px}
+.mb-text{font-size:.83rem;color:rgba(255,255,255,.65);line-height:1.55;max-width:560px}
+.mb-text strong{color:#fff}
+.mb-action{position:relative;z-index:2}
+
+.jobs-col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.results-count{font-size:.85rem;font-weight:600;color:var(--muted)}
+.results-count strong{color:var(--text);font-weight:800}
+.sort-select{padding:7px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;color:var(--text);outline:none;background:#fff;font-weight:600}
+
+/* ── JOB CARDS ── */
+.jcard{
+  background:#fff;border-radius:14px;border:1.5px solid var(--gold-border);
+  overflow:hidden;margin-bottom:14px;
+  transition:all .2s;
+  position:relative;
+}
+.jcard:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--gold)}
+.jcard.full{border-color:var(--blue-border)}
+.jcard.full:hover{border-color:var(--blue)}
+.jcard-body{padding:22px 24px}
+.jcard-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+.jcard-left{flex:1;min-width:0}
+.jcard-co{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.co-avatar{width:36px;height:36px;border-radius:9px;background:var(--navy);display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;flex-shrink:0}
+.co-info{display:flex;flex-direction:column}
+.co-name{font-size:.82rem;font-weight:700;color:var(--text);line-height:1.2}
+.co-tag{font-size:.7rem;color:var(--muted);font-weight:500;margin-top:1px}
+.jcard-title{font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:10px;letter-spacing:-.2px;line-height:1.3}
+.jcard-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:.78rem;color:var(--muted);margin-bottom:12px}
+.jcard-meta span{display:flex;align-items:center;gap:5px}
+.jcard-meta svg{opacity:.6;flex-shrink:0}
+.pay-rate{font-weight:800;color:var(--green)!important}
+.jcard-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
+.jtag{background:var(--off);border:1px solid var(--border);border-radius:100px;padding:3px 11px;font-size:.7rem;font-weight:700;color:var(--muted)}
+.jtag.trade{background:var(--blue-lt);border-color:var(--blue-border);color:var(--blue)}
+
+/* MATCH SCORE BADGE */
+.match-score{
+  flex-shrink:0;display:flex;flex-direction:column;align-items:center;
+  background:var(--blue-lt);border-radius:11px;padding:10px 14px;
+  border:1.5px solid var(--blue-border);min-width:80px;text-align:center;
+}
+.ms-num{font-size:1.35rem;font-weight:800;color:var(--blue);line-height:1;letter-spacing:-.5px}
+.ms-label{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-top:3px}
+.match-score.full{background:var(--green-bg);border-color:#86efac}
+.match-score.full .ms-num{color:var(--green)}
+.match-score.partial{background:var(--amber-bg);border-color:#fcd34d}
+.match-score.partial .ms-num{color:var(--amber)}
+
+/* CERT MATCH */
+.cert-match{background:var(--off);border-radius:10px;padding:11px 14px;margin-bottom:14px;border:1px solid var(--border)}
+.cm-title{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--light);margin-bottom:8px}
+.cm-chips{display:flex;flex-wrap:wrap;gap:5px}
+.cm-chip{display:inline-flex;align-items:center;gap:4px;border-radius:100px;padding:3px 10px;font-size:.7rem;font-weight:700}
+.cm-ok{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
+.cm-miss{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
+
+.jcard-actions{display:flex;gap:8px;padding-top:14px;border-top:1px solid #f1f5f9;align-items:center}
+.save-btn{margin-left:auto;width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--muted);transition:all .15s}
+.save-btn:hover{border-color:var(--blue);color:var(--blue)}
+.save-btn.saved{background:var(--blue-lt);border-color:var(--blue);color:var(--blue)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .filter-col{display:none}
+  .jobs-col{padding:20px}
+}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+  .search-bar{display:none}
+  .match-banner{grid-template-columns:1fr;gap:14px}
+  .mb-ico{display:none}
+  .jcard-top{flex-direction:column}
+  .match-score{align-self:flex-start;flex-direction:row;gap:7px;align-items:center;padding:6px 12px}
+  .ms-num{font-size:1rem}
+  .ms-label{margin-top:0}
+}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <a class="sb-logo" href="index.html">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <span class="logo-name">Rig<span>Pass</span></span>
+  </a>
+  <div class="sb-section">
+    <div class="sb-label">Main</div>
+    <a class="sb-link" href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a class="sb-link" href="profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile</a>
+    <a class="sb-link" href="certifications.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Safety Tickets</a>
+    <a class="sb-link active" href="jobs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Job Board<span class="sb-badge">9</span></a>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Account</div>
+    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages<span class="sb-badge">2</span></a>
+    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Alerts</a>
+    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+  </div>
+  <div class="pro-card" style="margin-top:auto">
+    <div class="pro-card-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Upgrade to Pro</div>
+    <p>Unlimited tickets, SMS alerts, priority visibility.</p>
+    <button>Upgrade — $7.99/mo</button>
+  </div>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-avatar">MR</div>
+      <div style="min-width:0"><div class="sb-uname">Mike Robertson</div><div class="sb-urole">Pipefitter · Free Plan</div></div>
+      <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Job Board</div>
+    <div class="topbar-right">
+      <div class="search-bar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search by title, company, location...">
+      </div>
+      <div class="icon-btn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="notif-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── FILTER COL ── -->
+    <aside class="filter-col">
+      <div class="fp-head">
+        Filters
+        <button class="fp-clear">Clear all</button>
+      </div>
+
+      <div class="fp-section">
+        <div class="fp-label">Province</div>
+        <label class="fp-check"><input type="checkbox" checked><span>Alberta</span><span class="fp-count">18</span></label>
+        <label class="fp-check"><input type="checkbox"><span>British Columbia</span><span class="fp-count">4</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Saskatchewan</span><span class="fp-count">2</span></label>
+        <label class="fp-check"><input type="checkbox"><span>NWT</span><span class="fp-count">1</span></label>
+      </div>
+      <div class="fp-divider"></div>
+
+      <div class="fp-section">
+        <div class="fp-label">Trade</div>
+        <label class="fp-check"><input type="checkbox" checked><span>Pipefitter</span><span class="fp-count">9</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Welder</span><span class="fp-count">6</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Electrician</span><span class="fp-count">4</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Instrumentation</span><span class="fp-count">3</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Heavy Equipment</span><span class="fp-count">2</span></label>
+      </div>
+      <div class="fp-divider"></div>
+
+      <div class="fp-section">
+        <div class="fp-label">Schedule</div>
+        <label class="fp-check"><input type="checkbox"><span>14/7 Rotation</span></label>
+        <label class="fp-check"><input type="checkbox"><span>21/7 Rotation</span></label>
+        <label class="fp-check"><input type="checkbox"><span>10/4 Rotation</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Mon–Fri</span></label>
+      </div>
+      <div class="fp-divider"></div>
+
+      <div class="fp-section">
+        <div class="fp-label">Show Only</div>
+        <label class="fp-check"><input type="checkbox" checked><span>Full cert matches</span></label>
+        <label class="fp-check"><input type="checkbox"><span>Camp provided</span></label>
+        <label class="fp-check"><input type="checkbox"><span>$60+/hr</span></label>
+      </div>
+    </aside>
+
+    <!-- ── JOBS COL ── -->
+    <div class="jobs-col">
+
+      <!-- MATCH BANNER -->
+      <div class="match-banner">
+        <div class="mb-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+        <div class="mb-content">
+          <div class="mb-title">Smart Matched For You</div>
+          <div class="mb-text"><strong>9 jobs</strong> match your trade and certifications. Renew expired tickets to unlock <strong>3 more</strong> partial matches.</div>
+        </div>
+        <div class="mb-action">
+          <a href="certifications.html" class="btn" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.25)">Renew Tickets</a>
+        </div>
+      </div>
+
+      <!-- HEADER -->
+      <div class="jobs-col-head">
+        <div class="results-count"><strong>24</strong> open positions in your area</div>
+        <select class="sort-select">
+          <option>Best Match</option>
+          <option>Newest First</option>
+          <option>Highest Pay</option>
+          <option>Nearest Location</option>
+        </select>
+      </div>
+
+      <!-- JOB 1 — FULL MATCH -->
+      <div class="jcard full">
+        <div class="jcard-body">
+          <div class="jcard-top">
+            <div class="jcard-left">
+              <div class="jcard-co">
+                <div class="co-avatar" style="background:#1e3a8a">SE</div>
+                <div class="co-info">
+                  <div class="co-name">Suncor Energy</div>
+                  <div class="co-tag">Posted 2 days ago</div>
+                </div>
+              </div>
+              <div class="jcard-title">Journeyman Pipefitter — Fort Hills Turnaround</div>
+              <div class="jcard-meta">
+                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Fort McMurray, AB</span>
+                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>8 months · 14/7 rotation</span>
+                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Starts Jun 1, 2025</span>
+                <span class="pay-rate">$55–$62/hr</span>
+              </div>
+              <div class="jcard-tags">
+                <span class="jtag trade">Pipefitter</span>
+                <span class="jtag">Turnaround</span>
+                <span class="jtag">Camp Provided</span>
+                <span class="jtag">Journeyman</span>
+              </div>
+            </div>
+            <div class="match-score full">
+              <div class="ms-num">100%</div>
+              <div class="ms-label">Match</div>
+            </div>
+          </div>
+          <div class="cert-match">
+            <div class="cm-title">✓ All Required Certifications Met</div>
+            <div class="cm-chips">
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>H2S Alive</span>
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>WHMIS 2018</span>
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Confined Space</span>
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Ground Disturbance II</span>
+            </div>
+          </div>
+          <div class="jcard-actions">
+            <button class="btn btn-blue" onclick="applyJob(this)">Apply Now</button>
+            <button class="btn btn-ghost">View Details</button>
+            <button class="save-btn" onclick="toggleSave(this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- JOB 2 — FULL MATCH -->
+      <div class="jcard full">
+        <div class="jcard-body">
+          <div class="jcard-top">
+            <div class="jcard-left">
+              <div class="jcard-co">
+                <div class="co-avatar" style="background:#0369a1">CE</div>
+                <div class="co-info">
+                  <div class="co-name">Cenovus Energy</div>
+                  <div class="co-tag">Posted 4 days ago</div>
+                </div>
+              </div>
+              <div class="jcard-title">Senior Pipefitter — Foster Creek SAGD</div>
+              <div class="jcard-meta">
+                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Cold Lake, AB</span>
+                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>6 months · 14/7 rotation</span>
+                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Starts May 15, 2025</span>
+                <span class="pay-rate">$60–$68/hr</span>
+              </div>
+              <div class="jcard-tags">
+                <span class="jtag trade">Pipefitter</span>
+                <span class="jtag">SAGD</span>
+                <span class="jtag">Senior</span>
+              </div>
+            </div>
+            <div class="match-score full">
+              <div class="ms-num">100%</div>
+              <div class="ms-label">Match</div>
+            </div>
+          </div>
+          <div class="cert-match">
+            <div class="cm-title">✓ All Required Certifications Met</div>
+            <div class="cm-chips">
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>H2S Alive</span>
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>WHMIS 2018</span>
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Confined Space</span>
+            </div>
+          </div>
+          <div class="jcard-actions">
+            <button class="btn btn-blue" onclick="applyJob(this)">Apply Now</button>
+            <button class="btn btn-ghost">View Details</button>
+            <button class="save-btn" onclick="toggleSave(this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- JOB 3 — PARTIAL MATCH -->
+      <div class="jcard">
+        <div class="jcard-body">
+          <div class="jcard-top">
+            <div class="jcard-left">
+              <div class="jcard-co">
+                <div class="co-avatar" style="background:#334155">TC</div>
+                <div class="co-info">
+                  <div class="co-name">TC Energy</div>
+                  <div class="co-tag">Posted today</div>
+                </div>
+              </div>
+              <div class="jcard-title">Pipefitter — Compressor Station Maintenance</div>
+              <div class="jcard-meta">
+                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Grande Prairie, AB</span>
+                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>12 months · Mon–Fri</span>
+                <span class="pay-rate">$52–$58/hr</span>
+              </div>
+              <div class="jcard-tags">
+                <span class="jtag trade">Pipefitter</span>
+                <span class="jtag">Plant Maintenance</span>
+              </div>
+            </div>
+            <div class="match-score partial">
+              <div class="ms-num">75%</div>
+              <div class="ms-label">Match</div>
+            </div>
+          </div>
+          <div class="cert-match">
+            <div class="cm-title">⚠ 2 Certifications Need Attention</div>
+            <div class="cm-chips">
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>H2S Alive</span>
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>WHMIS 2018</span>
+              <span class="cm-chip cm-miss"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>First Aid L3 — Expired</span>
+              <span class="cm-chip cm-miss"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>TDG — Expiring</span>
+            </div>
+          </div>
+          <div class="jcard-actions">
+            <button class="btn btn-blue" onclick="applyJob(this)">Apply Anyway</button>
+            <a href="certifications.html" class="btn" style="background:var(--amber-bg);color:var(--amber);border:1.5px solid #fcd34d;text-decoration:none">Renew Tickets →</a>
+            <button class="save-btn" onclick="toggleSave(this)" style="margin-left:auto"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- JOB 4 — APPLIED -->
+      <div class="jcard full">
+        <div class="jcard-body">
+          <div class="jcard-top">
+            <div class="jcard-left">
+              <div class="jcard-co">
+                <div class="co-avatar" style="background:#065f46">IM</div>
+                <div class="co-info">
+                  <div class="co-name">Imperial Oil</div>
+                  <div class="co-tag">Applied yesterday</div>
+                </div>
+              </div>
+              <div class="jcard-title">Journeyman Pipefitter — Kearl Lake</div>
+              <div class="jcard-meta">
+                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Fort McMurray, AB</span>
+                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>4 months · 21/7 rotation</span>
+                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Starts Apr 1, 2025</span>
+                <span class="pay-rate">$57–$64/hr</span>
+              </div>
+              <div class="jcard-tags">
+                <span class="jtag trade">Pipefitter</span>
+                <span class="jtag">Turnaround</span>
+                <span class="jtag">Camp Provided</span>
+              </div>
+            </div>
+            <div class="match-score full">
+              <div class="ms-num">100%</div>
+              <div class="ms-label">Match</div>
+            </div>
+          </div>
+          <div class="cert-match">
+            <div class="cm-title">✓ Application Submitted</div>
+            <div class="cm-chips">
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>H2S Alive</span>
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>WHMIS 2018</span>
+              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Confined Space</span>
+            </div>
+          </div>
+          <div class="jcard-actions">
+            <button class="btn btn-applied"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Applied</button>
+            <button class="btn btn-ghost">View Application</button>
+            <button class="save-btn saved" style="margin-left:auto"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function applyJob(btn){
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Applied';
+  btn.className = 'btn btn-applied';
+  btn.disabled = true;
+}
+function toggleSave(btn){
+  btn.classList.toggle('saved');
+  const svg = btn.querySelector('svg');
+  if(btn.classList.contains('saved')){
+    svg.setAttribute('fill','currentColor');
+  } else {
+    svg.setAttribute('fill','none');
+  }
+}
+</script>
+</body>
+</html>

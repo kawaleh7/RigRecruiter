@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — Hiring Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
+:root{
+  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
+  --navy:#0a1228;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#94a3b8;
+  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--red-bg:#fef2f2;
+  --amber:#92400e;--amber-bg:#fefce8;--gold:#b8923a;--gold-border:#c9963a;
+  --off:#f8fafc;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
+  --shadow:0 4px 14px rgba(15,23,42,.08);
+}
+
+/* ── SIDEBAR ── */
+.sidebar{width:248px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sb-logo{padding:22px 22px 0;display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:32px}
+.logo-mark{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 10px rgba(30,58,138,.25)}
+.logo-mark svg{width:16px;height:16px;fill:#fff}
+.logo-name{font-size:1.12rem;font-weight:800;color:var(--text)}
+.logo-name span{color:var(--blue-mid)}
+.sb-section{padding:0 12px;margin-bottom:6px}
+.sb-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--light);padding:0 12px;margin-bottom:8px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;font-size:.88rem;font-weight:500;color:var(--muted);text-decoration:none;transition:all .15s;margin-bottom:2px;position:relative}
+.sb-link:hover{background:#f1f5f9;color:var(--text)}
+.sb-link.active{background:var(--blue-lt);color:var(--blue);font-weight:700}
+.sb-link.active::before{content:'';position:absolute;left:-12px;top:8px;bottom:8px;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
+.sb-link svg{width:17px;height:17px;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:100px}
+.sb-divider{height:1px;background:var(--border);margin:14px 22px}
+.pro-card{margin:0 16px 12px;padding:16px;background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);border-radius:11px;color:#fff;position:relative;overflow:hidden}
+.pro-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(147,197,253,.15)}
+.pro-card-title{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#93c5fd;margin-bottom:6px;position:relative}
+.pro-card p{font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.5;margin-bottom:12px;position:relative}
+.pro-card button{width:100%;padding:8px;background:#fff;color:var(--blue);border:none;border-radius:7px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;position:relative}
+.pro-card button:hover{background:#f1f5f9}
+.sb-bottom{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:11px;padding:10px;border-radius:9px;cursor:pointer;transition:background .15s}
+.sb-user:hover{background:#f1f5f9}
+.sb-avatar{width:36px;height:36px;border-radius:9px;background:var(--navy);display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(10,18,40,.25)}
+.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2}
+.sb-urole{font-size:.7rem;color:var(--muted);margin-top:2px}
+.sb-arrow{margin-left:auto;color:var(--light)}
+
+/* ── MAIN ── */
+.main{margin-left:248px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:1.02rem;font-weight:800;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.icon-btn{width:38px;height:38px;border-radius:9px;border:1.5px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer;position:relative;transition:all .15s}
+.icon-btn:hover{border-color:var(--light);background:var(--off)}
+.notif-dot{position:absolute;top:7px;right:7px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid #fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:700;cursor:pointer;border:none;text-decoration:none;transition:all .15s;white-space:nowrap}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 10px rgba(30,58,138,.2)}
+.btn-blue:hover{background:var(--blue-mid);transform:translateY(-1px);box-shadow:0 8px 16px rgba(30,58,138,.25)}
+.btn-ghost{background:#fff;color:var(--muted);border:1.5px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--light)}
+.btn-sm{padding:7px 14px;font-size:.78rem}
+
+.content{padding:28px 32px;flex:1;max-width:1200px;margin:0 auto;width:100%}
+
+/* ── PAGE HEAD ── */
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+.page-head h1{font-size:1.6rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:4px}
+.page-head p{font-size:.88rem;color:var(--muted)}
+
+/* DATE RANGE PILLS */
+.date-range{display:flex;gap:6px;align-items:center}
+.dr-pill{padding:7px 14px;border-radius:100px;border:1.5px solid var(--border);background:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s}
+.dr-pill:hover{color:var(--text);border-color:var(--light)}
+.dr-pill.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi-card{
+  background:#fff;border-radius:12px;border:1.5px solid var(--gold-border);
+  padding:20px;transition:all .2s;
+  position:relative;overflow:hidden;isolation:isolate;
+}
+.kpi-card::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.5) 50%,transparent 60%);
+  transform:translateX(-100%);transition:transform .55s ease;
+  border-radius:inherit;pointer-events:none;z-index:1;
+}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--gold)}
+.kpi-card:hover::after{transform:translateX(100%)}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.kpi-ico{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;flex-shrink:0}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:.7rem;font-weight:800;padding:3px 8px;border-radius:5px}
+.trend-up{background:var(--green-bg);color:var(--green)}
+.trend-down{background:var(--red-bg);color:var(--red)}
+.kpi-num{font-size:1.9rem;font-weight:800;color:var(--text);line-height:1;letter-spacing:-1px}
+.kpi-label{font-size:.78rem;color:var(--muted);margin-top:6px;font-weight:600}
+
+/* ── HERO BANNER ── */
+.insight-banner{
+  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
+  border-radius:14px;padding:22px 26px;color:#fff;
+  margin-bottom:24px;position:relative;overflow:hidden;
+  display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;
+}
+.insight-banner::before{content:'';position:absolute;inset:0;opacity:.05;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:36px 36px}
+.ib-icon{width:50px;height:50px;border-radius:12px;background:rgba(147,197,253,.15);border:1px solid rgba(147,197,253,.3);display:grid;place-items:center;flex-shrink:0;position:relative;z-index:2}
+.ib-content{position:relative;z-index:2}
+.ib-title{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.ib-title h3{font-size:1rem;font-weight:800;color:#fff;letter-spacing:-.2px}
+.ib-tag{background:#22c55e;color:#fff;font-size:.65rem;font-weight:800;padding:3px 9px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px}
+.insight-banner p{font-size:.85rem;color:rgba(255,255,255,.7);line-height:1.55;max-width:560px}
+.insight-banner p strong{color:#fff;font-weight:700}
+.ib-cta{position:relative;z-index:2}
+
+/* ── CHART CARDS ── */
+.chart-grid{display:grid;grid-template-columns:1fr;gap:18px}
+.chart-card{
+  background:#fff;border-radius:14px;border:1.5px solid var(--gold-border);
+  padding:24px;transition:box-shadow .2s;
+}
+.chart-card:hover{box-shadow:var(--shadow-sm)}
+.chart-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:10px}
+.chart-title{font-size:1rem;font-weight:800;color:var(--text);letter-spacing:-.2px}
+.chart-sub{font-size:.82rem;color:var(--muted);margin-top:3px}
+.chart-actions{display:flex;align-items:center;gap:6px}
+.chart-wrap{position:relative;width:100%;margin-top:18px}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:18px;padding-top:18px;border-top:1px solid #f1f5f9}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:600;color:var(--muted)}
+.legend-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+
+/* TOP CARDS */
+.top-section{margin-top:18px}
+.top-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.top-card{background:#fff;border-radius:12px;border:1.5px solid var(--gold-border);padding:20px;transition:box-shadow .2s}
+.top-card:hover{box-shadow:var(--shadow-sm)}
+.top-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:.85rem}
+.top-row:last-child{border-bottom:none;padding-bottom:0}
+.top-row:first-child{padding-top:0}
+.top-label{color:var(--text);font-weight:600;display:flex;align-items:center;gap:9px}
+.top-rank{
+  width:22px;height:22px;border-radius:6px;background:var(--off);border:1px solid var(--border);
+  display:grid;place-items:center;font-size:.68rem;font-weight:800;color:var(--muted);flex-shrink:0;
+}
+.top-row:first-child .top-rank{background:var(--blue);color:#fff;border-color:var(--blue)}
+.top-row:nth-child(2) .top-rank{background:var(--blue-lt);color:var(--blue);border-color:var(--blue-border)}
+.top-val{font-weight:800;color:var(--text)}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .top-grid{grid-template-columns:1fr}
+  .insight-banner{grid-template-columns:1fr;gap:14px}
+  .ib-icon{display:none}
+  .ib-cta{grid-row:3}
+}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <a class="sb-logo" href="index.html">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <span class="logo-name">Rig<span>Pass</span></span>
+  </a>
+  <div class="sb-section">
+    <div class="sb-label">Hiring</div>
+    <a class="sb-link" href="talent.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Browse Workers</a>
+    <a class="sb-link" href="postings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Job Postings<span class="sb-badge">3</span></a>
+    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Roster</a>
+    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages<span class="sb-badge">5</span></a>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Account</div>
+    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Billing</a>
+    <a class="sb-link active" href="analytics.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</a>
+    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+  </div>
+  <div class="pro-card" style="margin-top:auto">
+    <div class="pro-card-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Employer Pro</div>
+    <p>Unlimited searches and advanced reporting.</p>
+    <button>Upgrade Plan</button>
+  </div>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-avatar">SE</div>
+      <div style="min-width:0"><div class="sb-uname">Suncor Energy</div><div class="sb-urole">Employer · Pro Plan</div></div>
+      <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Hiring Analytics</div>
+    <div class="topbar-right">
+      <div class="icon-btn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="notif-dot"></div>
+      </div>
+      <button class="btn btn-ghost">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- PAGE HEAD -->
+    <div class="page-head">
+      <div>
+        <h1>Hiring Analytics</h1>
+        <p>Track your hiring performance and worker pool trends across Western Canada.</p>
+      </div>
+      <div class="date-range">
+        <button class="dr-pill">7d</button>
+        <button class="dr-pill on">30d</button>
+        <button class="dr-pill">90d</button>
+        <button class="dr-pill">YTD</button>
+      </div>
+    </div>
+
+    <!-- INSIGHT BANNER -->
+    <div class="insight-banner">
+      <div class="ib-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="ib-content">
+        <div class="ib-title">
+          <h3>Your hiring is up this month</h3>
+          <span class="ib-tag">↑ 40%</span>
+        </div>
+        <p>You hired <strong>14 workers</strong> across <strong>3 active job postings</strong> with an average time-to-hire of <strong>6.2 days</strong> — well below the industry average of 14 days.</p>
+      </div>
+      <div class="ib-cta">
+        <a href="postings.html" class="btn" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.25)">View Postings</a>
+      </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-ico" style="background:var(--blue-lt)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <span class="kpi-trend trend-up">↑ 23%</span>
+        </div>
+        <div class="kpi-num">14</div>
+        <div class="kpi-label">Workers Hired</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <span class="kpi-trend trend-up">↓ 1.8 days</span>
+        </div>
+        <div class="kpi-num">6.2<span style="font-size:1rem;color:var(--muted);font-weight:600">d</span></div>
+        <div class="kpi-label">Avg Time to Hire</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-ico" style="background:#fdf8ee"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+          <span class="kpi-trend trend-up">↑ 2.1%</span>
+        </div>
+        <div class="kpi-num">98.4<span style="font-size:1rem;color:var(--muted);font-weight:600">%</span></div>
+        <div class="kpi-label">Cert Compliance</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-ico" style="background:var(--blue-lt)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <span class="kpi-trend trend-up">↑ 412</span>
+        </div>
+        <div class="kpi-num">1,284</div>
+        <div class="kpi-label">Profile Views</div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="chart-grid">
+      <!-- CHART 1: CERTIFICATIONS -->
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Most Held Certifications</div>
+            <div class="chart-sub">Workers in your search area holding each safety certification</div>
+          </div>
+          <button class="btn btn-ghost btn-sm">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+        </div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="certsChart"></canvas>
+        </div>
+      </div>
+
+      <!-- CHART 2: PLATFORM GROWTH -->
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Platform Growth</div>
+            <div class="chart-sub">Workers and employers joining RigPass month over month</div>
+          </div>
+          <button class="btn btn-ghost btn-sm">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+        </div>
+        <div class="chart-wrap" style="height:260px">
+          <canvas id="growthChart"></canvas>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1e3a8a"></div>Workers Joined</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c9963a"></div>Employers Joined</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOP LISTS -->
+    <div class="top-section">
+      <div class="top-grid">
+        <div class="top-card">
+          <div class="chart-title" style="margin-bottom:14px">Top Trades in Your Searches</div>
+          <div class="top-row"><div class="top-label"><div class="top-rank">1</div>Pipefitter</div><span class="top-val">342 workers</span></div>
+          <div class="top-row"><div class="top-label"><div class="top-rank">2</div>Welder</div><span class="top-val">298 workers</span></div>
+          <div class="top-row"><div class="top-label"><div class="top-rank">3</div>Electrician</div><span class="top-val">186 workers</span></div>
+          <div class="top-row"><div class="top-label"><div class="top-rank">4</div>Instrumentation Tech</div><span class="top-val">122 workers</span></div>
+          <div class="top-row"><div class="top-label"><div class="top-rank">5</div>Heavy Equipment Op.</div><span class="top-val">98 workers</span></div>
+        </div>
+        <div class="top-card">
+          <div class="chart-title" style="margin-bottom:14px">Top Locations</div>
+          <div class="top-row"><div class="top-label"><div class="top-rank">1</div>Fort McMurray, AB</div><span class="top-val">2,840</span></div>
+          <div class="top-row"><div class="top-label"><div class="top-rank">2</div>Edmonton, AB</div><span class="top-val">1,920</span></div>
+          <div class="top-row"><div class="top-label"><div class="top-rank">3</div>Calgary, AB</div><span class="top-val">1,460</span></div>
+          <div class="top-row"><div class="top-label"><div class="top-rank">4</div>Grande Prairie, AB</div><span class="top-val">980</span></div>
+          <div class="top-row"><div class="top-label"><div class="top-rank">5</div>Cold Lake, AB</div><span class="top-val">720</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+Chart.defaults.color = '#94a3b8';
+
+// CERTIFICATIONS BAR
+new Chart(document.getElementById('certsChart'), {
+  type: 'bar',
+  data: {
+    labels: ['H2S Alive','WHMIS 2018','First Aid','Fall Protection','Confined Space','TDG','Ground Dist. II','Rigging','Energy Iso','Scaffold'],
+    datasets: [{
+      data: [11840, 11200, 9640, 8320, 7180, 6940, 6120, 5480, 4860, 3920],
+      backgroundColor: '#1e3a8a',
+      borderRadius: 6,
+      borderSkipped: false,
+      hoverBackgroundColor: '#1e40af',
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#0a1228',
+        padding: 12,
+        cornerRadius: 8,
+        titleFont: { size: 13, weight: '700' },
+        bodyFont: { size: 12 },
+        callbacks: { label: ctx => ` ${ctx.parsed.y.toLocaleString()} workers` }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11, weight: '600' } } },
+      y: { grid: { color: '#f1f5f9' }, ticks: { callback: v => v.toLocaleString(), font: { size: 11 } } }
+    }
+  }
+});
+
+// GROWTH LINE
+new Chart(document.getElementById('growthChart'), {
+  type: 'line',
+  data: {
+    labels: ['Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan'],
+    datasets: [
+      {
+        label: 'Workers',
+        data: [480, 1240, 2180, 3640, 5120, 6840, 8200, 9480, 10600, 11400, 12000, 12400],
+        borderColor: '#1e3a8a',
+        backgroundColor: 'rgba(30,58,138,.08)',
+        borderWidth: 3,
+        fill: true,
+        tension: .4,
+        pointBackgroundColor: '#1e3a8a',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 7
+      },
+      {
+        label: 'Employers',
+        data: [12, 48, 98, 162, 240, 340, 460, 580, 680, 760, 820, 862],
+        borderColor: '#c9963a',
+        backgroundColor: 'rgba(201,150,58,.08)',
+        borderWidth: 3,
+        fill: true,
+        tension: .4,
+        pointBackgroundColor: '#c9963a',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        yAxisID: 'y2'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#0a1228',
+        padding: 12,
+        cornerRadius: 8,
+        titleFont: { size: 13, weight: '700' },
+        bodyFont: { size: 12 },
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}` }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11, weight: '600' } } },
+      y: { grid: { color: '#f1f5f9' }, ticks: { callback: v => v.toLocaleString(), font: { size: 11 } }, position: 'left' },
+      y2: { grid: { display: false }, ticks: { callback: v => v.toLocaleString(), font: { size: 11 } }, position: 'right' }
+    }
+  }
+});
+
+// Date range pills
+document.querySelectorAll('.dr-pill').forEach(p=>{
+  p.addEventListener('click',function(){
+    document.querySelectorAll('.dr-pill').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+  });
+});
+</script>
+</body>
+</html>

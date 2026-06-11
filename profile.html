@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — My Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
+:root{
+  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
+  --navy:#0a1228;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#94a3b8;
+  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--red-bg:#fef2f2;
+  --amber:#92400e;--amber-bg:#fefce8;--gold:#b8923a;--gold-border:#c9963a;
+  --off:#f8fafc;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
+  --shadow:0 4px 14px rgba(15,23,42,.08);
+}
+
+/* ── SIDEBAR ── */
+.sidebar{width:248px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sb-logo{padding:22px 22px 0;display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:32px}
+.logo-mark{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 10px rgba(30,58,138,.25)}
+.logo-mark svg{width:16px;height:16px;fill:#fff}
+.logo-name{font-size:1.12rem;font-weight:800;color:var(--text)}
+.logo-name span{color:var(--blue-mid)}
+.sb-section{padding:0 12px;margin-bottom:6px}
+.sb-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--light);padding:0 12px;margin-bottom:8px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;font-size:.88rem;font-weight:500;color:var(--muted);text-decoration:none;transition:all .15s;margin-bottom:2px;position:relative}
+.sb-link:hover{background:#f1f5f9;color:var(--text)}
+.sb-link.active{background:var(--blue-lt);color:var(--blue);font-weight:700}
+.sb-link.active::before{content:'';position:absolute;left:-12px;top:8px;bottom:8px;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
+.sb-link svg{width:17px;height:17px;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:100px}
+.sb-divider{height:1px;background:var(--border);margin:14px 22px}
+.pro-card{margin:0 16px 12px;padding:16px;background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);border-radius:11px;color:#fff;position:relative;overflow:hidden}
+.pro-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(147,197,253,.15)}
+.pro-card-title{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#93c5fd;margin-bottom:6px;position:relative}
+.pro-card p{font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.5;margin-bottom:12px;position:relative}
+.pro-card button{width:100%;padding:8px;background:#fff;color:var(--blue);border:none;border-radius:7px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;position:relative}
+.pro-card button:hover{background:#f1f5f9}
+.sb-bottom{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:11px;padding:10px;border-radius:9px;cursor:pointer;transition:background .15s}
+.sb-user:hover{background:#f1f5f9}
+.sb-avatar{width:36px;height:36px;border-radius:9px;background:var(--blue);display:grid;place-items:center;font-weight:800;font-size:.78rem;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(30,58,138,.25)}
+.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2}
+.sb-urole{font-size:.7rem;color:var(--muted);margin-top:2px}
+.sb-arrow{margin-left:auto;color:var(--light)}
+
+/* ── MAIN ── */
+.main{margin-left:248px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:1.02rem;font-weight:800;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.icon-btn{width:38px;height:38px;border-radius:9px;border:1.5px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer;position:relative;transition:all .15s}
+.icon-btn:hover{border-color:var(--light);background:var(--off)}
+.notif-dot{position:absolute;top:7px;right:7px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid #fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:700;cursor:pointer;border:none;text-decoration:none;transition:all .15s;white-space:nowrap}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 10px rgba(30,58,138,.2)}
+.btn-blue:hover{background:var(--blue-mid);transform:translateY(-1px);box-shadow:0 8px 16px rgba(30,58,138,.25)}
+.btn-ghost{background:#fff;color:var(--muted);border:1.5px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--light)}
+.btn-sm{padding:7px 14px;font-size:.78rem}
+
+.content{padding:28px 32px;flex:1;max-width:1200px;margin:0 auto;width:100%}
+
+/* ── PREVIEW BANNER ── */
+.preview-banner{
+  background:var(--blue-lt);border:1.5px solid var(--blue-border);
+  border-radius:11px;padding:13px 18px;margin-bottom:20px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+}
+.preview-banner-left{display:flex;align-items:center;gap:10px}
+.preview-banner-left svg{color:var(--blue);flex-shrink:0}
+.preview-banner-text{font-size:.83rem;color:var(--blue);font-weight:600}
+.preview-banner-text span{font-weight:500;opacity:.8}
+
+/* ── HERO PROFILE CARD ── */
+.profile-hero{
+  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
+  border-radius:14px;padding:32px;margin-bottom:20px;
+  color:#fff;position:relative;overflow:hidden;
+}
+.profile-hero::before{content:'';position:absolute;inset:0;opacity:.05;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:36px 36px}
+.profile-hero::after{content:'';position:absolute;top:-60px;right:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(147,197,253,.18) 0%,transparent 70%)}
+.ph-top{display:flex;align-items:flex-start;gap:24px;position:relative;z-index:2}
+.ph-avatar{width:90px;height:90px;border-radius:18px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:grid;place-items:center;font-weight:800;font-size:1.8rem;color:#fff;flex-shrink:0}
+.ph-info{flex:1;min-width:0}
+.ph-name-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.ph-name{font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.5px}
+.ph-verified{display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,.2);color:#86efac;border:1px solid rgba(34,197,94,.4);font-size:.7rem;font-weight:800;padding:4px 10px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px}
+.ph-role{font-size:.92rem;color:rgba(255,255,255,.75);margin-bottom:14px}
+.ph-meta{display:flex;flex-wrap:wrap;gap:18px;font-size:.82rem;color:rgba(255,255,255,.6)}
+.ph-meta span{display:flex;align-items:center;gap:6px}
+.ph-meta svg{opacity:.7;flex-shrink:0}
+.ph-actions{position:relative;z-index:2;display:flex;gap:10px;margin-top:22px;padding-top:22px;border-top:1px solid rgba(255,255,255,.1)}
+.btn-white{background:#fff;color:var(--blue);box-shadow:0 4px 10px rgba(0,0,0,.1)}
+.btn-white:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.15)}
+.btn-outline-w{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.25)}
+.btn-outline-w:hover{background:rgba(255,255,255,.18)}
+
+/* ── QUICK STATS ── */
+.quick-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.qs-card{
+  background:#fff;border-radius:12px;border:1.5px solid var(--gold-border);
+  padding:18px 20px;text-align:center;
+  transition:all .2s;position:relative;overflow:hidden;isolation:isolate;
+}
+.qs-card::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.5) 50%,transparent 60%);transform:translateX(-100%);transition:transform .55s ease;border-radius:inherit;pointer-events:none;z-index:1}
+.qs-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--gold)}
+.qs-card:hover::after{transform:translateX(100%)}
+.qs-num{font-size:1.7rem;font-weight:800;color:var(--blue);letter-spacing:-.7px;line-height:1}
+.qs-label{font-size:.74rem;color:var(--muted);margin-top:6px;font-weight:600}
+
+/* ── LAYOUT ── */
+.profile-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+
+/* CARDS */
+.card{background:#fff;border-radius:14px;border:1.5px solid var(--gold-border);padding:24px;margin-bottom:18px;transition:box-shadow .2s}
+.card:hover{box-shadow:var(--shadow-sm)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:.95rem;font-weight:800;color:var(--text);letter-spacing:-.1px}
+.card-edit{font-size:.78rem;font-weight:700;color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:4px;background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+
+/* ABOUT */
+.about-text{font-size:.9rem;color:var(--muted);line-height:1.7}
+
+/* CERTS TABLE */
+.cert-table{display:flex;flex-direction:column}
+.cert-row{
+  display:grid;grid-template-columns:42px 1fr auto auto;gap:14px;align-items:center;
+  padding:14px 0;border-bottom:1px solid #f1f5f9;
+}
+.cert-row:last-child{border-bottom:none}
+.cert-row:first-child{padding-top:0}
+.cert-ico{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;flex-shrink:0}
+.cert-info{min-width:0}
+.cert-name{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:2px}
+.cert-meta{font-size:.73rem;color:var(--muted)}
+.tag{display:inline-flex;align-items:center;gap:5px;border-radius:100px;padding:4px 10px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0}
+.tag::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.tg{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
+.tr-tag{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
+.ty{background:var(--amber-bg);color:var(--amber);border:1px solid #fcd34d}
+
+/* WORK HISTORY */
+.work-item{
+  display:flex;gap:14px;padding:16px 0;border-bottom:1px solid #f1f5f9;
+}
+.work-item:last-child{border-bottom:none;padding-bottom:0}
+.work-item:first-child{padding-top:0}
+.work-ico{
+  width:42px;height:42px;border-radius:10px;
+  background:var(--navy);display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;flex-shrink:0;
+}
+.work-info{flex:1;min-width:0}
+.work-title{font-size:.92rem;font-weight:800;color:var(--text);margin-bottom:2px;letter-spacing:-.1px}
+.work-co{font-size:.82rem;color:var(--muted);font-weight:600;margin-bottom:4px}
+.work-dates{font-size:.74rem;color:var(--light);margin-bottom:8px}
+.work-desc{font-size:.82rem;color:var(--muted);line-height:1.6}
+
+/* SKILLS */
+.skills-grid{display:flex;flex-wrap:wrap;gap:7px}
+.skill{
+  background:var(--off);border:1.5px solid var(--border);border-radius:100px;
+  padding:5px 13px;font-size:.78rem;font-weight:700;color:var(--text);
+}
+
+/* SIDE — RESUME CARD */
+.resume-card{
+  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
+  border-radius:14px;padding:22px;color:#fff;margin-bottom:18px;
+  position:relative;overflow:hidden;
+}
+.resume-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(147,197,253,.18) 0%,transparent 70%)}
+.resume-ico-big{width:48px;height:48px;background:rgba(147,197,253,.15);border:1px solid rgba(147,197,253,.3);border-radius:11px;display:grid;place-items:center;margin-bottom:14px;position:relative}
+.resume-card h3{font-size:1rem;font-weight:800;color:#fff;margin-bottom:6px;position:relative;letter-spacing:-.2px}
+.resume-card p{font-size:.8rem;color:rgba(255,255,255,.65);line-height:1.55;margin-bottom:16px;position:relative}
+.resume-meta{display:flex;align-items:center;justify-content:space-between;font-size:.74rem;color:rgba(255,255,255,.55);margin-bottom:14px;position:relative}
+.resume-actions{display:flex;gap:8px;position:relative}
+
+/* VISIBILITY */
+.vis-card{padding:20px}
+.vis-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f5f9}
+.vis-row:last-child{border-bottom:none;padding-bottom:0}
+.vis-row:first-child{padding-top:0}
+.vis-label{font-size:.85rem;font-weight:600;color:var(--text)}
+.vis-sub{font-size:.72rem;color:var(--muted);margin-top:2px}
+.toggle{position:relative;width:38px;height:22px;background:#cbd5e1;border-radius:100px;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--blue)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on::after{transform:translateX(16px)}
+
+/* INSIGHTS */
+.insight-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9;font-size:.84rem}
+.insight-row:last-child{border-bottom:none;padding-bottom:0}
+.insight-row:first-child{padding-top:0}
+.insight-label{color:var(--muted);font-weight:500}
+.insight-val{font-weight:800;color:var(--text)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .profile-grid{grid-template-columns:1fr}
+  .quick-stats{grid-template-columns:1fr 1fr}
+  .ph-top{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <a class="sb-logo" href="index.html">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <span class="logo-name">Rig<span>Pass</span></span>
+  </a>
+  <div class="sb-section">
+    <div class="sb-label">Main</div>
+    <a class="sb-link" href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a class="sb-link active" href="profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile</a>
+    <a class="sb-link" href="certifications.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Safety Tickets</a>
+    <a class="sb-link" href="jobs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Job Board<span class="sb-badge">9</span></a>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Account</div>
+    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages<span class="sb-badge">2</span></a>
+    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Alerts</a>
+    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+  </div>
+  <div class="pro-card" style="margin-top:auto">
+    <div class="pro-card-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Upgrade to Pro</div>
+    <p>Unlimited tickets, SMS alerts, priority visibility.</p>
+    <button>Upgrade — $7.99/mo</button>
+  </div>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-avatar">MR</div>
+      <div style="min-width:0"><div class="sb-uname">Mike Robertson</div><div class="sb-urole">Pipefitter · Free Plan</div></div>
+      <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">My Profile</div>
+    <div class="topbar-right">
+      <div class="icon-btn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="notif-dot"></div>
+      </div>
+      <button class="btn btn-blue">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit Profile
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- PREVIEW BANNER -->
+    <div class="preview-banner">
+      <div class="preview-banner-left">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <div class="preview-banner-text">
+          This is how employers see your profile
+          <span>· Public preview mode</span>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm">Privacy Settings</button>
+    </div>
+
+    <!-- HERO PROFILE -->
+    <div class="profile-hero">
+      <div class="ph-top">
+        <div class="ph-avatar">MR</div>
+        <div class="ph-info">
+          <div class="ph-name-row">
+            <h1 class="ph-name">Mike Robertson</h1>
+            <span class="ph-verified">✓ Verified</span>
+          </div>
+          <div class="ph-role">Journeyman Pipefitter · 12 years experience</div>
+          <div class="ph-meta">
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Fort McMurray, AB</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Available Now</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Open to 14/7, 21/7 rotation</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>$55–65/hr expected</span>
+          </div>
+        </div>
+      </div>
+      <div class="ph-actions">
+        <button class="btn btn-white">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Share Profile Link
+        </button>
+        <button class="btn btn-outline-w">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          Download as PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- QUICK STATS -->
+    <div class="quick-stats">
+      <div class="qs-card"><div class="qs-num">7</div><div class="qs-label">Valid Tickets</div></div>
+      <div class="qs-card"><div class="qs-num">12</div><div class="qs-label">Years Experience</div></div>
+      <div class="qs-card"><div class="qs-num">142</div><div class="qs-label">Profile Views</div></div>
+      <div class="qs-card"><div class="qs-num" style="color:var(--green)">100%</div><div class="qs-label">ISN-Ready</div></div>
+    </div>
+
+    <!-- ── MAIN GRID ── -->
+    <div class="profile-grid">
+      <!-- LEFT: profile content -->
+      <div>
+        <!-- ABOUT -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">About</div>
+            <button class="card-edit">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+          </div>
+          <p class="about-text">Journeyman Pipefitter with 12 years of high-pressure piping experience across Alberta's oil sands. Specialized in turnarounds at Suncor Fort Hills, Imperial Oil Kearl, and Cenovus Foster Creek. Comfortable in fast-paced safety-critical environments, comfortable with FIFO and rotational work. Holds a clean safety record across all sites with zero LTI incidents.</p>
+        </div>
+
+        <!-- CERTIFICATIONS -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Safety Certifications</div>
+            <a class="card-edit" href="certifications.html">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Manage
+            </a>
+          </div>
+          <div class="cert-table">
+            <div class="cert-row">
+              <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+              <div class="cert-info"><div class="cert-name">H2S Alive</div><div class="cert-meta">Issued May 2024 · Expires Nov 14, 2026</div></div>
+              <span class="tag tg">Valid</span>
+            </div>
+            <div class="cert-row">
+              <div class="cert-ico" style="background:var(--red-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+              <div class="cert-info"><div class="cert-name">First Aid — Level 3</div><div class="cert-meta">Issued Jul 2022 · Expired Jul 3, 2025</div></div>
+              <span class="tag tr-tag">Expired</span>
+            </div>
+            <div class="cert-row">
+              <div class="cert-ico" style="background:var(--amber-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg></div>
+              <div class="cert-info"><div class="cert-name">WHMIS 2018</div><div class="cert-meta">Issued Aug 2023 · Expires Aug 19, 2025</div></div>
+              <span class="tag ty">Expiring</span>
+            </div>
+            <div class="cert-row">
+              <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+              <div class="cert-info"><div class="cert-name">Confined Space Entry</div><div class="cert-meta">Issued Mar 2025 · Expires Mar 28, 2027</div></div>
+              <span class="tag tg">Valid</span>
+            </div>
+            <div class="cert-row">
+              <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+              <div class="cert-info"><div class="cert-name">Ground Disturbance Level II</div><div class="cert-meta">Issued Jan 2024 · Expires Jan 10, 2027</div></div>
+              <span class="tag tg">Valid</span>
+            </div>
+            <div class="cert-row">
+              <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+              <div class="cert-info"><div class="cert-name">Fall Protection</div><div class="cert-meta">Issued Mar 2024 · Expires Mar 20, 2027</div></div>
+              <span class="tag tg">Valid</span>
+            </div>
+            <div class="cert-row">
+              <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
+              <div class="cert-info"><div class="cert-name">Rigging & Hoisting Level 1</div><div class="cert-meta">Issued Nov 2023 · Expires Nov 15, 2026</div></div>
+              <span class="tag tg">Valid</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WORK HISTORY -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Work History</div>
+            <button class="card-edit">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Job
+            </button>
+          </div>
+          <div class="work-item">
+            <div class="work-ico">SE</div>
+            <div class="work-info">
+              <div class="work-title">Journeyman Pipefitter</div>
+              <div class="work-co">Suncor Energy — Fort Hills</div>
+              <div class="work-dates">Apr 2023 – Present · 1 yr 9 mo · Full-time</div>
+              <div class="work-desc">High-pressure process piping installation during scheduled turnarounds. Lead crew of 4 pipefitters on tie-in projects. Zero safety incidents over 18 months.</div>
+            </div>
+          </div>
+          <div class="work-item">
+            <div class="work-ico" style="background:#065f46">IM</div>
+            <div class="work-info">
+              <div class="work-title">Pipefitter</div>
+              <div class="work-co">Imperial Oil — Kearl Lake</div>
+              <div class="work-dates">Jun 2020 – Mar 2023 · 2 yrs 9 mo · Contract</div>
+              <div class="work-desc">Steam piping maintenance for SAGD operations. Completed multiple shutdown turnarounds. Mentored 2 apprentice pipefitters through their Red Seal certification.</div>
+            </div>
+          </div>
+          <div class="work-item">
+            <div class="work-ico" style="background:#0369a1">CE</div>
+            <div class="work-info">
+              <div class="work-title">Apprentice Pipefitter</div>
+              <div class="work-co">Cenovus Energy — Foster Creek</div>
+              <div class="work-dates">Aug 2013 – May 2020 · 6 yrs 9 mo · Full-time</div>
+              <div class="work-desc">Completed 4-year pipefitting apprenticeship. Hands-on experience with high-pressure process piping, tie-ins, and equipment isolation.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SKILLS -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Skills & Specializations</div>
+            <button class="card-edit">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+          </div>
+          <div class="skills-grid">
+            <span class="skill">High-Pressure Piping</span>
+            <span class="skill">Turnaround Work</span>
+            <span class="skill">Tie-In Specialist</span>
+            <span class="skill">SAGD Operations</span>
+            <span class="skill">Crew Lead</span>
+            <span class="skill">Blueprint Reading</span>
+            <span class="skill">Equipment Isolation</span>
+            <span class="skill">FIFO Experienced</span>
+            <span class="skill">Pneumatic Testing</span>
+            <span class="skill">Apprentice Mentor</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: side panels -->
+      <div>
+        <!-- RESUME CARD -->
+        <div class="resume-card">
+          <div class="resume-ico-big">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3>Resume</h3>
+          <p>Your oilfield-specific resume — auto-generated from your profile and updated whenever you add work history or certs.</p>
+          <div class="resume-meta">
+            <span>📄 mike-robertson-resume.pdf</span>
+            <span>2 days ago</span>
+          </div>
+          <div class="resume-actions">
+            <button class="btn btn-white btn-sm" style="flex:1">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+            </button>
+            <button class="btn btn-outline-w btn-sm">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Regenerate
+            </button>
+          </div>
+        </div>
+
+        <!-- VISIBILITY -->
+        <div class="card vis-card">
+          <div class="card-head">
+            <div class="card-title">Profile Visibility</div>
+          </div>
+          <div class="vis-row">
+            <div>
+              <div class="vis-label">Public to employers</div>
+              <div class="vis-sub">Verified employers can find you</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="vis-row">
+            <div>
+              <div class="vis-label">Show contact info</div>
+              <div class="vis-sub">Phone & email visible after contact request</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="vis-row">
+            <div>
+              <div class="vis-label">Open to opportunities</div>
+              <div class="vis-sub">Show "Available Now" badge</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="vis-row">
+            <div>
+              <div class="vis-label">Allow training requests</div>
+              <div class="vis-sub">Employers can send cert requirements</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+
+        <!-- INSIGHTS -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Profile Insights</div>
+            <span style="font-size:.72rem;color:var(--light);font-weight:600">Last 30 days</span>
+          </div>
+          <div class="insight-row"><span class="insight-label">Profile views</span><span class="insight-val">142</span></div>
+          <div class="insight-row"><span class="insight-label">Employers searched you</span><span class="insight-val">28</span></div>
+          <div class="insight-row"><span class="insight-label">Saved by employers</span><span class="insight-val">7</span></div>
+          <div class="insight-row"><span class="insight-label">Contact requests</span><span class="insight-val">4</span></div>
+          <div class="insight-row"><span class="insight-label">Search rank</span><span class="insight-val" style="color:var(--green)">Top 12%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
