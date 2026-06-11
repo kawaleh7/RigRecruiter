@@ -6,6 +6,7 @@
 <title>RigPass — Job Postings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
@@ -259,10 +260,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <button>Upgrade Plan</button>
   </div>
   <div class="sb-bottom">
-    <div class="sb-user">
-      <div class="sb-avatar">SE</div>
-      <div style="min-width:0"><div class="sb-uname">Suncor Energy</div><div class="sb-urole">Employer · Pro Plan</div></div>
+    <div class="sb-user" onclick="toggleUserMenu(event)" style="position:relative">
+      <div class="sb-avatar" id="sb-avatar">--</div>
+      <div style="min-width:0"><div class="sb-uname" id="sb-uname">Loading...</div><div class="sb-urole" id="sb-urole">—</div></div>
       <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);overflow:hidden;z-index:200">
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--red);background:#fff;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
     </div>
   </div>
 </aside>
@@ -322,143 +329,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
         <button class="stab">Closed <span class="count">1</span></button>
       </div>
 
-      <!-- POSTING 1 - ACTIVE -->
-      <div class="posting-card" onclick="showView('detail')" style="cursor:pointer">
-        <div class="pc-inner">
-          <div class="pc-left">
-            <div class="pc-title">Journeyman Pipefitter — Fort Hills Turnaround</div>
-            <div class="pc-meta">
-              <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>Fort McMurray, AB</span>
-              <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>Starts Jun 1, 2025</span>
-              <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>8 months · 14/7</span>
-              <span class="pay-rate">$55–62/hr</span>
-            </div>
-            <div class="pc-tags">
-              <span class="ptag trade">Pipefitter</span>
-              <span class="ptag">Turnaround</span>
-              <span class="ptag">Camp Provided</span>
-              <span class="ptag">Journeyman</span>
-            </div>
-            <div class="pc-certs">
-              <span class="pcert">H2S Alive</span>
-              <span class="pcert">WHMIS 2018</span>
-              <span class="pcert">Confined Space</span>
-              <span class="pcert">First Aid L3</span>
-            </div>
-          </div>
-          <div class="pc-right">
-            <span class="status-badge sb-active">● Active</span>
-            <div class="applicants-pill">
-              <div class="ap-num">14</div>
-              <div class="ap-label">Applicants</div>
-            </div>
-          </div>
-        </div>
-        <div class="pc-foot">
-          <span class="pc-date">Posted Jan 15, 2025 · Closes Mar 1, 2025</span>
-          <div class="pc-actions">
-            <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showView('post')">Edit</button>
-            <button class="btn btn-blue btn-sm" onclick="event.stopPropagation();showView('detail')">View Applicants →</button>
-          </div>
-        </div>
+      <!-- POSTINGS LIST (dynamic) -->
+      <div id="postings-list">
+        <div style="padding:40px;text-align:center;color:var(--light);font-size:.85rem">Loading postings...</div>
       </div>
-
-      <!-- POSTING 2 - ACTIVE -->
-      <div class="posting-card">
-        <div class="pc-inner">
-          <div class="pc-left">
-            <div class="pc-title">Red Seal Welder — Structural</div>
-            <div class="pc-meta">
-              <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>Bonnyville, AB</span>
-              <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>Starts Jul 15, 2025</span>
-              <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>12 months</span>
-              <span class="pay-rate">$58–68/hr</span>
-            </div>
-            <div class="pc-tags">
-              <span class="ptag trade">Welder</span>
-              <span class="ptag">Structural</span>
-              <span class="ptag">Red Seal</span>
-            </div>
-            <div class="pc-certs">
-              <span class="pcert">H2S Alive</span>
-              <span class="pcert">WHMIS 2018</span>
-              <span class="pcert">Fall Protection</span>
-            </div>
-          </div>
-          <div class="pc-right">
-            <span class="status-badge sb-active">● Active</span>
-            <div class="applicants-pill">
-              <div class="ap-num">8</div>
-              <div class="ap-label">Applicants</div>
-            </div>
-          </div>
-        </div>
-        <div class="pc-foot">
-          <span class="pc-date">Posted Jan 22, 2025 · Closes Apr 15, 2025</span>
-          <div class="pc-actions">
-            <button class="btn btn-ghost btn-sm">Edit</button>
-            <button class="btn btn-blue btn-sm">View Applicants →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- POSTING 3 - DRAFT -->
-      <div class="posting-card">
-        <div class="pc-inner">
-          <div class="pc-left">
-            <div class="pc-title">Instrumentation Technician</div>
-            <div class="pc-meta">
-              <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>Fort McMurray, AB</span>
-              <span style="color:var(--amber);font-weight:700">Draft — not published</span>
-            </div>
-            <div class="pc-tags">
-              <span class="ptag trade">Instrumentation</span>
-              <span class="ptag">Plant Maintenance</span>
-            </div>
-          </div>
-          <div class="pc-right">
-            <span class="status-badge sb-draft">○ Draft</span>
-          </div>
-        </div>
-        <div class="pc-foot">
-          <span class="pc-date">Last edited Jan 24, 2025</span>
-          <div class="pc-actions">
-            <button class="btn btn-ghost btn-sm" onclick="showView('post')">Continue Editing</button>
-            <button class="btn btn-blue btn-sm">Publish</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- POSTING 4 - CLOSED -->
-      <div class="posting-card" style="opacity:.65">
-        <div class="pc-inner">
-          <div class="pc-left">
-            <div class="pc-title">Journeyman Electrician</div>
-            <div class="pc-meta">
-              <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>Cold Lake, AB</span>
-              <span>Filled Jan 10, 2025</span>
-            </div>
-            <div class="pc-tags">
-              <span class="ptag trade">Electrician</span>
-              <span class="ptag">Journeyman</span>
-            </div>
-          </div>
-          <div class="pc-right">
-            <span class="status-badge sb-closed">● Closed</span>
-            <div class="applicants-pill" style="background:var(--off);border-color:var(--border)">
-              <div class="ap-num" style="color:var(--text)">22</div>
-              <div class="ap-label">Applied</div>
-            </div>
-          </div>
-        </div>
-        <div class="pc-foot">
-          <span class="pc-date">Posted Dec 1, 2024 · Closed Jan 10, 2025</span>
-          <div class="pc-actions">
-            <button class="btn btn-ghost btn-sm">Repost</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- ── POST VIEW ── -->
     <div class="view" id="view-post">
@@ -478,11 +352,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
           <div class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
           Job Details
         </div>
-        <div class="field"><label>Job Title</label><input type="text" placeholder="e.g. Journeyman Pipefitter, Red Seal Welder"></div>
+        <div class="field"><label>Job Title</label><input type="text" id="post-title" placeholder="e.g. Journeyman Pipefitter, Red Seal Welder"></div>
         <div class="field-row">
           <div class="field">
             <label>Primary Trade</label>
-            <select>
+            <select id="post-trade">
               <option value="">Select trade...</option>
               <option>Pipefitter</option><option>Welder</option><option>Electrician</option>
               <option>Instrumentation Tech</option><option>Heavy Equipment Operator</option>
@@ -491,13 +365,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
           </div>
           <div class="field">
             <label>Experience Level</label>
-            <select>
+            <select id="post-experience">
               <option>Journeyman</option><option>Red Seal</option><option>Apprentice (3rd/4th Year)</option>
               <option>Supervisor</option><option>Foreman</option><option>Any Level</option>
             </select>
           </div>
         </div>
-        <div class="field"><label>Job Description</label><textarea rows="4" placeholder="Describe the scope of work, site conditions, crew size, and any specific requirements..."></textarea></div>
+        <div class="field"><label>Job Description</label><textarea id="post-description" rows="4" placeholder="Describe the scope of work, site conditions, crew size, and any specific requirements..."></textarea></div>
       </div>
 
       <div class="form-card">
@@ -506,18 +380,33 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
           Location & Schedule
         </div>
         <div class="field-row">
-          <div class="field"><label>Site Location</label><input type="text" placeholder="e.g. Fort McMurray, AB"></div>
+          <div class="field"><label>Site Location</label><input type="text" id="post-city" placeholder="e.g. Fort McMurray"></div>
           <div class="field">
             <label>Province</label>
-            <select><option>Alberta</option><option>British Columbia</option><option>Saskatchewan</option><option>Manitoba</option><option>NWT</option></select>
+            <select id="post-province">
+              <option value="">Select...</option>
+              <option value="AB">Alberta</option>
+              <option value="BC">British Columbia</option>
+              <option value="MB">Manitoba</option>
+              <option value="NB">New Brunswick</option>
+              <option value="NL">Newfoundland and Labrador</option>
+              <option value="NS">Nova Scotia</option>
+              <option value="ON">Ontario</option>
+              <option value="PE">Prince Edward Island</option>
+              <option value="QC">Quebec</option>
+              <option value="SK">Saskatchewan</option>
+              <option value="NWT">Northwest Territories</option>
+              <option value="NU">Nunavut</option>
+              <option value="YT">Yukon</option>
+            </select>
           </div>
         </div>
         <div class="field-row-3">
-          <div class="field"><label>Start Date</label><input type="date"></div>
-          <div class="field"><label>Duration</label><input type="text" placeholder="e.g. 6 months"></div>
+          <div class="field"><label>Start Date</label><input type="date" id="post-start-date"></div>
+          <div class="field"><label>Duration</label><input type="text" id="post-duration" placeholder="e.g. 6 months"></div>
           <div class="field">
             <label>Schedule</label>
-            <select><option>14/7 Rotation</option><option>21/7 Rotation</option><option>10/4 Rotation</option><option>Mon–Fri</option><option>Flexible</option></select>
+            <select id="post-schedule"><option>14/7 Rotation</option><option>21/7 Rotation</option><option>10/4 Rotation</option><option>Mon–Fri</option><option>Flexible</option></select>
           </div>
         </div>
       </div>
@@ -528,12 +417,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
           Compensation
         </div>
         <div class="field-row">
-          <div class="field"><label>Pay Rate (min)</label><input type="text" placeholder="$55"></div>
-          <div class="field"><label>Pay Rate (max)</label><input type="text" placeholder="$65"></div>
+          <div class="field"><label>Pay Rate (min)</label><input type="number" id="post-pay-min" placeholder="55"></div>
+          <div class="field"><label>Pay Rate (max)</label><input type="number" id="post-pay-max" placeholder="65"></div>
         </div>
         <div class="field">
           <label>Rate Type</label>
-          <select><option>Per Hour</option><option>Per Day</option><option>Lump Sum</option></select>
+          <select id="post-pay-type"><option value="hourly">Per Hour</option><option value="daily">Per Day</option><option value="lump">Lump Sum</option></select>
         </div>
         <div class="field-hint">Competitive rates attract more qualified applicants.</div>
       </div>
@@ -548,8 +437,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
       </div>
 
       <div class="form-actions">
-        <button class="btn btn-blue btn-lg" onclick="showView('list')">Publish Job Posting</button>
-        <button class="btn btn-ghost btn-lg">Save as Draft</button>
+        <button class="btn btn-blue btn-lg" id="publish-btn" onclick="savePosting('active')">Publish Job Posting</button>
+        <button class="btn btn-ghost btn-lg" onclick="savePosting('draft')">Save as Draft</button>
         <button class="btn btn-ghost btn-lg" onclick="showView('list')">Cancel</button>
       </div>
     </div>
@@ -658,33 +547,382 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
 </div>
 
 <script>
+// ════════════════════════════════════════════════════════════════════
+// SUPABASE
+// ════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const CERTS_LIST = ['H2S Alive','WHMIS 2018','First Aid Level 1','First Aid Level 3','TDG','Ground Disturbance II','Confined Space Entry','Fall Protection','Rigging & Hoisting','Scaffold Builder','Energy Isolation','Fire Watch','Atmospheric Testing'];
 
+let currentUser = null;
+let currentProfile = null;
+let allPostings = [];
+let currentStatusFilter = 'all';
+let selectedCerts = new Set();
+let editingPostingId = null;
+
+// ════════════════════════════════════════════════════════════════════
+// INIT — auth guard + load sidebar + postings
+// ════════════════════════════════════════════════════════════════════
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(!profile){ alert('Profile not found.'); window.location.href = 'login.html'; return; }
+  currentProfile = profile;
+
+  // Block workers from this page
+  if(profile.role !== 'employer'){
+    alert('This page is for employers only. Redirecting...');
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  // Sidebar
+  const companyName = profile.company_name || (profile.first_name || '') + ' ' + (profile.last_name || '');
+  const display = companyName.trim() || currentUser.email.split('@')[0];
+  const initials = display.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-uname').textContent = display;
+  const planLabel = profile.plan === 'employer_pro' ? 'Pro Plan' : 'Free Plan';
+  document.getElementById('sb-urole').textContent = 'Employer · ' + planLabel;
+
+  buildCertSelector();
+  await loadPostings();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// LOAD POSTINGS FROM SUPABASE + applicant counts
+// ════════════════════════════════════════════════════════════════════
+async function loadPostings(){
+  const { data: jobs, error } = await sb
+    .from('jobs')
+    .select('*')
+    .eq('employer_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if(error){ console.error(error); return; }
+
+  // Fetch applicant counts per job
+  const jobIds = (jobs || []).map(j => j.id);
+  let appCounts = {};
+  if(jobIds.length){
+    const { data: apps } = await sb
+      .from('applications')
+      .select('job_id, status')
+      .in('job_id', jobIds);
+    (apps || []).forEach(a => {
+      if(!appCounts[a.job_id]) appCounts[a.job_id] = { total:0, shortlisted:0 };
+      appCounts[a.job_id].total++;
+      if(a.status === 'shortlisted' || a.status === 'hired') appCounts[a.job_id].shortlisted++;
+    });
+  }
+
+  allPostings = (jobs || []).map(j => ({
+    ...j,
+    applicants: appCounts[j.id]?.total || 0,
+    shortlisted: appCounts[j.id]?.shortlisted || 0
+  }));
+
+  updateStats();
+  updateTabCounts();
+  renderPostings();
+}
+
+function updateStats(){
+  const active = allPostings.filter(p => p.status === 'active').length;
+  const totalApplicants = allPostings.reduce((s,p) => s + p.applicants, 0);
+  const qualified = allPostings.reduce((s,p) => s + p.shortlisted, 0);
+
+  const nums = document.querySelectorAll('.sc-num');
+  if(nums.length >= 4){
+    nums[0].textContent = active;
+    nums[1].textContent = totalApplicants;
+    nums[2].textContent = qualified;
+    nums[3].textContent = '—';  // days to hire — placeholder
+  }
+}
+
+function updateTabCounts(){
+  const all = allPostings.length;
+  const active = allPostings.filter(p => p.status === 'active').length;
+  const draft = allPostings.filter(p => p.status === 'draft').length;
+  const closed = allPostings.filter(p => p.status === 'closed' || p.status === 'filled').length;
+  const counts = document.querySelectorAll('.stab .count');
+  if(counts.length >= 4){
+    counts[0].textContent = all;
+    counts[1].textContent = active;
+    counts[2].textContent = draft;
+    counts[3].textContent = closed;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// RENDER POSTINGS LIST
+// ════════════════════════════════════════════════════════════════════
+function renderPostings(){
+  const list = document.getElementById('postings-list');
+  let arr = allPostings;
+  if(currentStatusFilter === 'active') arr = arr.filter(p => p.status === 'active');
+  else if(currentStatusFilter === 'draft') arr = arr.filter(p => p.status === 'draft');
+  else if(currentStatusFilter === 'closed') arr = arr.filter(p => p.status === 'closed' || p.status === 'filled');
+
+  if(arr.length === 0){
+    if(allPostings.length === 0){
+      list.innerHTML = `<div style="background:#fff;border:1.5px dashed var(--border);border-radius:14px;padding:60px 24px;text-align:center">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--light)" stroke-width="1.5" style="margin:0 auto 14px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <p style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:6px">No job postings yet</p>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:18px">Create your first posting to start receiving applications from qualified workers.</p>
+        <button class="btn btn-blue" onclick="newPosting()">+ Post Your First Job</button>
+      </div>`;
+    } else {
+      list.innerHTML = `<div style="padding:40px;text-align:center;color:var(--light);font-size:.88rem">No postings match this filter.</div>`;
+    }
+    return;
+  }
+
+  list.innerHTML = arr.map(p => {
+    const statusBadge = p.status === 'active'
+      ? `<span style="background:var(--green-bg);color:var(--green);border:1px solid #86efac;padding:3px 9px;border-radius:5px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px">Active</span>`
+      : p.status === 'draft'
+      ? `<span style="background:#fefce8;color:var(--amber);border:1px solid #fde047;padding:3px 9px;border-radius:5px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px">Draft</span>`
+      : `<span style="background:var(--off);color:var(--muted);border:1px solid var(--border);padding:3px 9px;border-radius:5px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px">Closed</span>`;
+
+    const opacity = p.status === 'closed' || p.status === 'filled' ? '.65' : '1';
+    const posted = p.published_at ? new Date(p.published_at).toLocaleDateString('en-CA', {month:'short',day:'numeric',year:'numeric'}) : new Date(p.created_at).toLocaleDateString('en-CA', {month:'short',day:'numeric',year:'numeric'});
+    const payLabel = p.pay_min && p.pay_max ? `$${p.pay_min}–$${p.pay_max}${p.pay_type==='hourly'?'/hr':p.pay_type==='daily'?'/day':''}` : 'Pay TBD';
+    const locLabel = [p.city, p.province].filter(Boolean).join(', ') || 'Location TBD';
+
+    return `<div class="posting-card" style="opacity:${opacity}">
+      <div class="pc-inner">
+        <div style="flex:1;cursor:pointer" onclick="viewDetail('${p.id}')">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+            ${statusBadge}
+            <span style="font-size:.7rem;color:var(--muted);font-weight:600">${p.trade || ''}</span>
+          </div>
+          <div style="font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-.2px">${p.title}</div>
+          <div style="display:flex;gap:14px;font-size:.78rem;color:var(--muted);flex-wrap:wrap">
+            <span>📍 ${locLabel}</span>
+            <span>💰 ${payLabel}</span>
+            <span>📅 ${p.schedule || ''}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+          <div class="applicants-pill" style="background:var(--blue-lt);border:1px solid var(--blue-border);padding:6px 10px;border-radius:8px;text-align:center;min-width:60px">
+            <div class="ap-num" style="font-size:1.1rem;font-weight:800;color:var(--blue);line-height:1">${p.applicants}</div>
+            <div class="ap-label" style="font-size:.66rem;color:var(--blue);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Applied</div>
+          </div>
+        </div>
+      </div>
+      <div class="pc-foot" style="display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-top:1px solid var(--border);background:#fafbfc">
+        <span class="pc-date" style="font-size:.74rem;color:var(--muted)">Posted ${posted}</span>
+        <div class="pc-actions" style="display:flex;gap:8px">
+          ${p.status !== 'closed' && p.status !== 'filled' ? `<button class="btn btn-ghost btn-sm" onclick="closePosting('${p.id}')">Close</button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="confirmDeletePosting('${p.id}','${(p.title||'').replace(/'/g,"\\'")}')">Delete</button>
+          <button class="btn btn-blue btn-sm" onclick="viewDetail('${p.id}')">View</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// NEW POSTING (clear form)
+// ════════════════════════════════════════════════════════════════════
+function newPosting(){
+  editingPostingId = null;
+  document.getElementById('post-title').value = '';
+  document.getElementById('post-trade').value = '';
+  document.getElementById('post-experience').selectedIndex = 0;
+  document.getElementById('post-description').value = '';
+  document.getElementById('post-city').value = '';
+  document.getElementById('post-province').value = '';
+  document.getElementById('post-start-date').value = '';
+  document.getElementById('post-duration').value = '';
+  document.getElementById('post-schedule').selectedIndex = 0;
+  document.getElementById('post-pay-min').value = '';
+  document.getElementById('post-pay-max').value = '';
+  document.getElementById('post-pay-type').selectedIndex = 0;
+  selectedCerts.clear();
+  document.querySelectorAll('.cert-option.selected').forEach(b => {
+    b.classList.remove('selected');
+    const svg = b.querySelector('svg');
+    if(svg) svg.style.display = 'none';
+  });
+  showView('post');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SAVE POSTING (publish or draft)
+// ════════════════════════════════════════════════════════════════════
+async function savePosting(status){
+  const title = document.getElementById('post-title').value.trim();
+  const trade = document.getElementById('post-trade').value;
+
+  if(!title){ alert('Please enter a job title.'); return; }
+  if(!trade){ alert('Please select a primary trade.'); return; }
+
+  const btn = document.getElementById('publish-btn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.style.opacity = '.6';
+
+  const data = {
+    employer_id: currentUser.id,
+    title,
+    trade,
+    experience_level: document.getElementById('post-experience').value || null,
+    description: document.getElementById('post-description').value.trim() || null,
+    city: document.getElementById('post-city').value.trim() || null,
+    province: document.getElementById('post-province').value || null,
+    start_date: document.getElementById('post-start-date').value || null,
+    duration: document.getElementById('post-duration').value.trim() || null,
+    schedule: document.getElementById('post-schedule').value || null,
+    pay_min: parseInt(document.getElementById('post-pay-min').value) || null,
+    pay_max: parseInt(document.getElementById('post-pay-max').value) || null,
+    pay_type: document.getElementById('post-pay-type').value || 'hourly',
+    required_certs: Array.from(selectedCerts),
+    status,
+    published_at: status === 'active' ? new Date().toISOString() : null
+  };
+
+  let result;
+  if(editingPostingId){
+    result = await sb.from('jobs').update(data).eq('id', editingPostingId);
+  } else {
+    result = await sb.from('jobs').insert(data);
+  }
+
+  btn.disabled = false;
+  btn.style.opacity = '1';
+
+  if(result.error){
+    alert('Error saving posting: ' + result.error.message);
+    return;
+  }
+
+  editingPostingId = null;
+  await loadPostings();
+  showView('list');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CLOSE / DELETE / VIEW DETAIL
+// ════════════════════════════════════════════════════════════════════
+async function closePosting(id){
+  if(!confirm('Close this posting? Workers will no longer see it.')) return;
+  const { error } = await sb.from('jobs').update({ status: 'closed' }).eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadPostings();
+}
+
+async function confirmDeletePosting(id, title){
+  if(!confirm(`Delete "${title}"? All applications will be permanently removed.`)) return;
+  const { error } = await sb.from('jobs').delete().eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadPostings();
+}
+
+async function viewDetail(id){
+  const posting = allPostings.find(p => p.id === id);
+  if(!posting){ return; }
+
+  // Show detail view with this posting's data
+  document.getElementById('topbar-title').textContent = posting.title;
+
+  // Load applicants for this job
+  const { data: apps } = await sb
+    .from('applications')
+    .select('*, worker:profiles!applications_worker_id_fkey(*)')
+    .eq('job_id', id)
+    .order('applied_at', { ascending: false });
+
+  // Find applicants section in detail view and populate
+  // For now, just populate any list with class .applicants-list if it exists
+  const appsList = document.querySelector('#view-detail .applicants-list, #view-detail');
+  // Detail view has its own structure — we'll keep its rendering minimal for now
+  showView('detail');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CERT SELECTOR
+// ════════════════════════════════════════════════════════════════════
 function buildCertSelector(){
   document.getElementById('cert-selector').innerHTML = CERTS_LIST.map(c=>`
-    <button class="cert-option" onclick="toggleCert(this)">
+    <button class="cert-option" onclick="toggleCert(this,'${c.replace(/'/g,"\\'")}')">
       <span class="check"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" style="display:none"><polyline points="20 6 9 17 4 12"/></svg></span>
       ${c}
     </button>`).join('');
 }
-function toggleCert(btn){
+function toggleCert(btn, certName){
   btn.classList.toggle('selected');
-  btn.querySelector('svg').style.display = btn.classList.contains('selected') ? 'block' : 'none';
+  const isSelected = btn.classList.contains('selected');
+  btn.querySelector('svg').style.display = isSelected ? 'block' : 'none';
+  if(isSelected) selectedCerts.add(certName);
+  else selectedCerts.delete(certName);
 }
+
+// ════════════════════════════════════════════════════════════════════
+// VIEW SWITCHING
+// ════════════════════════════════════════════════════════════════════
 function showView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  const titles={list:'Job Postings',post:'Post New Job',detail:'Journeyman Pipefitter'};
-  document.getElementById('topbar-title').textContent = titles[v];
+  const titles={list:'Job Postings',post:'Post New Job',detail:'Posting Detail'};
+  if(v !== 'detail') document.getElementById('topbar-title').textContent = titles[v];
   window.scrollTo(0,0);
+
+  // If switching to "post" view from a "+ Post Job" button (not edit), clear form
+  if(v === 'post' && !editingPostingId){
+    // (Already handled by newPosting() — calling showView('post') directly skips clearing)
+  }
 }
-document.querySelectorAll('.stab').forEach(t=>{
+
+// Intercept "+ Post New Job" button to clear form
+document.querySelectorAll('.btn').forEach(btn => {
+  if(btn.textContent.includes('Post New Job') || btn.textContent.includes('Post Job') || btn.textContent.includes('+ Post')){
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      newPosting();
+    }, { capture: true });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// STATUS TABS
+// ════════════════════════════════════════════════════════════════════
+document.querySelectorAll('.stab').forEach((t,idx)=>{
   t.addEventListener('click',function(){
     document.querySelectorAll('.stab').forEach(x=>x.classList.remove('on'));
     this.classList.add('on');
+    const filters = ['all','active','draft','closed'];
+    currentStatusFilter = filters[idx] || 'all';
+    renderPostings();
   });
 });
-buildCertSelector();
+
+// ════════════════════════════════════════════════════════════════════
+// USER MENU + SIGN OUT
+// ════════════════════════════════════════════════════════════════════
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('user-menu');
+  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
+});
+
+init();
 </script>
 </body>
 </html>
