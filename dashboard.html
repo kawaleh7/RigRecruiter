@@ -6,6 +6,7 @@
 <title>RigPass — Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
@@ -374,13 +375,25 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
   </div>
 
   <div class="sb-bottom">
-    <div class="sb-user">
-      <div class="sb-avatar">MR</div>
+    <div class="sb-user" onclick="toggleUserMenu(event)" style="position:relative">
+      <div class="sb-avatar" id="sb-avatar">--</div>
       <div style="min-width:0">
-        <div class="sb-uname">Mike Robertson</div>
-        <div class="sb-urole">Pipefitter · Free Plan</div>
+        <div class="sb-uname" id="sb-uname">Loading...</div>
+        <div class="sb-urole" id="sb-urole">—</div>
       </div>
       <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+
+      <!-- User dropdown menu -->
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);overflow:hidden;z-index:200">
+        <a href="profile.html" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--text);text-decoration:none;font-weight:600;transition:background .15s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          My Profile
+        </a>
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--red);background:#fff;border:none;border-top:1px solid #f1f5f9;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left;transition:background .15s" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
     </div>
   </div>
 </aside>
@@ -411,9 +424,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <!-- ── GREETING ── -->
     <div class="greeting-card">
       <div class="greeting-left">
-        <div class="greeting-meta">Monday, January 27</div>
-        <h1>Good morning, Mike 👋</h1>
-        <p>You have <strong style="color:#fff">2 expiring certifications</strong> in the next 30 days and <strong style="color:#fff">9 new job matches</strong> for your trade.</p>
+        <div class="greeting-meta" id="greet-date">Loading...</div>
+        <h1 id="greet-hello">Welcome 👋</h1>
+        <p id="greet-msg">Loading your dashboard...</p>
       </div>
       <div class="greeting-actions">
         <a href="jobs.html" class="btn btn-white">View Job Matches</a>
@@ -606,6 +619,96 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     </div>
   </div>
 </div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// SUPABASE
+// ════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ════════════════════════════════════════════════════════════════════
+// AUTH GUARD + PROFILE LOAD
+// ════════════════════════════════════════════════════════════════════
+async function loadDashboard(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // Fetch user profile from Supabase
+  const { data: profile, error } = await sb
+    .from('profiles')
+    .select('*')
+    .eq('id', session.user.id)
+    .single();
+
+  if(error || !profile){
+    console.error('Profile load error:', error);
+    // Fallback display with email only
+    const email = session.user.email;
+    document.getElementById('sb-uname').textContent = email.split('@')[0];
+    document.getElementById('sb-urole').textContent = 'Setup pending';
+    document.getElementById('sb-avatar').textContent = email.substring(0,2).toUpperCase();
+    document.getElementById('greet-hello').textContent = 'Welcome 👋';
+    document.getElementById('greet-msg').innerHTML = 'Finish setting up your profile to see job matches.';
+    setDate();
+    return;
+  }
+
+  // Build display name + initials
+  const first = profile.first_name || '';
+  const last = profile.last_name || '';
+  const fullName = (first + ' ' + last).trim() || session.user.email.split('@')[0];
+  const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || session.user.email.substring(0,2).toUpperCase();
+
+  // Sidebar
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-uname').textContent = fullName;
+  const roleLabel = profile.role === 'employer' ? 'Employer' : (profile.trade || 'Worker');
+  const planLabel = profile.plan === 'pro' ? 'Pro Plan' : (profile.plan === 'employer_pro' ? 'Employer Pro' : 'Free Plan');
+  document.getElementById('sb-urole').textContent = roleLabel + ' · ' + planLabel;
+
+  // Greeting
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greet-hello').textContent = `${greeting}, ${first || fullName} 👋`;
+  document.getElementById('greet-msg').innerHTML = `Welcome to RigPass. Add your safety tickets and we'll match you with jobs that fit your certifications.`;
+  setDate();
+}
+
+function setDate(){
+  const d = new Date();
+  const opts = { weekday:'long', month:'long', day:'numeric' };
+  document.getElementById('greet-date').textContent = d.toLocaleDateString('en-CA', opts);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SIGN OUT
+// ════════════════════════════════════════════════════════════════════
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// USER DROPDOWN MENU
+// ════════════════════════════════════════════════════════════════════
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+document.addEventListener('click', () => {
+  const menu = document.getElementById('user-menu');
+  if(menu) menu.style.display = 'none';
+});
+
+// Load on page open
+loadDashboard();
+</script>
 
 </body>
 </html>
