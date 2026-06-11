@@ -6,6 +6,7 @@
 <title>RigPass — Job Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
@@ -154,6 +155,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
 .cm-chips{display:flex;flex-wrap:wrap;gap:5px}
 .cm-chip{display:inline-flex;align-items:center;gap:4px;border-radius:100px;padding:3px 10px;font-size:.7rem;font-weight:700}
 .cm-ok{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
+.cm-missing{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
 .cm-miss{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
 
 .jcard-actions{display:flex;gap:8px;padding-top:14px;border-top:1px solid #f1f5f9;align-items:center}
@@ -207,10 +209,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <button>Upgrade — $7.99/mo</button>
   </div>
   <div class="sb-bottom">
-    <div class="sb-user">
-      <div class="sb-avatar">MR</div>
-      <div style="min-width:0"><div class="sb-uname">Mike Robertson</div><div class="sb-urole">Pipefitter · Free Plan</div></div>
+    <div class="sb-user" onclick="toggleUserMenu(event)" style="position:relative">
+      <div class="sb-avatar" id="sb-avatar">--</div>
+      <div style="min-width:0"><div class="sb-uname" id="sb-uname">Loading...</div><div class="sb-urole" id="sb-urole">—</div></div>
       <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);overflow:hidden;z-index:200">
+        <a href="dashboard.html" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--text);text-decoration:none;font-weight:600" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--red);background:#fff;border:none;border-top:1px solid #f1f5f9;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
     </div>
   </div>
 </aside>
@@ -222,7 +234,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <div class="topbar-right">
       <div class="search-bar">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Search by title, company, location...">
+        <input type="text" id="search-input" placeholder="Search by title, company, location..." oninput="render()">
       </div>
       <div class="icon-btn">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -280,211 +292,30 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <div class="jobs-col">
 
       <!-- MATCH BANNER -->
-      <div class="match-banner">
+      <div class="match-banner" id="match-banner" style="display:none">
         <div class="mb-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
         <div class="mb-content">
           <div class="mb-title">Smart Matched For You</div>
-          <div class="mb-text"><strong>9 jobs</strong> match your trade and certifications. Renew expired tickets to unlock <strong>3 more</strong> partial matches.</div>
+          <div class="mb-text" id="match-banner-text">Calculating matches…</div>
         </div>
         <div class="mb-action">
-          <a href="certifications.html" class="btn" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.25)">Renew Tickets</a>
+          <a href="certifications.html" class="btn" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.25)">Manage Tickets</a>
         </div>
       </div>
 
       <!-- HEADER -->
       <div class="jobs-col-head">
-        <div class="results-count"><strong>24</strong> open positions in your area</div>
-        <select class="sort-select">
-          <option>Best Match</option>
-          <option>Newest First</option>
-          <option>Highest Pay</option>
-          <option>Nearest Location</option>
+        <div class="results-count"><strong id="results-count">0</strong> open positions</div>
+        <select class="sort-select" id="sort-select" onchange="render()">
+          <option value="match">Best Match</option>
+          <option value="newest">Newest First</option>
+          <option value="pay">Highest Pay</option>
         </select>
       </div>
 
-      <!-- JOB 1 — FULL MATCH -->
-      <div class="jcard full">
-        <div class="jcard-body">
-          <div class="jcard-top">
-            <div class="jcard-left">
-              <div class="jcard-co">
-                <div class="co-avatar" style="background:#1e3a8a">SE</div>
-                <div class="co-info">
-                  <div class="co-name">Suncor Energy</div>
-                  <div class="co-tag">Posted 2 days ago</div>
-                </div>
-              </div>
-              <div class="jcard-title">Journeyman Pipefitter — Fort Hills Turnaround</div>
-              <div class="jcard-meta">
-                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Fort McMurray, AB</span>
-                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>8 months · 14/7 rotation</span>
-                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Starts Jun 1, 2025</span>
-                <span class="pay-rate">$55–$62/hr</span>
-              </div>
-              <div class="jcard-tags">
-                <span class="jtag trade">Pipefitter</span>
-                <span class="jtag">Turnaround</span>
-                <span class="jtag">Camp Provided</span>
-                <span class="jtag">Journeyman</span>
-              </div>
-            </div>
-            <div class="match-score full">
-              <div class="ms-num">100%</div>
-              <div class="ms-label">Match</div>
-            </div>
-          </div>
-          <div class="cert-match">
-            <div class="cm-title">✓ All Required Certifications Met</div>
-            <div class="cm-chips">
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>H2S Alive</span>
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>WHMIS 2018</span>
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Confined Space</span>
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Ground Disturbance II</span>
-            </div>
-          </div>
-          <div class="jcard-actions">
-            <button class="btn btn-blue" onclick="applyJob(this)">Apply Now</button>
-            <button class="btn btn-ghost">View Details</button>
-            <button class="save-btn" onclick="toggleSave(this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- JOB 2 — FULL MATCH -->
-      <div class="jcard full">
-        <div class="jcard-body">
-          <div class="jcard-top">
-            <div class="jcard-left">
-              <div class="jcard-co">
-                <div class="co-avatar" style="background:#0369a1">CE</div>
-                <div class="co-info">
-                  <div class="co-name">Cenovus Energy</div>
-                  <div class="co-tag">Posted 4 days ago</div>
-                </div>
-              </div>
-              <div class="jcard-title">Senior Pipefitter — Foster Creek SAGD</div>
-              <div class="jcard-meta">
-                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Cold Lake, AB</span>
-                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>6 months · 14/7 rotation</span>
-                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Starts May 15, 2025</span>
-                <span class="pay-rate">$60–$68/hr</span>
-              </div>
-              <div class="jcard-tags">
-                <span class="jtag trade">Pipefitter</span>
-                <span class="jtag">SAGD</span>
-                <span class="jtag">Senior</span>
-              </div>
-            </div>
-            <div class="match-score full">
-              <div class="ms-num">100%</div>
-              <div class="ms-label">Match</div>
-            </div>
-          </div>
-          <div class="cert-match">
-            <div class="cm-title">✓ All Required Certifications Met</div>
-            <div class="cm-chips">
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>H2S Alive</span>
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>WHMIS 2018</span>
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Confined Space</span>
-            </div>
-          </div>
-          <div class="jcard-actions">
-            <button class="btn btn-blue" onclick="applyJob(this)">Apply Now</button>
-            <button class="btn btn-ghost">View Details</button>
-            <button class="save-btn" onclick="toggleSave(this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- JOB 3 — PARTIAL MATCH -->
-      <div class="jcard">
-        <div class="jcard-body">
-          <div class="jcard-top">
-            <div class="jcard-left">
-              <div class="jcard-co">
-                <div class="co-avatar" style="background:#334155">TC</div>
-                <div class="co-info">
-                  <div class="co-name">TC Energy</div>
-                  <div class="co-tag">Posted today</div>
-                </div>
-              </div>
-              <div class="jcard-title">Pipefitter — Compressor Station Maintenance</div>
-              <div class="jcard-meta">
-                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Grande Prairie, AB</span>
-                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>12 months · Mon–Fri</span>
-                <span class="pay-rate">$52–$58/hr</span>
-              </div>
-              <div class="jcard-tags">
-                <span class="jtag trade">Pipefitter</span>
-                <span class="jtag">Plant Maintenance</span>
-              </div>
-            </div>
-            <div class="match-score partial">
-              <div class="ms-num">75%</div>
-              <div class="ms-label">Match</div>
-            </div>
-          </div>
-          <div class="cert-match">
-            <div class="cm-title">⚠ 2 Certifications Need Attention</div>
-            <div class="cm-chips">
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>H2S Alive</span>
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>WHMIS 2018</span>
-              <span class="cm-chip cm-miss"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>First Aid L3 — Expired</span>
-              <span class="cm-chip cm-miss"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>TDG — Expiring</span>
-            </div>
-          </div>
-          <div class="jcard-actions">
-            <button class="btn btn-blue" onclick="applyJob(this)">Apply Anyway</button>
-            <a href="certifications.html" class="btn" style="background:var(--amber-bg);color:var(--amber);border:1.5px solid #fcd34d;text-decoration:none">Renew Tickets →</a>
-            <button class="save-btn" onclick="toggleSave(this)" style="margin-left:auto"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- JOB 4 — APPLIED -->
-      <div class="jcard full">
-        <div class="jcard-body">
-          <div class="jcard-top">
-            <div class="jcard-left">
-              <div class="jcard-co">
-                <div class="co-avatar" style="background:#065f46">IM</div>
-                <div class="co-info">
-                  <div class="co-name">Imperial Oil</div>
-                  <div class="co-tag">Applied yesterday</div>
-                </div>
-              </div>
-              <div class="jcard-title">Journeyman Pipefitter — Kearl Lake</div>
-              <div class="jcard-meta">
-                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Fort McMurray, AB</span>
-                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>4 months · 21/7 rotation</span>
-                <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Starts Apr 1, 2025</span>
-                <span class="pay-rate">$57–$64/hr</span>
-              </div>
-              <div class="jcard-tags">
-                <span class="jtag trade">Pipefitter</span>
-                <span class="jtag">Turnaround</span>
-                <span class="jtag">Camp Provided</span>
-              </div>
-            </div>
-            <div class="match-score full">
-              <div class="ms-num">100%</div>
-              <div class="ms-label">Match</div>
-            </div>
-          </div>
-          <div class="cert-match">
-            <div class="cm-title">✓ Application Submitted</div>
-            <div class="cm-chips">
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>H2S Alive</span>
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>WHMIS 2018</span>
-              <span class="cm-chip cm-ok"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Confined Space</span>
-            </div>
-          </div>
-          <div class="jcard-actions">
-            <button class="btn btn-applied"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Applied</button>
-            <button class="btn btn-ghost">View Application</button>
-            <button class="save-btn saved" style="margin-left:auto"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
-          </div>
-        </div>
+      <!-- DYNAMIC JOB LIST -->
+      <div id="jobs-list">
+        <div style="padding:60px 22px;text-align:center;color:var(--light);font-size:.88rem">Loading jobs...</div>
       </div>
 
     </div>
@@ -492,20 +323,309 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
 </div>
 
 <script>
-function applyJob(btn){
+// ════════════════════════════════════════════════════════════════════
+// SUPABASE
+// ════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+let myCerts = [];
+let myApplications = [];
+let allJobs = [];
+
+// ════════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════════
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(!profile){ alert('Profile not found.'); window.location.href = 'login.html'; return; }
+  currentProfile = profile;
+
+  // Send non-workers elsewhere
+  if(profile.is_admin){ window.location.href = 'admin.html'; return; }
+  if(profile.role === 'employer'){ window.location.href = 'employer-dashboard.html'; return; }
+
+  // Sidebar
+  const first = profile.first_name || '';
+  const last = profile.last_name || '';
+  const fullName = (first + ' ' + last).trim() || currentUser.email.split('@')[0];
+  const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-uname').textContent = fullName;
+  const planLabel = profile.plan === 'pro' ? 'Pro Plan' : 'Free Plan';
+  document.getElementById('sb-urole').textContent = (profile.trade || 'Worker') + ' · ' + planLabel;
+
+  await loadData();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// LOAD DATA
+// ════════════════════════════════════════════════════════════════════
+async function loadData(){
+  // My valid certs
+  const { data: certs } = await sb.from('certifications').select('*').eq('worker_id', currentUser.id);
+  myCerts = (certs || []).filter(c => !c.expiry_date || new Date(c.expiry_date) > new Date());
+
+  // My existing applications (to mark "Applied")
+  const { data: apps } = await sb.from('applications').select('*').eq('worker_id', currentUser.id);
+  myApplications = apps || [];
+
+  // All active jobs with employer profile (for company name)
+  const { data: jobs } = await sb
+    .from('jobs')
+    .select('*, employer:profiles!jobs_employer_id_fkey(company_name, first_name, last_name, city, province)')
+    .eq('status', 'active')
+    .order('published_at', { ascending: false });
+
+  allJobs = (jobs || []).map(job => ({
+    ...job,
+    matchPct: calculateMatch(job.required_certs || []),
+    appliedRecord: myApplications.find(a => a.job_id === job.id) || null
+  }));
+
+  render();
+  renderMatchBanner();
+}
+
+function calculateMatch(requiredCerts){
+  if(!requiredCerts || requiredCerts.length === 0) return 100;
+  const myValidCertNames = myCerts.map(c => c.name.toLowerCase());
+  const matched = requiredCerts.filter(req =>
+    myValidCertNames.some(my => my.includes(req.toLowerCase()) || req.toLowerCase().includes(my))
+  ).length;
+  return Math.round((matched / requiredCerts.length) * 100);
+}
+
+function renderMatchBanner(){
+  const banner = document.getElementById('match-banner');
+  if(allJobs.length === 0){ banner.style.display = 'none'; return; }
+
+  const fullMatches = allJobs.filter(j => j.matchPct === 100).length;
+  const partial = allJobs.filter(j => j.matchPct > 0 && j.matchPct < 100).length;
+
+  if(myCerts.length === 0){
+    banner.style.display = 'flex';
+    document.getElementById('match-banner-text').innerHTML = `<strong>Add your safety tickets</strong> to see which jobs you fully qualify for.`;
+  } else if(fullMatches > 0){
+    banner.style.display = 'flex';
+    document.getElementById('match-banner-text').innerHTML = `<strong>${fullMatches} job${fullMatches === 1 ? '' : 's'}</strong> fully match your certifications.${partial > 0 ? ` ${partial} more are partial matches.` : ''}`;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════════════════
+function render(){
+  const list = document.getElementById('jobs-list');
+  const search = document.getElementById('search-input').value.toLowerCase().trim();
+  const sort = document.getElementById('sort-select').value;
+
+  let filtered = allJobs.filter(j => {
+    if(!search) return true;
+    const haystack = [
+      j.title, j.trade, j.city, j.province, j.description,
+      j.employer?.company_name, j.employer?.first_name, j.employer?.last_name
+    ].filter(Boolean).join(' ').toLowerCase();
+    return haystack.includes(search);
+  });
+
+  // Sort
+  if(sort === 'match'){
+    filtered.sort((a,b) => b.matchPct - a.matchPct || new Date(b.published_at || b.created_at) - new Date(a.published_at || a.created_at));
+  } else if(sort === 'newest'){
+    filtered.sort((a,b) => new Date(b.published_at || b.created_at) - new Date(a.published_at || a.created_at));
+  } else if(sort === 'pay'){
+    filtered.sort((a,b) => (b.pay_max || b.pay_min || 0) - (a.pay_max || a.pay_min || 0));
+  }
+
+  document.getElementById('results-count').textContent = filtered.length;
+
+  if(filtered.length === 0){
+    if(allJobs.length === 0){
+      list.innerHTML = `<div style="background:#fff;border:1.5px dashed var(--border);border-radius:14px;padding:60px 24px;text-align:center">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--light)" stroke-width="1.5" style="margin:0 auto 14px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <p style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:6px">No jobs posted yet</p>
+        <p style="font-size:.85rem;color:var(--muted)">Check back soon — new postings appear here as employers add them.</p>
+      </div>`;
+    } else {
+      list.innerHTML = `<div style="padding:40px;text-align:center;color:var(--light);font-size:.88rem;background:#fff;border:1.5px dashed var(--border);border-radius:12px">No jobs match your search.</div>`;
+    }
+    return;
+  }
+
+  list.innerHTML = filtered.map(job => renderJobCard(job)).join('');
+}
+
+function renderJobCard(job){
+  const company = job.employer?.company_name || ((job.employer?.first_name || '') + ' ' + (job.employer?.last_name || '')).trim() || 'Employer';
+  const initials = company.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || 'EM';
+  const loc = [job.city, job.province].filter(Boolean).join(', ') || 'Location TBD';
+  const payLabel = job.pay_min && job.pay_max
+    ? `$${job.pay_min}–$${job.pay_max}${job.pay_type==='hourly'?'/hr':job.pay_type==='daily'?'/day':''}`
+    : job.pay_min ? `$${job.pay_min}+` : 'Pay TBD';
+  const posted = timeAgo(job.published_at || job.created_at);
+  const startDate = job.start_date ? new Date(job.start_date).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'}) : null;
+
+  const matchPct = job.matchPct;
+  const matchCls = matchPct === 100 ? 'full' : matchPct >= 50 ? 'partial' : 'low';
+
+  // Cert chips
+  const requiredCerts = job.required_certs || [];
+  const myValidCertNames = myCerts.map(c => c.name.toLowerCase());
+  const certChips = requiredCerts.map(req => {
+    const hasIt = myValidCertNames.some(my => my.includes(req.toLowerCase()) || req.toLowerCase().includes(my));
+    return `<span class="cm-chip ${hasIt ? 'cm-ok' : 'cm-missing'}">
+      ${hasIt
+        ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'}
+      ${req}
+    </span>`;
+  }).join('');
+
+  const certTitle = requiredCerts.length === 0
+    ? 'No specific certifications required'
+    : matchPct === 100
+    ? '✓ All Required Certifications Met'
+    : matchPct >= 50
+    ? `Partial Match — Missing ${requiredCerts.length - Math.round(matchPct * requiredCerts.length / 100)} cert${requiredCerts.length - Math.round(matchPct * requiredCerts.length / 100) === 1 ? '' : 's'}`
+    : `${Math.round(matchPct * requiredCerts.length / 100)} of ${requiredCerts.length} certifications met`;
+
+  // Apply button state
+  const alreadyApplied = !!job.appliedRecord;
+  const applyBtn = alreadyApplied
+    ? `<button class="btn btn-applied" disabled><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Applied</button>`
+    : `<button class="btn btn-blue" onclick="applyToJob('${job.id}', this)">Apply Now</button>`;
+
+  return `<div class="jcard ${matchCls}">
+    <div class="jcard-body">
+      <div class="jcard-top">
+        <div class="jcard-left">
+          <div class="jcard-co">
+            <div class="co-avatar" style="background:#1e3a8a">${initials}</div>
+            <div class="co-info">
+              <div class="co-name">${company}</div>
+              <div class="co-tag">Posted ${posted}</div>
+            </div>
+          </div>
+          <div class="jcard-title">${job.title}</div>
+          <div class="jcard-meta">
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${loc}</span>
+            ${job.duration || job.schedule ? `<span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${[job.duration, job.schedule].filter(Boolean).join(' · ')}</span>` : ''}
+            ${startDate ? `<span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Starts ${startDate}</span>` : ''}
+            <span class="pay-rate">${payLabel}</span>
+          </div>
+          <div class="jcard-tags">
+            ${job.trade ? `<span class="jtag trade">${job.trade}</span>` : ''}
+            ${job.experience_level ? `<span class="jtag">${job.experience_level}</span>` : ''}
+            ${job.camp_provided ? `<span class="jtag">Camp Provided</span>` : ''}
+          </div>
+          ${job.description ? `<div style="font-size:.84rem;color:var(--muted);line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">${job.description.length > 220 ? job.description.substring(0,220) + '…' : job.description}</div>` : ''}
+        </div>
+        <div class="match-score ${matchCls}">
+          <div class="ms-num">${matchPct}%</div>
+          <div class="ms-label">Match</div>
+        </div>
+      </div>
+      ${requiredCerts.length > 0 ? `<div class="cert-match">
+        <div class="cm-title">${certTitle}</div>
+        <div class="cm-chips">${certChips}</div>
+      </div>` : ''}
+      <div class="jcard-actions">
+        ${applyBtn}
+        <button class="save-btn" onclick="toggleSave(this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// APPLY TO JOB
+// ════════════════════════════════════════════════════════════════════
+async function applyToJob(jobId, btn){
+  btn.disabled = true;
+  btn.style.opacity = '.6';
+  const originalText = btn.innerHTML;
+  btn.textContent = 'Applying...';
+
+  const job = allJobs.find(j => j.id === jobId);
+  const matchScore = job ? job.matchPct : 0;
+
+  const { error } = await sb.from('applications').insert({
+    job_id: jobId,
+    worker_id: currentUser.id,
+    status: 'pending',
+    match_score: matchScore
+  });
+
+  if(error){
+    if(error.code === '23505'){ // unique violation
+      alert('You\'ve already applied to this job.');
+    } else {
+      alert('Error applying: ' + error.message);
+    }
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.innerHTML = originalText;
+    return;
+  }
+
+  // Update local state
+  myApplications.push({ job_id: jobId, worker_id: currentUser.id, status: 'pending' });
+  if(job) job.appliedRecord = { status: 'pending' };
+
   btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Applied';
   btn.className = 'btn btn-applied';
   btn.disabled = true;
+  btn.style.opacity = '1';
 }
+
 function toggleSave(btn){
   btn.classList.toggle('saved');
   const svg = btn.querySelector('svg');
-  if(btn.classList.contains('saved')){
-    svg.setAttribute('fill','currentColor');
-  } else {
-    svg.setAttribute('fill','none');
-  }
+  svg.setAttribute('fill', btn.classList.contains('saved') ? 'currentColor' : 'none');
 }
+
+function timeAgo(dateStr){
+  if(!dateStr) return 'recently';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if(mins < 1) return 'just now';
+  if(mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if(hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if(days < 30) return days + 'd ago';
+  const months = Math.floor(days / 30);
+  return months + 'mo ago';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// USER MENU + SIGN OUT
+// ════════════════════════════════════════════════════════════════════
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('user-menu');
+  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
+});
+
+init();
 </script>
 </body>
 </html>

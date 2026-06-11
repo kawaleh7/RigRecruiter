@@ -6,6 +6,7 @@
 <title>RigPass — Talent Pool</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
@@ -258,10 +259,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <button>Upgrade Plan</button>
   </div>
   <div class="sb-bottom">
-    <div class="sb-user">
-      <div class="sb-avatar">SE</div>
-      <div style="min-width:0"><div class="sb-uname">Suncor Energy</div><div class="sb-urole">Employer · Pro Plan</div></div>
+    <div class="sb-user" onclick="toggleUserMenu(event)" style="position:relative">
+      <div class="sb-avatar" id="sb-avatar">--</div>
+      <div style="min-width:0"><div class="sb-uname" id="sb-uname">Loading...</div><div class="sb-urole" id="sb-urole">—</div></div>
       <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);overflow:hidden;z-index:200">
+        <a href="employer-dashboard.html" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--text);text-decoration:none;font-weight:600" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--red);background:#fff;border:none;border-top:1px solid #f1f5f9;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
     </div>
   </div>
 </aside>
@@ -436,128 +447,350 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
 </div>
 
 <script>
-// ── WORKER DATA ──
-const workers = [
-  {id:1, initials:'MR', bg:'#1e3a8a', name:'Mike Robertson', role:'Journeyman Pipefitter', loc:'Fort McMurray, AB', exp:'12 yrs', certs:[{l:'H2S',ok:'ok'},{l:'WHMIS',ok:'ok'},{l:'Confined Space',ok:'ok'},{l:'First Aid',ok:'exp'}]},
-  {id:2, initials:'CW', bg:'#065f46', name:'Craig Wallace', role:'Red Seal Pipefitter', loc:'Edson, AB', exp:'18 yrs', certs:[{l:'H2S',ok:'ok'},{l:'WHMIS',ok:'ok'},{l:'First Aid L3',ok:'ok'},{l:'Rigging',ok:'ok'},{l:'Confined Space',ok:'ok'}]},
-  {id:3, initials:'JT', bg:'#0369a1', name:'Jason Tran', role:'Red Seal Welder', loc:'Edmonton, AB', exp:'8 yrs', certs:[{l:'H2S',ok:'ok'},{l:'WHMIS',ok:'ok'},{l:'First Aid L2',ok:'ok'},{l:'TDG',ok:'ok'},{l:'Fall Protection',ok:'warn'}]},
-  {id:4, initials:'DL', bg:'#475569', name:'Danny Lam', role:'Journeyman Pipefitter', loc:'Fort McMurray, AB', exp:'10 yrs', certs:[{l:'H2S',ok:'ok'},{l:'WHMIS',ok:'ok'},{l:'First Aid',ok:'exp'},{l:'Confined Space',ok:'ok'}]},
-  {id:5, initials:'SP', bg:'#7c3aed', name:'Sarah Payne', role:'Instrumentation Tech', loc:'Calgary, AB', exp:'6 yrs', certs:[{l:'H2S',ok:'ok'},{l:'WHMIS',ok:'ok'},{l:'Confined Space',ok:'ok'},{l:'Electrical Safety',ok:'ok'}]},
-  {id:6, initials:'BK', bg:'#334155', name:'Brad Kowalski', role:'Journeyman Electrician', loc:'Grande Prairie, AB', exp:'15 yrs', certs:[{l:'H2S',ok:'ok'},{l:'WHMIS',ok:'ok'},{l:'First Aid L3',ok:'ok'},{l:'Ground Dist II',ok:'ok'},{l:'Energy Iso',ok:'ok'}]},
-  {id:7, initials:'AT', bg:'#9333ea', name:'Amanda Turner', role:'Journeyman Welder', loc:'Bonnyville, AB', exp:'9 yrs', certs:[{l:'H2S',ok:'ok'},{l:'WHMIS',ok:'ok'},{l:'First Aid L3',ok:'ok'},{l:'Fall Protection',ok:'ok'}]},
-  {id:8, initials:'RM', bg:'#dc2626', name:'Ryan Miller', role:'Heavy Equipment Operator', loc:'Cold Lake, AB', exp:'14 yrs', certs:[{l:'H2S',ok:'ok'},{l:'WHMIS',ok:'ok'},{l:'First Aid L2',ok:'ok'},{l:'Forklift',ok:'ok'},{l:'Skid Steer',ok:'ok'}]},
-];
+// ════════════════════════════════════════════════════════════════════
+// SUPABASE
+// ════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const CERTS_LIST = ['H2S Alive','WHMIS 2018','First Aid Level 1','First Aid Level 3','TDG','Confined Space Entry','Ground Disturbance II','Fall Protection','Rigging & Hoisting','Scaffold Builder','Energy Isolation','Atmospheric Testing','Fire Watch'];
 
+let currentUser = null;
+let currentProfile = null;
+let workers = [];
+let workerCerts = {}; // worker_id -> [certs]
 let shortlist = [];
 
-// ── RENDER WORKERS ──
-function chipClass(ok){return ok==='ok'?'wc-chip':ok==='warn'?'wc-chip warn':'wc-chip exp'}
-function chipIcon(ok){
-  if(ok==='ok') return `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
-  if(ok==='warn') return `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="6" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+const AVATAR_COLORS = ['#1e3a8a','#065f46','#0369a1','#475569','#7c3aed','#334155','#9333ea','#dc2626','#b8923a','#0891b2'];
+
+// ════════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════════
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(!profile){ alert('Profile not found.'); window.location.href = 'login.html'; return; }
+  currentProfile = profile;
+
+  if(profile.is_admin){ window.location.href = 'admin.html'; return; }
+  if(profile.role !== 'employer'){
+    alert('This page is for employers only.');
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  // Sidebar
+  const companyName = profile.company_name || ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim();
+  const display = companyName || currentUser.email.split('@')[0];
+  const initials = display.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-uname').textContent = display;
+  const planLabel = profile.plan === 'employer_pro' ? 'Pro Plan' : 'Free Plan';
+  document.getElementById('sb-urole').textContent = 'Employer · ' + planLabel;
+
+  await loadWorkers();
+  await loadShortlist();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// LOAD WORKERS
+// ════════════════════════════════════════════════════════════════════
+async function loadWorkers(){
+  // Fetch all public worker profiles
+  const { data, error } = await sb
+    .from('profiles')
+    .select('*')
+    .eq('role', 'worker')
+    .eq('is_public', true)
+    .order('created_at', { ascending: false });
+
+  if(error){ console.error(error); return; }
+  workers = data || [];
+
+  // Fetch all certs for these workers
+  if(workers.length > 0){
+    const workerIds = workers.map(w => w.id);
+    const { data: certs } = await sb.from('certifications').select('*').in('worker_id', workerIds);
+    workerCerts = {};
+    (certs || []).forEach(c => {
+      if(!workerCerts[c.worker_id]) workerCerts[c.worker_id] = [];
+      workerCerts[c.worker_id].push(c);
+    });
+  }
+
+  renderWorkers();
+}
+
+async function loadShortlist(){
+  const { data } = await sb.from('shortlists').select('worker_id').eq('employer_id', currentUser.id);
+  shortlist = (data || []).map(s => s.worker_id);
+  renderWorkers();
+  renderShortlist();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// RENDER WORKERS
+// ════════════════════════════════════════════════════════════════════
+function chipClass(status){
+  return status==='valid' ? 'wc-chip' : status==='expiring' ? 'wc-chip warn' : 'wc-chip exp';
+}
+function chipIcon(status){
+  if(status==='valid') return `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`;
+  if(status==='expiring') return `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="6" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
   return `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+}
+function certStatus(c){
+  if(!c.expiry_date) return 'valid';
+  const days = Math.ceil((new Date(c.expiry_date) - new Date()) / (1000*60*60*24));
+  if(days < 0) return 'expired';
+  if(days <= 60) return 'expiring';
+  return 'valid';
 }
 
 function renderWorkers(){
   const grid = document.getElementById('workers-grid');
-  grid.innerHTML = workers.map(w=>{
-    const isShort = shortlist.some(s=>s.id===w.id);
+
+  if(workers.length === 0){
+    grid.innerHTML = `<div style="grid-column:1/-1;background:#fff;border:1.5px dashed var(--border);border-radius:14px;padding:60px 24px;text-align:center">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--light)" stroke-width="1.5" style="margin:0 auto 14px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <p style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:6px">No workers signed up yet</p>
+      <p style="font-size:.85rem;color:var(--muted)">Once workers create accounts and make their profiles public, they'll appear here.</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = workers.map((w, idx) => {
+    const first = w.first_name || '';
+    const last = w.last_name || '';
+    const name = (first + ' ' + last).trim() || 'Worker';
+    const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || w.email.substring(0,2).toUpperCase();
+    const bg = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+    const role = w.trade || 'Worker';
+    const expLabel = w.experience_years ? `${w.experience_years} yr${w.experience_years === 1 ? '' : 's'}` : 'New';
+    const loc = [w.city, w.province].filter(Boolean).join(', ') || 'Location not set';
+    const isShort = shortlist.includes(w.id);
+
+    // Availability label
+    const availMap = {
+      'available_now': { label: 'Available Now', cls: 'wc-avail' },
+      'within_2_weeks': { label: 'Available in 2 wks', cls: 'wc-avail' },
+      'within_30_days': { label: 'Available in 30d', cls: 'wc-avail' },
+      'not_available': { label: 'Not Available', cls: 'wc-avail not-avail' }
+    };
+    const avail = availMap[w.availability] || { label: '—', cls: 'wc-avail not-avail' };
+
+    // Top 5 certs by expiry date
+    const certs = (workerCerts[w.id] || [])
+      .slice()
+      .sort((a, b) => new Date(b.expiry_date || 0) - new Date(a.expiry_date || 0))
+      .slice(0, 5);
+
     return `<div class="wcard ${isShort?'shortlisted':''}">
       <div class="wc-top">
-        <div class="wc-avatar" style="background:${w.bg}">${w.initials}</div>
+        <div class="wc-avatar" style="background:${bg}">${initials}</div>
         <div class="wc-info">
           <div class="wc-name-row">
-            <span class="wc-name">${w.name}</span>
-            <span class="wc-verified">✓ Verified</span>
+            <span class="wc-name">${name}</span>
+            ${w.is_verified ? '<span class="wc-verified">✓ Verified</span>' : ''}
           </div>
-          <div class="wc-role">${w.role}</div>
+          <div class="wc-role">${role}</div>
           <div class="wc-meta">
-            <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>${w.loc}</span>
-            <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${w.exp} experience</span>
+            <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>${loc}</span>
+            <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${expLabel}</span>
           </div>
         </div>
-        <span class="wc-avail">Available</span>
+        <span class="${avail.cls}">${avail.label}</span>
       </div>
       <div class="wc-certs">
-        <div class="wc-cert-label">Certifications</div>
+        <div class="wc-cert-label">Certifications (${(workerCerts[w.id] || []).length})</div>
         <div class="wc-cert-chips">
-          ${w.certs.map(c=>`<span class="${chipClass(c.ok)}">${chipIcon(c.ok)}${c.l}</span>`).join('')}
+          ${certs.length === 0
+            ? '<span style="font-size:.78rem;color:var(--light);font-style:italic">No certs added yet</span>'
+            : certs.map(c => {
+                const status = certStatus(c);
+                return `<span class="${chipClass(status)}">${chipIcon(status)}${c.name}</span>`;
+              }).join('')
+          }
         </div>
       </div>
       <div class="wc-actions">
-        <button class="btn short-btn ${isShort?'added':''}" onclick="toggleShortlist(${w.id})">
-          ${isShort?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Added':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Shortlist'}
+        <button class="btn short-btn ${isShort?'added':''}" onclick="toggleShortlist('${w.id}')">
+          ${isShort
+            ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Added'
+            : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Shortlist'}
         </button>
-        <a href="profile.html" class="btn btn-ghost">View Profile</a>
+        <button class="btn btn-ghost" onclick="viewWorkerProfile('${w.id}')">View Profile</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── SHORTLIST ──
-function toggleShortlist(id){
-  const w = workers.find(x=>x.id===id);
-  const i = shortlist.findIndex(x=>x.id===id);
-  if(i>=0) shortlist.splice(i,1); else shortlist.push(w);
+function viewWorkerProfile(workerId){
+  // For now just alert - full profile view will need a worker-detail page
+  const worker = workers.find(w => w.id === workerId);
+  if(!worker) return;
+  const name = ((worker.first_name || '') + ' ' + (worker.last_name || '')).trim() || 'Worker';
+  const certCount = (workerCerts[workerId] || []).length;
+  alert(`${name}\n${worker.trade || 'Worker'} · ${worker.experience_years || 0} yrs\n${worker.bio || 'No bio yet'}\n\nCertifications: ${certCount}\nLocation: ${[worker.city, worker.province].filter(Boolean).join(', ') || 'Not set'}\n\nFull profile view coming soon.`);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SHORTLIST
+// ════════════════════════════════════════════════════════════════════
+async function toggleShortlist(workerId){
+  const isShort = shortlist.includes(workerId);
+
+  if(isShort){
+    // Remove
+    const { error } = await sb.from('shortlists').delete().eq('employer_id', currentUser.id).eq('worker_id', workerId);
+    if(error){ alert('Error: ' + error.message); return; }
+    shortlist = shortlist.filter(id => id !== workerId);
+  } else {
+    // Add
+    const { error } = await sb.from('shortlists').insert({
+      employer_id: currentUser.id,
+      worker_id: workerId
+    });
+    if(error){
+      if(error.code === '23505'){
+        // already exists, just refresh
+      } else {
+        alert('Error: ' + error.message);
+        return;
+      }
+    }
+    if(!shortlist.includes(workerId)) shortlist.push(workerId);
+  }
+
   renderWorkers();
   renderShortlist();
 }
+
 function renderShortlist(){
-  document.getElementById('short-count').textContent = shortlist.length;
-  document.getElementById('drawer-count').textContent = shortlist.length;
+  const countEls = [document.getElementById('short-count'), document.getElementById('drawer-count')];
+  countEls.forEach(el => { if(el) el.textContent = shortlist.length; });
+
   const empty = document.getElementById('drawer-empty');
   const body = document.getElementById('drawer-body');
-  if(shortlist.length===0){
-    body.innerHTML = empty.outerHTML;
-    document.getElementById('contact-btn').disabled = true;
-    document.getElementById('contact-btn').style.opacity='.5';
-    document.getElementById('training-btn').disabled = true;
-    document.getElementById('training-btn').style.opacity='.5';
+  if(!body) return;
+
+  if(shortlist.length === 0){
+    body.innerHTML = empty ? empty.outerHTML : '<div style="padding:30px;text-align:center;color:var(--muted)">No workers shortlisted yet</div>';
+    const contactBtn = document.getElementById('contact-btn');
+    const trainingBtn = document.getElementById('training-btn');
+    if(contactBtn){ contactBtn.disabled = true; contactBtn.style.opacity = '.5'; }
+    if(trainingBtn){ trainingBtn.disabled = true; trainingBtn.style.opacity = '.5'; }
   } else {
-    body.innerHTML = shortlist.map(w=>`<div class="short-item">
-      <div class="short-avatar" style="background:${w.bg}">${w.initials}</div>
-      <div class="short-info">
-        <div class="short-name">${w.name}</div>
-        <div class="short-role">${w.role}</div>
-      </div>
-      <button class="short-remove" onclick="toggleShortlist(${w.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>`).join('');
-    document.getElementById('contact-btn').disabled = false;
-    document.getElementById('contact-btn').style.opacity='1';
-    document.getElementById('training-btn').disabled = false;
-    document.getElementById('training-btn').style.opacity='1';
+    body.innerHTML = shortlist.map((id, idx) => {
+      const w = workers.find(x => x.id === id);
+      if(!w) return '';
+      const name = ((w.first_name || '') + ' ' + (w.last_name || '')).trim() || 'Worker';
+      const initials = ((w.first_name?.[0] || '') + (w.last_name?.[0] || '')).toUpperCase() || w.email.substring(0,2).toUpperCase();
+      const bg = AVATAR_COLORS[workers.indexOf(w) % AVATAR_COLORS.length];
+      return `<div class="short-item">
+        <div class="short-avatar" style="background:${bg}">${initials}</div>
+        <div class="short-info">
+          <div class="short-name">${name}</div>
+          <div class="short-role">${w.trade || 'Worker'}</div>
+        </div>
+        <button class="short-remove" onclick="toggleShortlist('${w.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>`;
+    }).join('');
+    const contactBtn = document.getElementById('contact-btn');
+    const trainingBtn = document.getElementById('training-btn');
+    if(contactBtn){ contactBtn.disabled = false; contactBtn.style.opacity = '1'; }
+    if(trainingBtn){ trainingBtn.disabled = false; trainingBtn.style.opacity = '1'; }
   }
 }
-function clearShortlist(){if(confirm('Clear all shortlisted workers?')){shortlist=[];renderWorkers();renderShortlist()}}
 
-function openDrawer(){document.getElementById('drawer-bd').classList.add('open');document.getElementById('drawer').classList.add('open')}
-function closeDrawer(){document.getElementById('drawer-bd').classList.remove('open');document.getElementById('drawer').classList.remove('open')}
+async function clearShortlist(){
+  if(!confirm('Clear all shortlisted workers?')) return;
+  await sb.from('shortlists').delete().eq('employer_id', currentUser.id);
+  shortlist = [];
+  renderWorkers();
+  renderShortlist();
+}
 
-// ── TRAINING MODAL ──
+function openDrawer(){
+  document.getElementById('drawer-bd').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('drawer-bd').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// TRAINING MODAL
+// ════════════════════════════════════════════════════════════════════
 function openTrainingModal(){
   document.getElementById('modal-bd').classList.add('open');
-  document.getElementById('modal-recipients').innerHTML = shortlist.map(w=>`
-    <span class="modal-recipient">
-      <span class="ra" style="background:${w.bg}">${w.initials}</span>
-      ${w.name}
-    </span>`).join('');
+  const recipients = shortlist.map(id => workers.find(w => w.id === id)).filter(Boolean);
+  document.getElementById('modal-recipients').innerHTML = recipients.map((w, idx) => {
+    const name = ((w.first_name || '') + ' ' + (w.last_name || '')).trim() || 'Worker';
+    const initials = ((w.first_name?.[0] || '') + (w.last_name?.[0] || '')).toUpperCase() || w.email.substring(0,2).toUpperCase();
+    const bg = AVATAR_COLORS[workers.indexOf(w) % AVATAR_COLORS.length];
+    return `<span class="modal-recipient">
+      <span class="ra" style="background:${bg}">${initials}</span>
+      ${name}
+    </span>`;
+  }).join('');
   document.getElementById('cert-checkboxes').innerHTML = CERTS_LIST.map((c,i)=>`
     <label class="cert-option"><input type="checkbox" id="tc-${i}">${c}</label>
   `).join('');
 }
-function closeTrainingModal(){document.getElementById('modal-bd').classList.remove('open')}
-function sendTrainingReq(){
+function closeTrainingModal(){
+  document.getElementById('modal-bd').classList.remove('open');
+}
+
+async function sendTrainingReq(){
   const sel = CERTS_LIST.filter((_,i)=>document.getElementById('tc-'+i)?.checked);
-  if(!sel.length){alert('Please select at least one required certification.');return}
-  alert(`Training requirements sent to ${shortlist.length} workers!\n\nRequired: ${sel.join(', ')}`);
+  if(!sel.length){ alert('Please select at least one required certification.'); return; }
+
+  const jobName = prompt('Job name for this training request:', 'Upcoming Project');
+  if(!jobName) return;
+
+  // Insert training requirement for each shortlisted worker
+  const records = shortlist.map(workerId => ({
+    employer_id: currentUser.id,
+    worker_id: workerId,
+    job_name: jobName,
+    required_certs: sel,
+    status: 'sent'
+  }));
+
+  const { error } = await sb.from('training_requirements').insert(records);
+  if(error){
+    alert('Error sending: ' + error.message);
+    return;
+  }
+  alert(`Training requirements sent to ${shortlist.length} worker${shortlist.length === 1 ? '' : 's'}!\n\nRequired: ${sel.join(', ')}`);
   closeTrainingModal();
   closeDrawer();
 }
 
-renderWorkers();
-renderShortlist();
+// ════════════════════════════════════════════════════════════════════
+// USER MENU + SIGN OUT
+// ════════════════════════════════════════════════════════════════════
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('user-menu');
+  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
+});
+
+init();
 </script>
 </body>
 </html>
