@@ -383,9 +383,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:#0f172a;min-height:100vh}
           </button>
         </div>
 
-        <div class="verified-note">
+        <!-- Worker-only note -->
+        <div class="verified-note" id="worker-note">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
           <p>Your profile and safety tickets are only visible to verified, paying employers.</p>
+        </div>
+
+        <!-- Employer-only note -->
+        <div class="verified-note" id="employer-note" style="display:none;background:var(--blue-lt);border-color:var(--blue-border)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <p style="color:var(--blue)">Hire qualified, certified workers across Western Canada. Get verified after signup to unlock full talent access.</p>
         </div>
 
         <div class="auth-msg" id="signup-msg"></div>
@@ -400,6 +407,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:#0f172a;min-height:100vh}
             <input type="text" id="signup-last" placeholder="Robertson" autocomplete="family-name">
           </div>
         </div>
+
+        <!-- Employer-only: Company Name -->
+        <div class="field" id="company-field" style="display:none">
+          <label>Company Name</label>
+          <input type="text" id="signup-company" placeholder="e.g. Suncor Energy, Independent Contractor" autocomplete="organization">
+        </div>
+
         <div class="field">
           <label>Email Address</label>
           <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email">
@@ -434,7 +448,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:#0f172a;min-height:100vh}
               <option value="YT">Yukon</option>
             </select>
           </div>
-          <div class="field">
+          <!-- Worker-only: Primary Trade -->
+          <div class="field" id="trade-field">
             <label>Primary Trade</label>
             <select id="signup-trade">
               <option value="">Select...</option>
@@ -467,11 +482,22 @@ const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Redirect logged-in user to the right dashboard for their role
+async function redirectToDashboard(userId){
+  if(userId){
+    const { data: profile } = await sb.from('profiles').select('role').eq('id', userId).single();
+    const dest = profile?.role === 'employer' ? 'employer-dashboard.html' : 'dashboard.html';
+    window.location.href = dest;
+  } else {
+    window.location.href = 'dashboard.html';
+  }
+}
+
 // If user is already logged in, send them to dashboard
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
-    window.location.href = 'dashboard.html';
+    redirectToDashboard(session.user.id);
   }
 })();
 
@@ -539,7 +565,7 @@ async function signIn(){
   }
 
   showMsg('signin', 'success', 'Signed in! Redirecting...');
-  setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+  setTimeout(() => { redirectToDashboard(data.user.id); }, 800);
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -560,6 +586,7 @@ async function signUp(){
   const password = document.getElementById('signup-password').value;
   const province = document.getElementById('signup-province').value;
   const trade = document.getElementById('signup-trade').value;
+  const company = document.getElementById('signup-company').value.trim();
 
   // Validation
   if(!firstName || !lastName){
@@ -578,6 +605,10 @@ async function signUp(){
     showMsg('signup', 'error', 'Please select your primary trade.');
     return;
   }
+  if(role === 'employer' && !company){
+    showMsg('signup', 'error', 'Please enter your company name.');
+    return;
+  }
 
   setLoading('signup-btn', true);
 
@@ -590,7 +621,8 @@ async function signUp(){
         first_name: firstName,
         last_name: lastName,
         trade: role === 'worker' ? trade : null,
-        province: province || null
+        province: province || null,
+        company_name: role === 'employer' ? company : null
       }
     }
   });
@@ -611,7 +643,9 @@ async function signUp(){
     setLoading('signup-btn', false, 'Create Account — Free');
   } else {
     showMsg('signup', 'success', 'Account created! Redirecting to dashboard...');
-    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+    // Use role-based redirect (we know the role from the form)
+    const dest = role === 'employer' ? 'employer-dashboard.html' : 'dashboard.html';
+    setTimeout(() => { window.location.href = dest; }, 1000);
   }
 }
 
@@ -668,12 +702,22 @@ function authTab(btn,id){
   document.getElementById(id).classList.add('on');
 }
 
-// Role toggle (each row independent)
+// Role toggle (each row independent) + swap visible fields on signup
 document.querySelectorAll('.role-toggle').forEach(tog=>{
   tog.querySelectorAll('.rtog').forEach(btn=>{
     btn.addEventListener('click',function(){
       tog.querySelectorAll('.rtog').forEach(t=>t.classList.remove('on'));
       this.classList.add('on');
+
+      // If this is the SIGNUP role toggle, swap fields
+      if(tog.id === 'signup-role'){
+        const role = this.dataset.role;
+        const isEmployer = role === 'employer';
+        document.getElementById('worker-note').style.display = isEmployer ? 'none' : 'flex';
+        document.getElementById('employer-note').style.display = isEmployer ? 'flex' : 'none';
+        document.getElementById('company-field').style.display = isEmployer ? 'block' : 'none';
+        document.getElementById('trade-field').style.display = isEmployer ? 'none' : 'block';
+      }
     });
   });
 });

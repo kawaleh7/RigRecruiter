@@ -645,6 +645,12 @@ async function loadDashboard(){
     .eq('id', session.user.id)
     .single();
 
+  // Employers belong on the employer dashboard
+  if(profile && profile.role === 'employer'){
+    window.location.href = 'employer-dashboard.html';
+    return;
+  }
+
   if(error || !profile){
     console.error('Profile load error:', error);
     // Fallback display with email only
