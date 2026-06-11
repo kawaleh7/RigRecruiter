@@ -453,11 +453,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:#0f172a;min-height:100vh}
 // ════════════════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // If user is already logged in, send them to dashboard
 (async () => {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await sb.auth.getSession();
   if (session) {
     window.location.href = 'dashboard.html';
   }
@@ -512,7 +512,7 @@ async function signIn(){
 
   setLoading('signin-btn', true);
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
 
   if(error){
     setLoading('signin-btn', false, 'Sign In');
@@ -569,7 +569,7 @@ async function signUp(){
 
   setLoading('signup-btn', true);
 
-  const { data, error } = await supabase.auth.signUp({
+  const { data, error } = await sb.auth.signUp({
     email,
     password,
     options: {
@@ -609,7 +609,7 @@ async function signUp(){
 async function signInWithGoogle(){
   const role = getSelectedRole(document.getElementById('signup').classList.contains('on') ? 'signup' : 'signin');
 
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  const { data, error } = await sb.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: window.location.origin + '/dashboard.html',
@@ -636,7 +636,7 @@ async function resetPassword(e){
     showMsg('signin', 'info', 'Enter your email above, then click "Forgot?" again.');
     return;
   }
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + '/login.html'
   });
   if(error){
