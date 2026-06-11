@@ -480,30 +480,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
             <div class="card-title">Your Safety Tickets</div>
             <a class="card-action" href="certifications.html">Manage all <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
           </div>
-          <div class="cert-row">
-            <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-            <div class="cert-info"><div class="cert-name">H2S Alive</div><div class="cert-date">Expires Nov 14, 2026 — 658 days left</div></div>
-            <span class="tag tg">Valid</span>
-          </div>
-          <div class="cert-row">
-            <div class="cert-ico" style="background:var(--red-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
-            <div class="cert-info"><div class="cert-name">First Aid — Level 3</div><div class="cert-date">Expired Jul 3, 2025 — renewal needed</div></div>
-            <span class="tag tr">Expired</span>
-          </div>
-          <div class="cert-row">
-            <div class="cert-ico" style="background:var(--amber-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-            <div class="cert-info"><div class="cert-name">WHMIS 2018</div><div class="cert-date">Expires Aug 19, 2025 — 56 days left</div></div>
-            <span class="tag ty">Expiring</span>
-          </div>
-          <div class="cert-row">
-            <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-            <div class="cert-info"><div class="cert-name">Confined Space Entry</div><div class="cert-date">Expires Mar 28, 2027 — 793 days left</div></div>
-            <span class="tag tg">Valid</span>
-          </div>
-          <div class="cert-row">
-            <div class="cert-ico" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-            <div class="cert-info"><div class="cert-name">Ground Disturbance II</div><div class="cert-date">Expires Jan 10, 2027 — 716 days left</div></div>
-            <span class="tag tg">Valid</span>
+          <div id="dash-certs-list">
+            <div style="padding:20px;text-align:center;color:var(--light);font-size:.82rem">Loading tickets...</div>
           </div>
         </div>
 
@@ -511,35 +489,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
         <div class="card">
           <div class="card-head">
             <div class="card-title">Recent Activity</div>
-            <a class="card-action" href="#">View all <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
           </div>
-          <div class="activity-item">
-            <div class="act-ico act-blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
-            <div class="act-content">
-              <div class="act-text"><strong>Suncor Energy</strong> viewed your profile</div>
-              <div class="act-time">2 hours ago</div>
-            </div>
-          </div>
-          <div class="activity-item">
-            <div class="act-ico act-green"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <div class="act-content">
-              <div class="act-text">Application submitted to <strong>Imperial Oil — Kearl Lake</strong></div>
-              <div class="act-time">Yesterday at 3:42 PM</div>
-            </div>
-          </div>
-          <div class="activity-item">
-            <div class="act-ico act-amber"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></div>
-            <div class="act-content">
-              <div class="act-text"><strong>WHMIS 2018</strong> expires in 56 days — renew soon</div>
-              <div class="act-time">2 days ago</div>
-            </div>
-          </div>
-          <div class="activity-item">
-            <div class="act-ico act-blue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg></div>
-            <div class="act-content">
-              <div class="act-text">3 new jobs matched your trade</div>
-              <div class="act-time">3 days ago</div>
-            </div>
+          <div id="activity-list">
+            <div style="padding:20px;text-align:center;color:var(--light);font-size:.82rem">Loading activity...</div>
           </div>
         </div>
       </div>
@@ -550,38 +502,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
         <div class="complete-card">
           <div class="cc-head">
             <div class="cc-title">Profile Strength</div>
-            <div class="cc-pct">65%</div>
+            <div class="cc-pct" id="cc-pct">0%</div>
           </div>
           <div class="cc-sub">Complete your profile to get noticed by more employers.</div>
-          <div class="cc-bar"><div class="cc-fill"></div></div>
-          <div class="cc-steps">
-            <div class="cc-step done"><div class="cc-step-ico"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>Add basic info</div>
-            <div class="cc-step done"><div class="cc-step-ico"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>Upload safety tickets</div>
-            <div class="cc-step done"><div class="cc-step-ico"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>Set availability</div>
-            <div class="cc-step"><div class="cc-step-ico"></div>Upload resume</div>
-            <div class="cc-step"><div class="cc-step-ico"></div>Add work history</div>
+          <div class="cc-bar"><div class="cc-fill" id="cc-fill" style="width:0%"></div></div>
+          <div class="cc-steps" id="cc-steps">
+            <div class="cc-step"><div class="cc-step-ico"></div>Loading...</div>
           </div>
-        </div>
-
-        <!-- VIEWS -->
-        <div class="views-card">
-          <div class="views-top">
-            <div class="views-left">
-              <div class="views-num">142</div>
-              <div class="views-label">Profile views this week</div>
-            </div>
-            <span class="views-change">↑ 23%</span>
-          </div>
-          <div class="views-bar">
-            <div class="vbar" style="height:35%"></div>
-            <div class="vbar" style="height:55%"></div>
-            <div class="vbar" style="height:45%"></div>
-            <div class="vbar" style="height:75%"></div>
-            <div class="vbar" style="height:60%"></div>
-            <div class="vbar" style="height:80%"></div>
-            <div class="vbar today" style="height:90%"></div>
-          </div>
-          <div class="views-days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
         </div>
 
         <!-- JOB MATCHES -->
@@ -590,30 +517,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
             <div class="card-title">Top Matches</div>
             <a class="card-action" href="jobs.html">See all <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
           </div>
-          <a href="jobs.html" class="job-match-card" style="text-decoration:none;display:block">
-            <div class="jmc-top">
-              <span class="jmc-co">Suncor Energy</span>
-              <span class="jmc-match">100% MATCH</span>
-            </div>
-            <div class="jmc-title">Journeyman Pipefitter — Fort Hills</div>
-            <div class="jmc-meta">Fort McMurray, AB · $55–62/hr</div>
-          </a>
-          <a href="jobs.html" class="job-match-card" style="text-decoration:none;display:block">
-            <div class="jmc-top">
-              <span class="jmc-co">Cenovus Energy</span>
-              <span class="jmc-match">100% MATCH</span>
-            </div>
-            <div class="jmc-title">Senior Pipefitter — Foster Creek</div>
-            <div class="jmc-meta">Cold Lake, AB · $60–68/hr</div>
-          </a>
-          <a href="jobs.html" class="job-match-card" style="text-decoration:none;display:block">
-            <div class="jmc-top">
-              <span class="jmc-co">Imperial Oil</span>
-              <span class="jmc-match" style="background:var(--amber-bg);color:var(--amber);border-color:#fcd34d">75% MATCH</span>
-            </div>
-            <div class="jmc-title">Pipefitter — Kearl Lake Turnaround</div>
-            <div class="jmc-meta">Fort McMurray, AB · $57–64/hr</div>
-          </a>
+          <div id="top-matches-list">
+            <div style="padding:20px;text-align:center;color:var(--light);font-size:.82rem">Loading matches...</div>
+          </div>
         </div>
       </div>
     </div>
@@ -687,8 +593,231 @@ async function loadDashboard(){
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   document.getElementById('greet-hello').textContent = `${greeting}, ${first || fullName} 👋`;
-  document.getElementById('greet-msg').innerHTML = `Welcome to RigPass. Add your safety tickets and we'll match you with jobs that fit your certifications.`;
   setDate();
+
+  // Load real data
+  await Promise.all([loadCerts(profile), loadMatches(profile), loadActivity(profile)]);
+  renderProfileStrength(profile);
+
+  // Smart greeting message based on data
+  const certs = window._dashCerts || [];
+  const expiring = certs.filter(c => {
+    if(!c.expiry_date) return false;
+    const days = Math.ceil((new Date(c.expiry_date) - new Date()) / (1000*60*60*24));
+    return days >= 0 && days <= 60;
+  }).length;
+  const expired = certs.filter(c => c.expiry_date && new Date(c.expiry_date) < new Date()).length;
+
+  let msg = '';
+  if(certs.length === 0){
+    msg = `Welcome to RigPass. <strong style="color:#fff">Add your safety tickets</strong> to start matching with jobs.`;
+  } else if(expired > 0){
+    msg = `You have <strong style="color:#fcd34d">${expired} expired certification${expired === 1 ? '' : 's'}</strong>. Renew to unlock more job matches.`;
+  } else if(expiring > 0){
+    msg = `<strong style="color:#fcd34d">${expiring} certification${expiring === 1 ? '' : 's'}</strong> expiring soon. Plan renewal to stay job-ready.`;
+  } else {
+    msg = `All your safety tickets are valid. Browse <strong style="color:#fff">jobs that match your trade</strong>.`;
+  }
+  document.getElementById('greet-msg').innerHTML = msg;
+}
+
+async function loadCerts(profile){
+  const { data: certs } = await sb.from('certifications').select('*').eq('worker_id', profile.id).order('expiry_date', { ascending: true });
+  const list = document.getElementById('dash-certs-list');
+  if(!list) return;
+  if(!certs || certs.length === 0){
+    list.innerHTML = `<div style="padding:30px 22px;text-align:center;color:var(--muted)">
+      <p style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:6px">No safety tickets yet</p>
+      <p style="font-size:.78rem;margin-bottom:14px">Add your tickets to attract employers.</p>
+      <a href="certifications.html" class="btn btn-blue" style="display:inline-flex">Add Tickets</a>
+    </div>`;
+    window._dashCerts = [];
+    return;
+  }
+  window._dashCerts = certs;
+
+  // Show top 5
+  list.innerHTML = certs.slice(0,5).map(c => {
+    const days = Math.ceil((new Date(c.expiry_date) - new Date()) / (1000*60*60*24));
+    const status = days < 0 ? 'expired' : days <= 60 ? 'expiring' : 'valid';
+    const tagCls = status === 'valid' ? 'tg' : status === 'expiring' ? 'ty' : 'tr';
+    const tagLabel = status === 'valid' ? 'Valid' : status === 'expiring' ? 'Expiring' : 'Expired';
+    const bg = status === 'valid' ? 'var(--green-bg)' : status === 'expiring' ? 'var(--amber-bg)' : 'var(--red-bg)';
+    const stroke = status === 'valid' ? 'var(--green)' : status === 'expiring' ? 'var(--amber)' : 'var(--red)';
+    const expLabel = c.expiry_date
+      ? (days < 0 ? `Expired ${Math.abs(days)} days ago` : days === 0 ? 'Expires today' : `Expires in ${days} days`)
+      : 'No expiry date';
+    const icon = status === 'valid'
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`
+      : status === 'expiring'
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+    return `<div class="cert-row">
+      <div class="cert-ico" style="background:${bg}">${icon}</div>
+      <div class="cert-info"><div class="cert-name">${c.name}</div><div class="cert-date">${expLabel}</div></div>
+      <span class="tag ${tagCls}">${tagLabel}</span>
+    </div>`;
+  }).join('');
+}
+
+async function loadMatches(profile){
+  const certs = window._dashCerts || [];
+  const validCertNames = certs.filter(c => !c.expiry_date || new Date(c.expiry_date) > new Date()).map(c => c.name.toLowerCase());
+
+  const { data: jobs } = await sb
+    .from('jobs')
+    .select('*, employer:profiles!jobs_employer_id_fkey(company_name, first_name, last_name)')
+    .eq('status', 'active')
+    .order('published_at', { ascending: false })
+    .limit(20);
+
+  const list = document.getElementById('top-matches-list');
+  if(!list) return;
+
+  if(!jobs || jobs.length === 0){
+    list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:.82rem">
+      No jobs posted yet — check back soon.
+    </div>`;
+    return;
+  }
+
+  // Calculate match per job, sort by match
+  const scored = jobs.map(j => {
+    const req = j.required_certs || [];
+    let matchPct = 100;
+    if(req.length > 0){
+      const matched = req.filter(r => validCertNames.some(v => v.includes(r.toLowerCase()) || r.toLowerCase().includes(v))).length;
+      matchPct = Math.round((matched / req.length) * 100);
+    }
+    return { ...j, matchPct };
+  }).sort((a,b) => b.matchPct - a.matchPct).slice(0, 3);
+
+  list.innerHTML = scored.map(j => {
+    const company = j.employer?.company_name || ((j.employer?.first_name || '') + ' ' + (j.employer?.last_name || '')).trim() || 'Employer';
+    const loc = [j.city, j.province].filter(Boolean).join(', ') || 'Location TBD';
+    const pay = j.pay_min && j.pay_max ? `$${j.pay_min}–$${j.pay_max}${j.pay_type==='hourly'?'/hr':''}` : 'Pay TBD';
+    const matchStyle = j.matchPct === 100 ? '' : j.matchPct >= 50 ? 'style="background:var(--amber-bg);color:var(--amber);border-color:#fcd34d"' : 'style="background:#f1f5f9;color:var(--muted);border-color:var(--border)"';
+    return `<a href="jobs.html" class="job-match-card" style="text-decoration:none;display:block">
+      <div class="jmc-top">
+        <span class="jmc-co">${company}</span>
+        <span class="jmc-match" ${matchStyle}>${j.matchPct}% MATCH</span>
+      </div>
+      <div class="jmc-title">${j.title}</div>
+      <div class="jmc-meta">${loc} · ${pay}</div>
+    </a>`;
+  }).join('');
+}
+
+async function loadActivity(profile){
+  const list = document.getElementById('activity-list');
+  if(!list) return;
+  const activity = [];
+
+  // Recent applications
+  const { data: apps } = await sb
+    .from('applications')
+    .select('*, job:jobs!applications_job_id_fkey(title, employer:profiles!jobs_employer_id_fkey(company_name))')
+    .eq('worker_id', profile.id)
+    .order('applied_at', { ascending: false })
+    .limit(5);
+
+  (apps || []).forEach(a => {
+    const company = a.job?.employer?.company_name || 'an employer';
+    const title = a.job?.title || 'a posting';
+    activity.push({
+      type: 'app',
+      icon: 'green',
+      text: `Application submitted to <strong>${company} — ${title}</strong>`,
+      time: a.applied_at
+    });
+  });
+
+  // Expiring certs (within 60 days)
+  const certs = window._dashCerts || [];
+  certs.forEach(c => {
+    if(!c.expiry_date) return;
+    const days = Math.ceil((new Date(c.expiry_date) - new Date()) / (1000*60*60*24));
+    if(days >= 0 && days <= 60){
+      activity.push({
+        type: 'cert',
+        icon: 'amber',
+        text: `<strong>${c.name}</strong> expires in ${days} day${days === 1 ? '' : 's'} — renew soon`,
+        time: new Date(Date.now() - 60*60*1000).toISOString()
+      });
+    } else if(days < 0){
+      activity.push({
+        type: 'cert-exp',
+        icon: 'amber',
+        text: `<strong>${c.name}</strong> expired ${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'} ago`,
+        time: c.expiry_date
+      });
+    }
+  });
+
+  // Profile creation event
+  activity.push({
+    type: 'signup',
+    icon: 'blue',
+    text: 'Welcome to RigPass! Your account was created',
+    time: profile.created_at
+  });
+
+  // Sort by time desc
+  activity.sort((a,b) => new Date(b.time) - new Date(a.time));
+
+  if(activity.length === 0){
+    list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:.82rem">No activity yet.</div>`;
+    return;
+  }
+
+  list.innerHTML = activity.slice(0, 5).map(item => {
+    const icons = {
+      green: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+      blue: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg>',
+      amber: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>'
+    };
+    return `<div class="activity-item">
+      <div class="act-ico act-${item.icon}">${icons[item.icon]}</div>
+      <div class="act-content">
+        <div class="act-text">${item.text}</div>
+        <div class="act-time">${timeAgo(item.time)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderProfileStrength(profile){
+  const steps = [
+    { key: 'basic', label: 'Add basic info', done: !!(profile.first_name && profile.last_name && profile.trade) },
+    { key: 'tickets', label: 'Upload safety tickets', done: (window._dashCerts || []).length > 0 },
+    { key: 'avail', label: 'Set availability', done: !!profile.availability },
+    { key: 'resume', label: 'Upload resume', done: !!profile.resume_url },
+    { key: 'bio', label: 'Add bio / description', done: !!(profile.bio && profile.bio.length > 20) }
+  ];
+  const doneCount = steps.filter(s => s.done).length;
+  const pct = Math.round((doneCount / steps.length) * 100);
+
+  document.getElementById('cc-pct').textContent = pct + '%';
+  document.getElementById('cc-fill').style.width = pct + '%';
+  document.getElementById('cc-steps').innerHTML = steps.map(s => `
+    <div class="cc-step ${s.done ? 'done' : ''}">
+      <div class="cc-step-ico">${s.done ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+      ${s.label}
+    </div>
+  `).join('');
+}
+
+function timeAgo(dateStr){
+  if(!dateStr) return 'recently';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if(mins < 1) return 'just now';
+  if(mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if(hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if(days < 30) return days + 'd ago';
+  return new Date(dateStr).toLocaleDateString('en-CA', { month:'short', day:'numeric' });
 }
 
 function setDate(){

@@ -452,77 +452,38 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
       </button>
 
       <div class="detail-hero">
-        <div class="dh-breadcrumb">Job Postings › <span>Journeyman Pipefitter</span></div>
-        <div class="dh-title">Journeyman Pipefitter — Fort Hills Turnaround</div>
-        <div class="dh-badges">
-          <span class="dbadge dbadge-green">● Active</span>
-          <span class="dbadge dbadge-blue">Fort McMurray, AB</span>
-          <span class="dbadge dbadge-blue">Starts Jun 1, 2025</span>
-          <span class="dbadge dbadge-blue">$55–62/hr</span>
-        </div>
+        <div class="dh-breadcrumb">Job Postings › <span id="dh-crumb">—</span></div>
+        <div class="dh-title" id="dh-title">Loading...</div>
+        <div class="dh-badges" id="dh-badges"></div>
       </div>
 
       <div class="detail-body">
         <div>
           <div class="mini-stats">
-            <div class="ms"><div class="ms-label">Applicants</div><div class="ms-num">14</div></div>
-            <div class="ms"><div class="ms-label">Fully Qualified</div><div class="ms-num" style="color:var(--green)">9</div></div>
-            <div class="ms"><div class="ms-label">Missing Certs</div><div class="ms-num" style="color:var(--amber)">5</div></div>
-            <div class="ms"><div class="ms-label">Days Left</div><div class="ms-num">38</div></div>
+            <div class="ms"><div class="ms-label">Applicants</div><div class="ms-num" id="ms-total">0</div></div>
+            <div class="ms"><div class="ms-label">Fully Qualified</div><div class="ms-num" id="ms-qualified" style="color:var(--green)">0</div></div>
+            <div class="ms"><div class="ms-label">Partial Match</div><div class="ms-num" id="ms-partial" style="color:var(--amber)">0</div></div>
+            <div class="ms"><div class="ms-label">Days Posted</div><div class="ms-num" id="ms-days">0</div></div>
           </div>
 
           <div class="dc">
             <div class="dc-title">Job Summary</div>
-            <div class="dc-text">High-pressure process piping installation and maintenance at Suncor Fort Hills Oil Sands facility. Scope includes new construction tie-ins, equipment isolation, and preventive maintenance during the spring turnaround. Workers must be comfortable in a fast-paced, safety-critical environment. Camp accommodation and FIFO from Edmonton/Calgary provided.</div>
+            <div class="dc-text" id="dh-summary">—</div>
           </div>
 
           <div class="dc">
-            <div class="dc-title">Applicants <span style="font-size:.75rem;font-weight:600;color:var(--light);margin-left:6px">14 total</span></div>
-            <div class="applicant-row">
-              <div class="app-avatar" style="background:#1e3a8a">MR</div>
-              <div class="app-info"><div class="app-name">Mike Robertson</div><div class="app-role">Journeyman Pipefitter · 12 yrs</div></div>
-              <div class="app-match">
-                <span class="match-badge match-full">100% Match</span>
-                <a href="profile.html" class="btn btn-blue btn-sm">View</a>
-              </div>
+            <div class="dc-title">Applicants <span style="font-size:.75rem;font-weight:600;color:var(--light);margin-left:6px" id="dh-applicant-count">0 total</span></div>
+            <div id="detail-applicants-list">
+              <div style="padding:24px;text-align:center;color:var(--light);font-size:.85rem">No applicants yet — share your job link to get the word out.</div>
             </div>
-            <div class="applicant-row">
-              <div class="app-avatar" style="background:#065f46">CW</div>
-              <div class="app-info"><div class="app-name">Craig Wallace</div><div class="app-role">Red Seal Pipefitter · 18 yrs</div></div>
-              <div class="app-match">
-                <span class="match-badge match-full">100% Match</span>
-                <a href="profile.html" class="btn btn-blue btn-sm">View</a>
-              </div>
-            </div>
-            <div class="applicant-row">
-              <div class="app-avatar" style="background:#475569">DL</div>
-              <div class="app-info"><div class="app-name">Danny Lam</div><div class="app-role">Journeyman Pipefitter · 10 yrs</div></div>
-              <div class="app-match">
-                <span class="match-badge match-partial">Missing: First Aid L3</span>
-                <a href="profile.html" class="btn btn-ghost btn-sm">View</a>
-              </div>
-            </div>
-            <div class="applicant-row">
-              <div class="app-avatar" style="background:#334155">JT</div>
-              <div class="app-info"><div class="app-name">Jason Tran</div><div class="app-role">Journeyman Pipefitter · 8 yrs</div></div>
-              <div class="app-match">
-                <span class="match-badge match-full">100% Match</span>
-                <a href="profile.html" class="btn btn-blue btn-sm">View</a>
-              </div>
-            </div>
-            <div style="margin-top:14px"><button class="btn btn-ghost" style="width:100%">View All 14 Applicants →</button></div>
           </div>
         </div>
 
         <div>
           <div class="dc">
             <div class="dc-title">Mandatory Certifications</div>
-            <div class="cert-badge-list">
-              <div class="cbi cbi-req"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>H2S Alive</div>
-              <div class="cbi cbi-req"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>WHMIS 2018</div>
-              <div class="cbi cbi-req"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Confined Space Entry</div>
-              <div class="cbi cbi-req"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>First Aid Level 3</div>
-              <div class="cbi cbi-opt"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>Ground Disturbance II (Preferred)</div>
+            <div class="cert-badge-list" id="detail-cert-list">
+              <div style="font-size:.82rem;color:var(--light);font-style:italic">None specified</div>
             </div>
             <div class="safety-notice">
               <div class="sn-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>Safety Notice</div>
@@ -533,12 +494,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
           <div class="dc">
             <div class="dc-title">Actions</div>
             <div style="display:flex;flex-direction:column;gap:8px">
-              <button class="btn btn-blue" style="width:100%" onclick="showView('post')">Edit Posting</button>
-              <button class="btn btn-ghost" style="width:100%">
+              <button class="btn btn-blue" style="width:100%" id="detail-edit-btn">Edit Posting</button>
+              <button class="btn btn-ghost" style="width:100%" id="detail-share-btn">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/></svg>
                 Share Job Link
               </button>
-              <button class="btn btn-danger" style="width:100%">Close Posting</button>
+              <button class="btn btn-danger" style="width:100%" id="detail-close-btn">Close Posting</button>
             </div>
           </div>
         </div>
@@ -758,6 +719,36 @@ function newPosting(){
 }
 
 // ════════════════════════════════════════════════════════════════════
+// LOAD EXISTING POSTING INTO FORM (for editing)
+// ════════════════════════════════════════════════════════════════════
+function loadPostingIntoForm(posting){
+  editingPostingId = posting.id;
+  document.getElementById('post-title').value = posting.title || '';
+  document.getElementById('post-trade').value = posting.trade || '';
+  document.getElementById('post-experience').value = posting.experience_level || '';
+  document.getElementById('post-description').value = posting.description || '';
+  document.getElementById('post-city').value = posting.city || '';
+  document.getElementById('post-province').value = posting.province || '';
+  document.getElementById('post-start-date').value = posting.start_date || '';
+  document.getElementById('post-duration').value = posting.duration || '';
+  document.getElementById('post-schedule').value = posting.schedule || '';
+  document.getElementById('post-pay-min').value = posting.pay_min || '';
+  document.getElementById('post-pay-max').value = posting.pay_max || '';
+  document.getElementById('post-pay-type').value = posting.pay_type || 'hourly';
+
+  // Load cert selections
+  selectedCerts.clear();
+  (posting.required_certs || []).forEach(c => selectedCerts.add(c));
+  document.querySelectorAll('.cert-option').forEach(btn => {
+    const certName = btn.textContent.trim();
+    const isSelected = selectedCerts.has(certName);
+    btn.classList.toggle('selected', isSelected);
+    const svg = btn.querySelector('svg');
+    if(svg) svg.style.display = isSelected ? 'block' : 'none';
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════
 // SAVE POSTING (publish or draft)
 // ════════════════════════════════════════════════════════════════════
 async function savePosting(status){
@@ -835,18 +826,154 @@ async function viewDetail(id){
   // Show detail view with this posting's data
   document.getElementById('topbar-title').textContent = posting.title;
 
-  // Load applicants for this job
+  // Hero
+  document.getElementById('dh-crumb').textContent = posting.title;
+  document.getElementById('dh-title').textContent = posting.title;
+
+  // Badges
+  const badges = [];
+  const statusMap = {
+    active: { cls: 'dbadge-green', label: '● Active' },
+    draft: { cls: 'dbadge-amber', label: 'Draft' },
+    closed: { cls: 'dbadge', label: 'Closed' }
+  };
+  const st = statusMap[posting.status] || statusMap.draft;
+  badges.push(`<span class="dbadge ${st.cls}">${st.label}</span>`);
+  const loc = [posting.city, posting.province].filter(Boolean).join(', ');
+  if(loc) badges.push(`<span class="dbadge dbadge-blue">${loc}</span>`);
+  if(posting.start_date){
+    const startDate = new Date(posting.start_date).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+    badges.push(`<span class="dbadge dbadge-blue">Starts ${startDate}</span>`);
+  }
+  if(posting.pay_min){
+    const pay = posting.pay_max ? `$${posting.pay_min}–$${posting.pay_max}` : `$${posting.pay_min}+`;
+    const unit = posting.pay_type === 'hourly' ? '/hr' : posting.pay_type === 'daily' ? '/day' : '';
+    badges.push(`<span class="dbadge dbadge-blue">${pay}${unit}</span>`);
+  }
+  document.getElementById('dh-badges').innerHTML = badges.join('');
+
+  // Summary
+  document.getElementById('dh-summary').textContent = posting.description || 'No description provided.';
+
+  // Mandatory certs
+  const certList = document.getElementById('detail-cert-list');
+  const requiredCerts = posting.required_certs || [];
+  if(requiredCerts.length === 0){
+    certList.innerHTML = '<div style="font-size:.82rem;color:var(--light);font-style:italic">No specific certifications required</div>';
+  } else {
+    certList.innerHTML = requiredCerts.map(c => `
+      <div class="cbi cbi-req"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>${c}</div>
+    `).join('');
+  }
+
+  // Days posted
+  const posted = posting.published_at || posting.created_at;
+  const daysPosted = Math.floor((Date.now() - new Date(posted).getTime()) / (1000*60*60*24));
+  document.getElementById('ms-days').textContent = daysPosted;
+
+  // Load applicants for this job with worker profile
   const { data: apps } = await sb
     .from('applications')
     .select('*, worker:profiles!applications_worker_id_fkey(*)')
     .eq('job_id', id)
     .order('applied_at', { ascending: false });
 
-  // Find applicants section in detail view and populate
-  // For now, just populate any list with class .applicants-list if it exists
-  const appsList = document.querySelector('#view-detail .applicants-list, #view-detail');
-  // Detail view has its own structure — we'll keep its rendering minimal for now
+  const applicants = apps || [];
+
+  // For each, fetch their certs and compute match %
+  const applicantsWithMatch = await Promise.all(applicants.map(async (app) => {
+    if(!app.worker) return { ...app, matchPct: 0, missingCerts: [] };
+
+    let matchPct = 100;
+    let missingCerts = [];
+    if(requiredCerts.length > 0){
+      const { data: certs } = await sb.from('certifications').select('name, expiry_date').eq('worker_id', app.worker_id);
+      const validCertNames = (certs || []).filter(c => !c.expiry_date || new Date(c.expiry_date) > new Date()).map(c => c.name.toLowerCase());
+      missingCerts = requiredCerts.filter(req =>
+        !validCertNames.some(v => v.includes(req.toLowerCase()) || req.toLowerCase().includes(v))
+      );
+      matchPct = Math.round(((requiredCerts.length - missingCerts.length) / requiredCerts.length) * 100);
+    }
+    return { ...app, matchPct, missingCerts };
+  }));
+
+  // Sort by match desc
+  applicantsWithMatch.sort((a,b) => b.matchPct - a.matchPct || new Date(b.applied_at) - new Date(a.applied_at));
+
+  // Mini-stats
+  const fullyQualified = applicantsWithMatch.filter(a => a.matchPct === 100).length;
+  const partial = applicantsWithMatch.filter(a => a.matchPct > 0 && a.matchPct < 100).length;
+  document.getElementById('ms-total').textContent = applicantsWithMatch.length;
+  document.getElementById('ms-qualified').textContent = fullyQualified;
+  document.getElementById('ms-partial').textContent = partial;
+  document.getElementById('dh-applicant-count').textContent = applicantsWithMatch.length + ' total';
+
+  // Render applicants list
+  const list = document.getElementById('detail-applicants-list');
+  if(applicantsWithMatch.length === 0){
+    list.innerHTML = `<div style="padding:30px;text-align:center;color:var(--muted);font-size:.85rem">
+      <p style="font-weight:600;color:var(--text);margin-bottom:4px">No applicants yet</p>
+      <p>Workers who match this trade will see your posting on their job board.</p>
+    </div>`;
+  } else {
+    const AVATAR_COLORS = ['#1e3a8a','#065f46','#0369a1','#475569','#7c3aed','#334155','#9333ea','#dc2626'];
+    list.innerHTML = applicantsWithMatch.map((app, idx) => {
+      const w = app.worker || {};
+      const first = w.first_name || '';
+      const last = w.last_name || '';
+      const name = (first + ' ' + last).trim() || 'Anonymous Worker';
+      const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || 'WK';
+      const bg = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+      const role = w.trade || 'Worker';
+      const exp = w.experience_years ? `${w.experience_years} yr${w.experience_years === 1 ? '' : 's'}` : 'New';
+      const matchCls = app.matchPct === 100 ? 'match-full' : app.matchPct >= 50 ? 'match-partial' : 'match-low';
+      const matchLabel = app.matchPct === 100
+        ? '100% Match'
+        : app.missingCerts.length > 0
+        ? `Missing: ${app.missingCerts.slice(0,2).join(', ')}${app.missingCerts.length > 2 ? '…' : ''}`
+        : `${app.matchPct}% Match`;
+      return `<div class="applicant-row">
+        <div class="app-avatar" style="background:${bg}">${initials}</div>
+        <div class="app-info"><div class="app-name">${name}</div><div class="app-role">${role} · ${exp}</div></div>
+        <div class="app-match">
+          <span class="match-badge ${matchCls}">${matchLabel}</span>
+          <button class="btn ${app.matchPct === 100 ? 'btn-blue' : 'btn-ghost'} btn-sm" onclick="viewApplicantProfile('${w.id}')">View</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Wire up actions
+  document.getElementById('detail-edit-btn').onclick = () => editPosting(posting);
+  document.getElementById('detail-share-btn').onclick = () => sharePosting(posting);
+  document.getElementById('detail-close-btn').onclick = () => closePosting(posting.id);
+
   showView('detail');
+}
+
+function viewApplicantProfile(workerId){
+  alert('Full worker profile view coming soon. Worker ID: ' + workerId);
+}
+
+function editPosting(posting){
+  // Populate the form with existing values
+  if(typeof loadPostingIntoForm === 'function'){
+    loadPostingIntoForm(posting);
+  }
+  showView('post');
+}
+
+function sharePosting(posting){
+  const url = window.location.origin + '/jobs.html#job-' + posting.id;
+  if(navigator.share){
+    navigator.share({ title: posting.title, url: url }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Link copied to clipboard:\n' + url);
+    }).catch(() => {
+      prompt('Copy this link:', url);
+    });
+  }
 }
 
 // ════════════════════════════════════════════════════════════════════
