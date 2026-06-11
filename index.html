@@ -1122,5 +1122,118 @@ document.querySelectorAll('.bcard,.plan,.step').forEach((el,i)=>{
   io.observe(el);
 });
 </script>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     🚧 DEV NAV — TEMPORARY TESTING PANEL
+     Delete this entire block before public launch.
+══════════════════════════════════════════════════════════════════ -->
+<style>
+#dev-nav-btn{
+  position:fixed;bottom:20px;right:20px;z-index:9998;
+  width:54px;height:54px;border-radius:50%;
+  background:#0a1228;color:#fff;border:2px solid #c9963a;
+  cursor:pointer;display:grid;place-items:center;
+  box-shadow:0 8px 20px rgba(0,0,0,.35);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  transition:all .2s;
+}
+#dev-nav-btn:hover{transform:scale(1.08);box-shadow:0 12px 28px rgba(0,0,0,.45)}
+#dev-nav-panel{
+  position:fixed;bottom:84px;right:20px;z-index:9999;
+  width:300px;max-height:80vh;overflow-y:auto;
+  background:#fff;border:2px solid #c9963a;border-radius:14px;
+  box-shadow:0 20px 50px rgba(0,0,0,.3);
+  padding:16px;display:none;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+#dev-nav-panel.open{display:block}
+#dev-nav-panel .dn-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:12px;border-bottom:1.5px solid #e2e8f0;margin-bottom:12px;
+}
+#dev-nav-panel .dn-title{font-size:.95rem;font-weight:800;color:#0a1228;letter-spacing:-.2px}
+#dev-nav-panel .dn-tag{
+  display:inline-block;background:#fef2f2;color:#991b1b;
+  border:1px solid #fda4af;font-size:.6rem;font-weight:800;
+  padding:2px 7px;border-radius:4px;text-transform:uppercase;
+  letter-spacing:.5px;margin-left:6px;
+}
+#dev-nav-panel .dn-section{margin-bottom:14px}
+#dev-nav-panel .dn-section:last-child{margin-bottom:0}
+#dev-nav-panel .dn-section-title{
+  font-size:.66rem;font-weight:800;color:#94a3b8;
+  text-transform:uppercase;letter-spacing:1px;
+  padding:4px 6px;margin-bottom:4px;
+}
+#dev-nav-panel a{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:7px;
+  font-size:.84rem;font-weight:600;color:#0f172a;
+  text-decoration:none;transition:background .15s;
+}
+#dev-nav-panel a:hover{background:#f1f5f9}
+#dev-nav-panel .dn-emoji{width:20px;text-align:center;flex-shrink:0;font-size:1rem}
+#dev-nav-panel .dn-arrow{margin-left:auto;color:#94a3b8;font-size:.85rem}
+#dev-nav-panel .dn-warn{
+  background:#fefce8;border:1px solid #fde047;
+  border-radius:7px;padding:8px 10px;margin-top:12px;
+  font-size:.72rem;color:#92400e;font-weight:600;line-height:1.4;
+}
+</style>
+
+<!-- Floating toggle button -->
+<button id="dev-nav-btn" onclick="document.getElementById('dev-nav-panel').classList.toggle('open')" title="Quick Nav (dev)">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<!-- Slide-out nav panel -->
+<div id="dev-nav-panel">
+  <div class="dn-header">
+    <div class="dn-title">Quick Nav <span class="dn-tag">Dev</span></div>
+    <button onclick="document.getElementById('dev-nav-panel').classList.remove('open')" style="background:transparent;border:none;cursor:pointer;color:#94a3b8;padding:4px;font-size:1.1rem;line-height:1">✕</button>
+  </div>
+
+  <div class="dn-section">
+    <div class="dn-section-title">Auth</div>
+    <a href="login.html"><span class="dn-emoji">🔐</span>Login / Signup<span class="dn-arrow">→</span></a>
+  </div>
+
+  <div class="dn-section">
+    <div class="dn-section-title">Worker Pages</div>
+    <a href="dashboard.html"><span class="dn-emoji">📊</span>Dashboard<span class="dn-arrow">→</span></a>
+    <a href="jobs.html"><span class="dn-emoji">💼</span>Browse Jobs<span class="dn-arrow">→</span></a>
+    <a href="certifications.html"><span class="dn-emoji">🎫</span>Certifications<span class="dn-arrow">→</span></a>
+    <a href="profile.html"><span class="dn-emoji">👤</span>My Profile<span class="dn-arrow">→</span></a>
+  </div>
+
+  <div class="dn-section">
+    <div class="dn-section-title">Employer Pages</div>
+    <a href="employer-dashboard.html"><span class="dn-emoji">📈</span>Employer Dashboard<span class="dn-arrow">→</span></a>
+    <a href="postings.html"><span class="dn-emoji">📋</span>Job Postings<span class="dn-arrow">→</span></a>
+    <a href="talent.html"><span class="dn-emoji">🔍</span>Browse Talent<span class="dn-arrow">→</span></a>
+    <a href="analytics.html"><span class="dn-emoji">📉</span>Analytics<span class="dn-arrow">→</span></a>
+  </div>
+
+  <div class="dn-section">
+    <div class="dn-section-title">Admin Pages</div>
+    <a href="admin.html"><span class="dn-emoji">🛡️</span>Admin Console<span class="dn-arrow">→</span></a>
+    <a href="admin-verification.html"><span class="dn-emoji">✅</span>Verification Queue<span class="dn-arrow">→</span></a>
+    <a href="admin-users.html"><span class="dn-emoji">👥</span>All Users<span class="dn-arrow">→</span></a>
+  </div>
+
+  <div class="dn-section">
+    <div class="dn-section-title">Legal</div>
+    <a href="terms.html"><span class="dn-emoji">📄</span>Terms of Service<span class="dn-arrow">→</span></a>
+    <a href="privacy.html"><span class="dn-emoji">🔒</span>Privacy Policy<span class="dn-arrow">→</span></a>
+  </div>
+
+  <div class="dn-warn">
+    ⚠️ Remove this Dev Nav before launching to your 800 users.
+  </div>
+</div>
+<!-- ═════════════════════════════════════════════════════════════════
+     END DEV NAV
+══════════════════════════════════════════════════════════════════ -->
+
 </body>
 </html>
