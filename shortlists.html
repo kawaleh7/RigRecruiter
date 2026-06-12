@@ -402,12 +402,58 @@ function render(){
       </div>
       <div class="w-actions">
         <span class="w-added">Added ${timeAgo(r.created_at)}</span>
-        <a href="worker-profile-view.html?id=${w.id}" class="btn btn-blue">View Profile</a>
+        <button class="btn btn-blue" onclick="inviteToApply('${w.id}', '${fullName.replace(/'/g,"\\'")}')">Invite to Apply</button>
+        <a href="worker-profile-view.html?id=${w.id}" class="btn btn-ghost">View Profile</a>
         <button class="btn btn-ghost" onclick="editNote('${r.id}', '${(r.note || '').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">${r.note ? 'Edit Note' : 'Add Note'}</button>
         <button class="btn btn-ghost danger" onclick="removeFromRoster('${r.id}', '${fullName.replace(/'/g,"\\'")}')">Remove</button>
       </div>
     </div>`;
   }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// INVITE TO APPLY — pick one of your active jobs, send invitation
+// ════════════════════════════════════════════════════════════════════
+async function inviteToApply(workerId, workerName){
+  // Fetch employer's active jobs
+  const { data: jobs } = await sb.from('jobs')
+    .select('id, title, city, province')
+    .eq('employer_id', currentUser.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+
+  if(!jobs || jobs.length === 0){
+    if(confirm('You have no active job postings to invite ' + workerName + ' to.\n\nPost a job first?')){
+      window.location.href = 'post-job.html';
+    }
+    return;
+  }
+
+  // Pick a job by number
+  const menu = jobs.map((j, i) => `${i + 1}. ${j.title}${j.city ? ' — ' + j.city : ''}`).join('\n');
+  const pick = prompt(`Invite ${workerName} to which job?\n\n${menu}\n\nEnter the number:`);
+  if(pick === null) return;
+  const idx = parseInt(pick) - 1;
+  if(isNaN(idx) || idx < 0 || idx >= jobs.length){ alert('Invalid choice.'); return; }
+  const job = jobs[idx];
+
+  const { error } = await sb.from('invitations').insert({
+    employer_id: currentUser.id,
+    worker_id: workerId,
+    job_id: job.id,
+    status: 'sent'
+  });
+
+  if(error){
+    if(error.code === '23505'){
+      alert(workerName + ' has already been invited to that job.');
+    } else {
+      alert('Error: ' + error.message);
+    }
+    return;
+  }
+
+  alert(`✓ Invitation sent!\n\n"${job.title}" will appear at the top of ${workerName}'s job board with an "Invited" badge.`);
 }
 
 async function editNote(shortlistId, currentNote){

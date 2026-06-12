@@ -290,6 +290,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <div class="jobs-col">
 
       <!-- MATCH BANNER -->
+      <!-- INVITATION BANNER -->
+      <div id="invite-banner" style="display:none;align-items:flex-start;gap:12px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:11px;padding:15px 18px;margin-bottom:18px">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" stroke-width="2" style="flex-shrink:0;margin-top:1px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <div id="invite-banner-text" style="font-size:.85rem;color:#1e3a8a;line-height:1.55;font-weight:500"></div>
+      </div>
+
       <div class="match-banner" id="match-banner" style="display:none">
         <div class="mb-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
         <div class="mb-content">
@@ -333,6 +339,7 @@ let currentProfile = null;
 let myCerts = [];
 let myApplications = [];
 let allJobs = [];
+let myInvites = [];
 
 // ════════════════════════════════════════════════════════════════════
 // INIT
@@ -388,11 +395,34 @@ async function loadData(){
   // VERIFICATION ENFORCEMENT: workers only see jobs from approved employers
   const verifiedJobs = (jobs || []).filter(j => j.employer && j.employer.verification_status === 'approved');
 
+  // Invitations sent to this worker
+  const { data: invites } = await sb.from('invitations')
+    .select('*').eq('worker_id', currentUser.id).in('status', ['sent','viewed']);
+  myInvites = invites || [];
+  const invitedJobIds = new Set(myInvites.map(i => i.job_id));
+
   allJobs = verifiedJobs.map(job => ({
     ...job,
     matchPct: calculateMatch(job.required_certs || []),
-    appliedRecord: myApplications.find(a => a.job_id === job.id) || null
+    appliedRecord: myApplications.find(a => a.job_id === job.id) || null,
+    invited: invitedJobIds.has(job.id)
   }));
+
+  // Invited jobs float to the top
+  allJobs.sort((a,b) => (b.invited ? 1 : 0) - (a.invited ? 1 : 0));
+
+  // Invitation banner
+  const pendingInvites = allJobs.filter(j => j.invited && !j.appliedRecord);
+  const invBanner = document.getElementById('invite-banner');
+  if(invBanner && pendingInvites.length > 0){
+    invBanner.style.display = 'flex';
+    document.getElementById('invite-banner-text').innerHTML =
+      `<strong>You've been invited to apply!</strong> ${pendingInvites.length === 1
+        ? `An employer wants you for "${pendingInvites[0].title}".`
+        : `Employers invited you to ${pendingInvites.length} jobs.`} Invited candidates are far more likely to get hired — they're at the top of your list.`;
+    // mark as viewed
+    sb.from('invitations').update({ status: 'viewed' }).eq('worker_id', currentUser.id).eq('status', 'sent').then(() => {});
+  }
 
   render();
   renderMatchBanner();
@@ -520,7 +550,7 @@ function renderJobCard(job){
               <div class="co-tag">Posted ${posted}</div>
             </div>
           </div>
-          <div class="jcard-title">${job.title}</div>
+          <div class="jcard-title">${job.invited ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:.64rem;font-weight:800;background:#1e3a8a;color:#fff;padding:3px 9px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px;vertical-align:middle;margin-right:8px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Invited</span>' : ''}${job.title}</div>
           <div class="jcard-meta">
             <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${loc}</span>
             ${job.duration || job.schedule ? `<span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${[job.duration, job.schedule].filter(Boolean).join(' · ')}</span>` : ''}
@@ -563,19 +593,36 @@ async function applyToJob(jobId, btn){
     return;
   }
 
+  const job = allJobs.find(j => j.id === jobId);
+
+  // SCREENING QUESTIONS: if job has them, collect answers first
+  const questions = (job && job.screening_questions) || [];
+  let screeningAnswers = [];
+  if(questions.length > 0){
+    for(const sq of questions){
+      const ans = confirm(`Screening question from the employer:\n\n"${sq.q}"\n\nPress OK for YES, Cancel for NO.`);
+      screeningAnswers.push({ q: sq.q, answer: ans ? 'yes' : 'no', dealbreaker: !!sq.dealbreaker });
+      if(sq.dealbreaker && !ans){
+        if(!confirm(`Heads up: the employer marked that question as a requirement, and you answered No.\n\nYou can still apply, but your application will be flagged as not meeting it.\n\nApply anyway?`)){
+          return;
+        }
+      }
+    }
+  }
+
   btn.disabled = true;
   btn.style.opacity = '.6';
   const originalText = btn.innerHTML;
   btn.textContent = 'Applying...';
 
-  const job = allJobs.find(j => j.id === jobId);
   const matchScore = job ? job.matchPct : 0;
 
   const { error } = await sb.from('applications').insert({
     job_id: jobId,
     worker_id: currentUser.id,
     status: 'pending',
-    match_score: matchScore
+    match_score: matchScore,
+    screening_answers: screeningAnswers
   });
 
   if(error){
@@ -593,6 +640,9 @@ async function applyToJob(jobId, btn){
   // Update local state (include applied_at for rate limit)
   myApplications.push({ job_id: jobId, worker_id: currentUser.id, status: 'pending', applied_at: new Date().toISOString() });
   if(job) job.appliedRecord = { status: 'pending' };
+
+  // If this job was an invitation, mark it applied
+  sb.from('invitations').update({ status: 'applied' }).eq('worker_id', currentUser.id).eq('job_id', jobId).then(() => {});
 
   btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Applied';
   btn.className = 'btn btn-applied';

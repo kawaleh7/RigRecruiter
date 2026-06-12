@@ -584,7 +584,7 @@ async function viewDetail(id){
         : app.missingCerts.length > 0
         ? `Missing: ${app.missingCerts.slice(0,2).join(', ')}${app.missingCerts.length > 2 ? '…' : ''}`
         : `${app.matchPct}%`;
-      return `<div class="applicant-row">
+      return `<div class="applicant-row" style="flex-wrap:wrap">
         <div class="a-avatar">${initials}</div>
         <div class="a-info">
           <div class="a-name">${name}</div>
@@ -602,6 +602,18 @@ async function viewDetail(id){
           </select>
           <a href="worker-profile-view.html?id=${w.id}" class="btn ${app.matchPct === 100 ? 'btn-blue' : 'btn-ghost'} btn-sm">View</a>
         </div>
+        ${(app.screening_answers && app.screening_answers.length) ? `
+        <div style="flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;padding:8px 0 0 54px">
+          ${app.screening_answers.map(sa => {
+            const fail = sa.dealbreaker && sa.answer === 'no';
+            const pass = sa.answer === 'yes';
+            return `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;padding:4px 9px;border-radius:5px;${
+              fail ? 'background:var(--danger-soft);color:var(--danger);border:1px solid #fda4af'
+              : pass ? 'background:var(--ok-soft);color:var(--ok);border:1px solid #bbf7d0'
+              : 'background:var(--line-soft);color:var(--text-2);border:1px solid var(--line)'
+            }">${fail ? '✗' : pass ? '✓' : '–'} ${sa.q} — ${sa.answer.toUpperCase()}${fail ? ' (deal-breaker)' : ''}</span>`;
+          }).join('')}
+        </div>` : ''}
       </div>`;
     }).join('');
   }
