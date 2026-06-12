@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a;display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+:root{
+  --navy:#0a1228;
+  --blue:#1e3a8a;
+  --blue-mid:#1e40af;
+  --blue-soft:#eef2ff;
+  --text:#0f172a;
+  --text-2:#475569;
+  --muted:#64748b;
+  --light:#94a3b8;
+  --line:#e2e8f0;
+  --line-soft:#f1f5f9;
+  --ok:#15803d;
+  --ok-soft:#f0fdf4;
+  --warn:#a16207;
+  --warn-soft:#fefce8;
+  --danger:#b91c1c;
+  --danger-soft:#fef2f2;
+}
+
+/* SIDEBAR */
+.sidebar{width:240px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sb-top{padding:22px 22px 18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line-soft)}
+.sb-logo{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+.sb-logo svg{width:16px;height:16px;fill:#fff}
+.sb-brand{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.3px;line-height:1.1}
+.sb-brand span{color:var(--blue)}
+.sb-tag{display:inline-block;font-size:.6rem;font-weight:800;color:var(--blue);background:var(--blue-soft);padding:1px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+.sb-nav{flex:1;padding:18px 12px;overflow-y:auto}
+.sb-section + .sb-section{margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.sb-label{font-size:.66rem;font-weight:800;color:var(--light);text-transform:uppercase;letter-spacing:1.2px;padding:0 10px 6px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;font-size:.86rem;font-weight:600;color:var(--text-2);text-decoration:none;margin-bottom:2px;transition:all .15s}
+.sb-link:hover{background:var(--line-soft);color:var(--text)}
+.sb-link.active{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.sb-link svg{width:17px;height:17px;flex-shrink:0;stroke-width:2}
+
+.sb-bottom{padding:14px;border-top:1px solid var(--line-soft)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;cursor:pointer;transition:background .15s;position:relative}
+.sb-user:hover{background:var(--line-soft)}
+.sb-avatar{width:34px;height:34px;border-radius:9px;background:var(--blue);display:grid;place-items:center;color:#fff;font-size:.74rem;font-weight:800;flex-shrink:0}
+.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.sb-urole{font-size:.72rem;color:var(--muted);margin-top:2px}
+.sb-arrow{margin-left:auto;color:var(--light)}
+
+/* MAIN */
+.main{flex:1;padding:32px 40px 60px;min-width:0;max-width:980px}
+.page-head{margin-bottom:24px}
+.page-head h1{font-size:1.65rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:6px}
+.page-head p{font-size:.92rem;color:var(--text-2);line-height:1.5}
+
+/* SETTINGS LAYOUT — left tabs + right content */
+.settings-layout{display:grid;grid-template-columns:220px 1fr;gap:32px;align-items:flex-start}
+
+.tab-nav{
+  background:#fff;border:1px solid var(--line);border-radius:12px;
+  padding:10px;position:sticky;top:24px;
+}
+.tab-btn{
+  display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:8px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:600;
+  color:var(--text-2);background:transparent;border:none;
+  width:100%;text-align:left;cursor:pointer;margin-bottom:2px;transition:all .15s;
+}
+.tab-btn:hover{background:var(--line-soft);color:var(--text)}
+.tab-btn.on{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.tab-btn svg{width:16px;height:16px;flex-shrink:0;stroke-width:2}
+
+.tab-content{min-width:0}
+.tab-panel{display:none}
+.tab-panel.on{display:block}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:24px 26px;margin-bottom:18px}
+.card-title{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:4px;letter-spacing:-.2px}
+.card-sub{font-size:.8rem;color:var(--muted);margin-bottom:18px;line-height:1.45}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:5px}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 13px;border:1.5px solid var(--line);border-radius:8px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);
+  outline:none;transition:border-color .15s,box-shadow .15s;background:#fff;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,58,138,.1)}
+.field input:disabled{background:var(--line-soft);color:var(--muted)}
+.field textarea{resize:vertical;min-height:80px;font-family:'Plus Jakarta Sans',sans-serif;line-height:1.5}
+.field-help{font-size:.74rem;color:var(--muted);margin-top:5px;line-height:1.4}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:10px 18px;border-radius:9px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:700;
+  cursor:pointer;border:1.5px solid transparent;text-decoration:none;transition:all .15s;
+}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:var(--blue-mid)}
+.btn-ghost{background:#fff;color:var(--text-2);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--light);color:var(--text);background:var(--line-soft)}
+.btn-danger{background:#fff;color:var(--danger);border-color:var(--danger)}
+.btn-danger:hover{background:var(--danger-soft)}
+
+.danger-zone{border-color:#fda4af;background:#fef2f2}
+.danger-zone .card-title{color:var(--danger)}
+
+/* TOGGLES */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid var(--line-soft);gap:18px}
+.toggle-row:first-of-type{border-top:none;padding-top:0}
+.toggle-row:last-child{padding-bottom:0}
+.toggle-info{flex:1;min-width:0}
+.toggle-label{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:3px}
+.toggle-sub{font-size:.76rem;color:var(--muted);line-height:1.45}
+.toggle{position:relative;width:38px;height:22px;background:#cbd5e1;border-radius:100px;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--blue)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on::after{transform:translateX(16px)}
+
+.toggle-section + .toggle-section{margin-top:18px;padding-top:18px;border-top:1px solid var(--line-soft)}
+.section-title{font-size:.78rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+
+.msg{padding:11px 14px;border-radius:8px;margin-top:10px;font-size:.84rem;font-weight:600;display:none;line-height:1.45}
+.msg.success{background:var(--ok-soft);color:var(--ok);border:1px solid #86efac;display:block}
+.msg.error{background:var(--danger-soft);color:var(--danger);border:1px solid #fda4af;display:block}
+
+@media(max-width:900px){
+  .settings-layout{grid-template-columns:1fr}
+  .tab-nav{position:relative;top:0;display:flex;overflow-x:auto;padding:6px;gap:4px}
+  .tab-btn{flex-shrink:0;margin-bottom:0;white-space:nowrap}
+  .two-col{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .sidebar{width:64px}
+  .sb-brand,.sb-link span,.sb-uname,.sb-urole,.sb-arrow,.sb-label,.sb-tag{display:none}
+  .sb-link{justify-content:center;padding:9px 0}
+  .sb-user{justify-content:center;padding:0}
+  .main{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR — role-aware, populated by JS -->
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <div>
+      <div class="sb-brand">Rig<span>Pass</span></div>
+      <span class="sb-tag" id="role-tag" style="display:none">Employer</span>
+    </div>
+  </div>
+
+  <nav class="sb-nav" id="sb-nav">
+    <!-- populated by JS based on role -->
+  </nav>
+
+  <div class="sb-bottom">
+    <div class="sb-user" onclick="toggleUserMenu(event)">
+      <div class="sb-avatar" id="sb-avatar">--</div>
+      <div style="min-width:0">
+        <div class="sb-uname" id="sb-uname">Loading...</div>
+        <div class="sb-urole" id="sb-urole">—</div>
+      </div>
+      <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.12);overflow:hidden;z-index:200">
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--danger);background:#fff;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+  <div class="page-head">
+    <h1>Settings</h1>
+    <p>Manage your account, notifications, and preferences.</p>
+  </div>
+
+  <div class="settings-layout">
+
+    <!-- LEFT: tab nav -->
+    <div class="tab-nav" id="tab-nav">
+      <button class="tab-btn on" data-tab="account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Account
+      </button>
+      <button class="tab-btn" data-tab="jobprefs" id="tab-jobprefs" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Job Preferences
+      </button>
+      <button class="tab-btn" data-tab="company" id="tab-company" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+        Company
+      </button>
+      <button class="tab-btn" data-tab="privacy" id="tab-privacy" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+        Profile Visibility
+      </button>
+      <button class="tab-btn" data-tab="billing" id="tab-billing" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Billing
+      </button>
+      <button class="tab-btn" data-tab="platform" id="tab-platform" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+        Platform
+      </button>
+      <button class="tab-btn" data-tab="notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </button>
+      <button class="tab-btn" data-tab="security">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Security
+      </button>
+      <button class="tab-btn" data-tab="danger" style="color:var(--danger)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+        Delete Account
+      </button>
+    </div>
+
+    <!-- RIGHT: tab content -->
+    <div class="tab-content">
+
+      <!-- ACCOUNT TAB -->
+      <div class="tab-panel on" id="panel-account">
+        <div class="card">
+          <div class="card-title">Account Information</div>
+          <div class="card-sub">Your sign-in email and how you appear on the platform.</div>
+
+          <div class="field">
+            <label>Email Address</label>
+            <input type="email" id="current-email" disabled>
+            <div class="field-help">This is the email you use to sign in.</div>
+          </div>
+
+          <button class="btn btn-ghost" onclick="changeEmail()">Change Email</button>
+          <div id="email-msg" class="msg"></div>
+        </div>
+
+        <div class="card" id="account-name-card" style="display:none">
+          <div class="card-title">Name</div>
+          <div class="card-sub">How employers and admins see your name on the platform.</div>
+
+          <div class="two-col">
+            <div class="field">
+              <label>First Name</label>
+              <input type="text" id="first-name">
+            </div>
+            <div class="field">
+              <label>Last Name</label>
+              <input type="text" id="last-name">
+            </div>
+          </div>
+
+          <button class="btn btn-blue" onclick="saveName()">Save Name</button>
+          <div id="name-msg" class="msg"></div>
+        </div>
+      </div>
+
+      <!-- JOB PREFERENCES TAB (worker only) — ZipRecruiter-style job alert prefs -->
+      <div class="tab-panel" id="panel-jobprefs">
+        <div class="card">
+          <div class="card-title">What You're Looking For</div>
+          <div class="card-sub">These preferences power your job matches. The more accurate they are, the better your matches.</div>
+
+          <div class="two-col">
+            <div class="field">
+              <label>Your Trade</label>
+              <select id="jp-trade">
+                <option value="">Select…</option>
+                <option>Pipefitter</option><option>Welder</option><option>Electrician</option>
+                <option>Instrumentation Tech</option><option>Heavy Equipment Op.</option>
+                <option>Millwright</option><option>Boilermaker</option><option>Ironworker</option>
+                <option>Insulator</option><option>Scaffolder</option><option>Crane Operator</option>
+                <option>Labourer</option><option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Availability</label>
+              <select id="jp-availability">
+                <option value="">Not set</option>
+                <option value="available_now">Available now</option>
+                <option value="within_2_weeks">Within 2 weeks</option>
+                <option value="within_30_days">Within 30 days</option>
+                <option value="not_available">Not available</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="field">
+              <label>Minimum Pay ($/hr)</label>
+              <input type="number" id="jp-pay-min" min="0" placeholder="e.g. 40">
+              <div class="field-help">You won't be matched below this.</div>
+            </div>
+            <div class="field">
+              <label>Target Pay ($/hr)</label>
+              <input type="number" id="jp-pay-max" min="0" placeholder="e.g. 60">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Where You'll Work</label>
+            <div id="jp-provinces" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-top:4px">
+              <!-- province checkboxes rendered by JS -->
+            </div>
+            <div class="field-help">Leave all unchecked to see jobs anywhere in Canada.</div>
+          </div>
+
+          <div class="field">
+            <label>Job Types You'll Take</label>
+            <div id="jp-types" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-top:4px">
+              <!-- employment type checkboxes rendered by JS -->
+            </div>
+          </div>
+
+          <button class="btn btn-blue" onclick="saveJobPrefs()">Save Job Preferences</button>
+          <div id="jobprefs-msg" class="msg"></div>
+        </div>
+      </div>
+
+      <!-- COMPANY TAB (employer only) -->
+      <div class="tab-panel" id="panel-company">
+        <div class="card">
+          <div class="card-title">Company Information</div>
+          <div class="card-sub">This is what workers see when they view your job postings or visit your employer profile.</div>
+
+          <div class="field">
+            <label>Company Name</label>
+            <input type="text" id="company-name" placeholder="e.g. Acme Energy Services Ltd.">
+          </div>
+
+          <div class="two-col">
+            <div class="field">
+              <label>Industry</label>
+              <select id="industry">
+                <option value="">Select industry</option>
+                <option>Oil & Gas</option>
+                <option>Construction</option>
+                <option>Pipeline</option>
+                <option>Mining</option>
+                <option>Power & Utilities</option>
+                <option>Renewable Energy</option>
+                <option>Industrial Services</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Company Size</label>
+              <select id="company-size">
+                <option value="">Select size</option>
+                <option>1–10 employees</option>
+                <option>11–50 employees</option>
+                <option>51–200 employees</option>
+                <option>201–1,000 employees</option>
+                <option>1,000+ employees</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="field">
+              <label>City</label>
+              <input type="text" id="city" placeholder="e.g. Edmonton">
+            </div>
+            <div class="field">
+              <label>Province</label>
+              <select id="province">
+                <option value="">Select</option>
+                <option>Alberta</option>
+                <option>British Columbia</option>
+                <option>Saskatchewan</option>
+                <option>Manitoba</option>
+                <option>Ontario</option>
+                <option>Quebec</option>
+                <option>New Brunswick</option>
+                <option>Nova Scotia</option>
+                <option>Prince Edward Island</option>
+                <option>Newfoundland and Labrador</option>
+                <option>Yukon</option>
+                <option>Northwest Territories</option>
+                <option>Nunavut</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>About Your Company</label>
+            <textarea id="bio" rows="4" placeholder="Briefly describe what your company does, the projects you work on, and what makes you a great employer."></textarea>
+            <div class="field-help">Workers will see this on your employer profile.</div>
+          </div>
+
+          <button class="btn btn-blue" onclick="saveCompany()">Save Company Info</button>
+          <div id="company-msg" class="msg"></div>
+        </div>
+      </div>
+
+      <!-- PRIVACY TAB (worker only) -->
+      <div class="tab-panel" id="panel-privacy">
+        <div class="card">
+          <div class="card-title">Profile Visibility</div>
+          <div class="card-sub">Control who can see your profile and how employers can contact you.</div>
+
+          <div class="toggle-section">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Visible to employers</div>
+                <div class="toggle-sub">Verified employers can find your profile when searching for workers. Turn off to hide your profile completely.</div>
+              </div>
+              <div class="toggle" id="t-is-public" onclick="toggleField('is_public', this)"></div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Show contact details</div>
+                <div class="toggle-sub">Allow verified employers to see your email and phone number when they view your profile.</div>
+              </div>
+              <div class="toggle" id="t-show-contact" onclick="toggleField('show_contact', this)"></div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Open to opportunities</div>
+                <div class="toggle-sub">Show an "Available Now" badge on your profile to attract more job offers.</div>
+              </div>
+              <div class="toggle" id="t-open-to-opps" onclick="toggleField('open_to_opportunities', this)"></div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Accept training requests</div>
+                <div class="toggle-sub">Let employers send you required certifications they want you to complete before a placement.</div>
+              </div>
+              <div class="toggle" id="t-allow-training" onclick="toggleField('allow_training_requests', this)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BILLING TAB (employer only) -->
+      <div class="tab-panel" id="panel-billing">
+        <div class="card">
+          <div class="card-title">Current Plan</div>
+          <div class="card-sub">Your subscription and what's included.</div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;background:var(--blue-soft);border:1px solid #c7d2fe;border-radius:10px;flex-wrap:wrap">
+            <div>
+              <div style="font-size:1.05rem;font-weight:800;color:var(--blue);letter-spacing:-.2px" id="billing-plan-name">Free Plan</div>
+              <div style="font-size:.8rem;color:var(--text-2);margin-top:3px" id="billing-plan-desc">Post jobs and browse talent at no cost during our launch period.</div>
+            </div>
+            <div style="font-size:1.3rem;font-weight:800;color:var(--text);letter-spacing:-.4px" id="billing-plan-price">$0<span style="font-size:.78rem;color:var(--muted);font-weight:600">/mo</span></div>
+          </div>
+
+          <div style="margin-top:16px;font-size:.84rem;color:var(--text-2);line-height:1.6">
+            Included in your plan:
+          </div>
+          <ul style="font-size:.84rem;color:var(--text-2);line-height:1.8;padding-left:22px;margin-top:6px">
+            <li>Unlimited job postings</li>
+            <li>Browse and shortlist certified workers</li>
+            <li>Cert-based applicant matching</li>
+            <li>Training requests to workers</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Payment Method</div>
+          <div class="card-sub">No payment method needed on the free plan. When paid plans launch, you'll add a card here.</div>
+          <button class="btn btn-ghost" disabled style="opacity:.55;cursor:not-allowed">Add Payment Method — Coming Soon</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Billing History</div>
+          <div class="card-sub">Invoices and receipts will appear here.</div>
+          <div style="padding:26px 0;text-align:center;color:var(--muted);font-size:.84rem">
+            No invoices yet — you're on the free plan.
+          </div>
+        </div>
+      </div>
+
+      <!-- PLATFORM TAB (admin only) -->
+      <div class="tab-panel" id="panel-platform">
+        <div class="card">
+          <div class="card-title">Platform Management</div>
+          <div class="card-sub">Quick access to admin operations.</div>
+
+          <a href="admin.html" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1.5px solid var(--line);border-radius:9px;text-decoration:none;color:var(--text);font-size:.88rem;font-weight:700;margin-bottom:10px;transition:all .15s" onmouseover="this.style.borderColor='var(--blue)';this.style.background='var(--blue-soft)'" onmouseout="this.style.borderColor='var(--line)';this.style.background='#fff'">
+            Admin Dashboard
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a href="admin-verification.html" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1.5px solid var(--line);border-radius:9px;text-decoration:none;color:var(--text);font-size:.88rem;font-weight:700;margin-bottom:10px;transition:all .15s" onmouseover="this.style.borderColor='var(--blue)';this.style.background='var(--blue-soft)'" onmouseout="this.style.borderColor='var(--line)';this.style.background='#fff'">
+            Employer Verification Queue
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a href="admin-users.html" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1.5px solid var(--line);border-radius:9px;text-decoration:none;color:var(--text);font-size:.88rem;font-weight:700;transition:all .15s" onmouseover="this.style.borderColor='var(--blue)';this.style.background='var(--blue-soft)'" onmouseout="this.style.borderColor='var(--line)';this.style.background='#fff'">
+            User & Plan Management
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Platform Notes</div>
+          <div class="card-sub">Operational reminders for admins.</div>
+          <ul style="font-size:.85rem;color:var(--text-2);line-height:1.8;padding-left:22px">
+            <li>New employers must be verified before their jobs go live to workers.</li>
+            <li>Plans are set manually via All Users → Actions → Set Plan until Stripe is connected.</li>
+            <li>Suspended users keep their data but can't use the platform.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS TAB -->
+      <div class="tab-panel" id="panel-notifications">
+        <div class="card">
+          <div class="card-title">Notification Preferences</div>
+          <div class="card-sub">Choose how we contact you about activity on your account.</div>
+
+          <div class="toggle-section">
+            <div class="section-title">Master Switch</div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Email notifications</div>
+                <div class="toggle-sub">Turn off all emails (you'll still need to log in to see updates).</div>
+              </div>
+              <div class="toggle" id="t-email-notif" onclick="toggleField('email_notifications', this)"></div>
+            </div>
+          </div>
+
+          <!-- Worker-specific notifications -->
+          <div class="toggle-section" id="notif-worker" style="display:none">
+            <div class="section-title">As a Worker</div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Application status updates</div>
+                <div class="toggle-sub">Get notified when an employer reviews, shortlists, or hires you.</div>
+              </div>
+              <div class="toggle" id="t-status-change" onclick="toggleField('notify_status_change', this)"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Weekly job match digest</div>
+                <div class="toggle-sub">A weekly email summarizing new jobs that match your trade and certifications.</div>
+              </div>
+              <div class="toggle" id="t-new-jobs" onclick="toggleField('notify_new_jobs', this)"></div>
+            </div>
+          </div>
+
+          <!-- Employer-specific notifications -->
+          <div class="toggle-section" id="notif-employer" style="display:none">
+            <div class="section-title">As an Employer</div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">New applicant alerts</div>
+                <div class="toggle-sub">Get an email when a worker applies to one of your job postings.</div>
+              </div>
+              <div class="toggle" id="t-new-applicant" onclick="toggleField('notify_new_applicant', this)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECURITY TAB -->
+      <div class="tab-panel" id="panel-security">
+        <div class="card">
+          <div class="card-title">Change Password</div>
+          <div class="card-sub">Use at least 8 characters. We recommend a mix of letters, numbers, and symbols.</div>
+
+          <div class="field">
+            <label>New Password</label>
+            <input type="password" id="new-password" placeholder="At least 8 characters" autocomplete="new-password">
+          </div>
+          <div class="field">
+            <label>Confirm New Password</label>
+            <input type="password" id="confirm-password" placeholder="Re-enter to confirm" autocomplete="new-password">
+          </div>
+
+          <button class="btn btn-blue" onclick="changePassword()">Update Password</button>
+          <div id="pw-msg" class="msg"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Active Sessions</div>
+          <div class="card-sub">You're currently signed in. To sign out of all devices, use the button below.</div>
+
+          <button class="btn btn-ghost" onclick="signOutAllDevices()">Sign Out of All Devices</button>
+          <div id="sessions-msg" class="msg"></div>
+        </div>
+      </div>
+
+      <!-- DANGER ZONE TAB -->
+      <div class="tab-panel" id="panel-danger">
+        <div class="card danger-zone">
+          <div class="card-title">Delete Account</div>
+          <div class="card-sub" style="color:var(--danger)">This action is permanent and cannot be undone.</div>
+
+          <p style="font-size:.86rem;color:var(--text);margin-bottom:14px;line-height:1.6">
+            Deleting your account will permanently remove:
+          </p>
+          <ul style="font-size:.85rem;color:var(--text-2);line-height:1.7;margin-bottom:18px;padding-left:24px">
+            <li>Your profile and personal information</li>
+            <li id="del-bullet-certs">Your certifications and resume</li>
+            <li id="del-bullet-apps">Your applications and saved jobs</li>
+            <li>Your work history and skills</li>
+            <li id="del-bullet-postings" style="display:none">All your job postings (workers will no longer see them)</li>
+          </ul>
+          <p style="font-size:.86rem;color:var(--text);margin-bottom:18px;line-height:1.6">
+            Employers will no longer be able to find you on the platform.
+          </p>
+
+          <button class="btn btn-danger" onclick="deleteAccount()">Permanently Delete My Account</button>
+          <div id="del-msg" class="msg"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<script>
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+
+// ════════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════════
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(!profile){ alert('Profile not found.'); window.location.href = 'login.html'; return; }
+  currentProfile = profile;
+
+  // Sidebar identity
+  const isEmployer = profile.role === 'employer';
+  const isAdmin = profile.is_admin;
+  const display = isEmployer
+    ? (profile.company_name || ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || currentUser.email.split('@')[0])
+    : (((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || currentUser.email.split('@')[0]);
+  const initials = display.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-uname').textContent = display;
+  document.getElementById('sb-urole').textContent = isAdmin ? 'Admin' : (isEmployer ? 'Employer' : (profile.trade || 'Worker'));
+
+  // Build sidebar (role-aware)
+  buildSidebar(isEmployer, isAdmin);
+
+  // Show role tag
+  if(isEmployer){
+    const tag = document.getElementById('role-tag');
+    tag.textContent = 'Employer';
+    tag.style.background = '#fdf8ee';
+    tag.style.color = '#b8923a';
+    tag.style.display = 'inline-block';
+  } else if(isAdmin){
+    const tag = document.getElementById('role-tag');
+    tag.textContent = 'Admin';
+    tag.style.background = '#fef2f2';
+    tag.style.color = '#b91c1c';
+    tag.style.display = 'inline-block';
+  }
+
+  // Show/hide tabs by role
+  if(isAdmin){
+    document.getElementById('tab-platform').style.display = 'flex';
+  } else if(isEmployer){
+    document.getElementById('tab-company').style.display = 'flex';
+    document.getElementById('tab-billing').style.display = 'flex';
+    document.getElementById('notif-employer').style.display = 'block';
+    document.getElementById('del-bullet-postings').style.display = 'list-item';
+    document.getElementById('del-bullet-certs').style.display = 'none';
+  } else {
+    document.getElementById('tab-jobprefs').style.display = 'flex';
+    document.getElementById('tab-privacy').style.display = 'flex';
+    document.getElementById('notif-worker').style.display = 'block';
+    document.getElementById('account-name-card').style.display = 'block';
+  }
+
+  // Wire up tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('on'));
+      btn.classList.add('on');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('on');
+    });
+  });
+
+  // Populate fields
+  document.getElementById('current-email').value = currentUser.email;
+  document.getElementById('first-name').value = profile.first_name || '';
+  document.getElementById('last-name').value = profile.last_name || '';
+
+  if(isEmployer){
+    document.getElementById('company-name').value = profile.company_name || '';
+    document.getElementById('industry').value = profile.industry || '';
+    document.getElementById('company-size').value = profile.company_size || '';
+    document.getElementById('city').value = profile.city || '';
+    document.getElementById('province').value = profile.province || '';
+    document.getElementById('bio').value = profile.bio || '';
+  } else {
+    document.getElementById('t-is-public').classList.toggle('on', profile.is_public !== false);
+    document.getElementById('t-show-contact').classList.toggle('on', profile.show_contact !== false);
+    document.getElementById('t-open-to-opps').classList.toggle('on', profile.open_to_opportunities !== false);
+    document.getElementById('t-allow-training').classList.toggle('on', profile.allow_training_requests !== false);
+    document.getElementById('t-status-change').classList.toggle('on', profile.notify_status_change !== false);
+    document.getElementById('t-new-jobs').classList.toggle('on', profile.notify_new_jobs !== false);
+
+    // Job Preferences
+    document.getElementById('jp-trade').value = profile.trade || '';
+    document.getElementById('jp-availability').value = profile.availability || '';
+    document.getElementById('jp-pay-min').value = profile.expected_pay_min || '';
+    document.getElementById('jp-pay-max').value = profile.expected_pay_max || '';
+    renderPrefChecks('jp-provinces',
+      ['Alberta','British Columbia','Saskatchewan','Manitoba','Ontario','Northwest Territories','Yukon'],
+      profile.preferred_provinces || []);
+    renderPrefChecks('jp-types',
+      ['Full-time','Contract','Part-time','Casual','Turnaround','Apprenticeship'],
+      profile.preferred_employment_types || []);
+  }
+
+  document.getElementById('t-email-notif').classList.toggle('on', profile.email_notifications !== false);
+  if(isEmployer){
+    document.getElementById('t-new-applicant').classList.toggle('on', profile.notify_new_applicant !== false);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// JOB PREFERENCES (worker)
+// ════════════════════════════════════════════════════════════════════
+function renderPrefChecks(containerId, options, selected){
+  const el = document.getElementById(containerId);
+  el.innerHTML = options.map(opt => `
+    <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid ${selected.includes(opt) ? 'var(--blue)' : 'var(--line)'};border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--text);background:${selected.includes(opt) ? 'var(--blue-soft)' : '#fff'};transition:all .15s">
+      <input type="checkbox" value="${opt}" ${selected.includes(opt) ? 'checked' : ''}
+        onchange="this.parentElement.style.borderColor=this.checked?'var(--blue)':'var(--line)';this.parentElement.style.background=this.checked?'var(--blue-soft)':'#fff'"
+        style="width:15px;height:15px;accent-color:var(--blue)">
+      ${opt}
+    </label>
+  `).join('');
+}
+
+async function saveJobPrefs(){
+  const provinces = [...document.querySelectorAll('#jp-provinces input:checked')].map(i => i.value);
+  const types = [...document.querySelectorAll('#jp-types input:checked')].map(i => i.value);
+  const payMin = document.getElementById('jp-pay-min').value;
+  const payMax = document.getElementById('jp-pay-max').value;
+
+  const updates = {
+    trade: document.getElementById('jp-trade').value || null,
+    availability: document.getElementById('jp-availability').value || null,
+    expected_pay_min: payMin ? parseInt(payMin) : null,
+    expected_pay_max: payMax ? parseInt(payMax) : null,
+    preferred_provinces: provinces,
+    preferred_employment_types: types
+  };
+
+  const msg = document.getElementById('jobprefs-msg');
+  msg.className = 'msg';
+  const { error } = await sb.from('profiles').update(updates).eq('id', currentUser.id);
+  if(error){
+    msg.className = 'msg error';
+    msg.textContent = 'Error: ' + error.message;
+    return;
+  }
+  msg.className = 'msg success';
+  msg.textContent = '✓ Job preferences saved — your matches will update.';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SIDEBAR BUILDER — role-aware
+// ════════════════════════════════════════════════════════════════════
+function buildSidebar(isEmployer, isAdmin){
+  const nav = document.getElementById('sb-nav');
+  let html = '';
+
+  if(isAdmin){
+    html = `
+      <div class="sb-section">
+        <div class="sb-label">Admin</div>
+        <a class="sb-link" href="admin.html">${ico('grid')}<span>Dashboard</span></a>
+        <a class="sb-link" href="admin-verification.html">${ico('check')}<span>Verification</span></a>
+        <a class="sb-link" href="admin-users.html">${ico('users')}<span>All Users</span></a>
+      </div>
+      <div class="sb-section">
+        <div class="sb-label">Account</div>
+        <a class="sb-link active" href="settings.html">${ico('settings')}<span>Settings</span></a>
+      </div>
+    `;
+  } else if(isEmployer){
+    html = `
+      <div class="sb-section">
+        <div class="sb-label">Main</div>
+        <a class="sb-link" href="employer-dashboard.html">${ico('grid')}<span>Dashboard</span></a>
+        <a class="sb-link" href="postings.html">${ico('briefcase')}<span>Job Postings</span></a>
+        <a class="sb-link" href="talent.html">${ico('search')}<span>Browse Talent</span></a>
+        <a class="sb-link" href="shortlists.html">${ico('users')}<span>My Roster</span></a>
+        <a class="sb-link" href="analytics.html">${ico('chart')}<span>Analytics</span></a>
+      </div>
+      <div class="sb-section">
+        <div class="sb-label">Account</div>
+        <a class="sb-link" href="profile.html">${ico('user')}<span>Company Profile</span></a>
+        <a class="sb-link active" href="settings.html">${ico('settings')}<span>Settings</span></a>
+      </div>
+    `;
+  } else {
+    html = `
+      <div class="sb-section">
+        <div class="sb-label">Main</div>
+        <a class="sb-link" href="dashboard.html">${ico('grid')}<span>Dashboard</span></a>
+        <a class="sb-link" href="jobs.html">${ico('briefcase')}<span>Browse Jobs</span></a>
+        <a class="sb-link" href="my-applications.html">${ico('file')}<span>My Applications</span></a>
+        <a class="sb-link" href="certifications.html">${ico('shield')}<span>Safety Tickets</span></a>
+        <a class="sb-link" href="training.html">${ico('cap')}<span>Training</span></a>
+        <a class="sb-link" href="profile.html">${ico('user')}<span>My Profile</span></a>
+      </div>
+      <div class="sb-section">
+        <div class="sb-label">Account</div>
+        <a class="sb-link active" href="settings.html">${ico('settings')}<span>Settings</span></a>
+      </div>
+    `;
+  }
+
+  nav.innerHTML = html;
+}
+
+function ico(name){
+  const i = {
+    grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+    briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+    chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+    file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    cap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.65 3.36 3 6 3s6-1.35 6-3v-5"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+    settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'
+  };
+  return i[name] || '';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CHANGE EMAIL
+// ════════════════════════════════════════════════════════════════════
+async function changeEmail(){
+  const newEmail = prompt('Enter your new email address:', currentUser.email);
+  if(!newEmail || newEmail === currentUser.email) return;
+
+  const msg = document.getElementById('email-msg');
+  msg.className = 'msg';
+
+  const { error } = await sb.auth.updateUser({ email: newEmail });
+  if(error){
+    msg.className = 'msg error';
+    msg.textContent = 'Error: ' + error.message;
+    return;
+  }
+  msg.className = 'msg success';
+  msg.textContent = '✓ Confirmation email sent to ' + newEmail + '. Click the link to complete the change.';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SAVE NAME
+// ════════════════════════════════════════════════════════════════════
+async function saveName(){
+  const first = document.getElementById('first-name').value.trim();
+  const last = document.getElementById('last-name').value.trim();
+  const msg = document.getElementById('name-msg');
+  msg.className = 'msg';
+
+  const { error } = await sb.from('profiles').update({ first_name: first, last_name: last }).eq('id', currentUser.id);
+  if(error){
+    msg.className = 'msg error';
+    msg.textContent = 'Error: ' + error.message;
+    return;
+  }
+  msg.className = 'msg success';
+  msg.textContent = '✓ Name updated';
+  setTimeout(() => { window.location.reload(); }, 1000);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SAVE COMPANY
+// ════════════════════════════════════════════════════════════════════
+async function saveCompany(){
+  const data = {
+    company_name: document.getElementById('company-name').value.trim() || null,
+    industry: document.getElementById('industry').value || null,
+    company_size: document.getElementById('company-size').value || null,
+    city: document.getElementById('city').value.trim() || null,
+    province: document.getElementById('province').value || null,
+    bio: document.getElementById('bio').value.trim() || null
+  };
+  const msg = document.getElementById('company-msg');
+  msg.className = 'msg';
+
+  const { error } = await sb.from('profiles').update(data).eq('id', currentUser.id);
+  if(error){
+    msg.className = 'msg error';
+    msg.textContent = 'Error: ' + error.message;
+    return;
+  }
+  msg.className = 'msg success';
+  msg.textContent = '✓ Company information updated';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CHANGE PASSWORD
+// ════════════════════════════════════════════════════════════════════
+async function changePassword(){
+  const pw = document.getElementById('new-password').value;
+  const confirm = document.getElementById('confirm-password').value;
+  const msg = document.getElementById('pw-msg');
+  msg.className = 'msg';
+
+  if(pw.length < 8){
+    msg.className = 'msg error';
+    msg.textContent = 'Password must be at least 8 characters.';
+    return;
+  }
+  if(pw !== confirm){
+    msg.className = 'msg error';
+    msg.textContent = 'Passwords do not match.';
+    return;
+  }
+
+  const { error } = await sb.auth.updateUser({ password: pw });
+  if(error){
+    msg.className = 'msg error';
+    msg.textContent = 'Error: ' + error.message;
+    return;
+  }
+  msg.className = 'msg success';
+  msg.textContent = '✓ Password updated successfully';
+  document.getElementById('new-password').value = '';
+  document.getElementById('confirm-password').value = '';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SIGN OUT ALL DEVICES
+// ════════════════════════════════════════════════════════════════════
+async function signOutAllDevices(){
+  if(!confirm('Sign out of all devices? You\'ll need to sign in again on each device.')) return;
+  await sb.auth.signOut({ scope: 'global' });
+  window.location.href = 'login.html';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// TOGGLES (generic)
+// ════════════════════════════════════════════════════════════════════
+async function toggleField(field, el){
+  el.classList.toggle('on');
+  const update = {};
+  update[field] = el.classList.contains('on');
+  const { error } = await sb.from('profiles').update(update).eq('id', currentUser.id);
+  if(error){
+    console.error(error);
+    el.classList.toggle('on');
+    alert('Failed to save. Try again.');
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// DELETE ACCOUNT
+// ════════════════════════════════════════════════════════════════════
+async function deleteAccount(){
+  const confirm1 = prompt('To confirm permanent deletion, type "DELETE" below:');
+  if(confirm1 !== 'DELETE') return;
+  if(!window.confirm('Are you absolutely sure? This will erase all your data immediately and cannot be undone.')) return;
+
+  const msg = document.getElementById('del-msg');
+  msg.className = 'msg';
+
+  const { error } = await sb.from('profiles').delete().eq('id', currentUser.id);
+  if(error){
+    msg.className = 'msg error';
+    msg.textContent = 'Error: ' + error.message + ' (Contact support if this persists.)';
+    return;
+  }
+
+  await sb.auth.signOut();
+  alert('Your account has been deleted. We\'re sorry to see you go.');
+  window.location.href = 'index.html';
+}
+
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('user-menu');
+  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
+});
+
+init();
+</script>
+</body>
+</html>
