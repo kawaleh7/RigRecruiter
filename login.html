@@ -338,7 +338,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:#0f172a;min-height:100vh}
           <input type="email" id="signin-email" placeholder="you@example.com" autocomplete="email">
         </div>
         <div class="field">
-          <label>Password <a href="#" onclick="resetPassword(event)">Forgot?</a></label>
+          <label>Password <a href="forgot-password.html">Forgot?</a></label>
           <input type="password" id="signin-password" placeholder="••••••••" autocomplete="current-password">
         </div>
         <button class="btn btn-blue" id="signin-btn" style="margin-top:8px;width:100%" onclick="signIn()">
@@ -485,7 +485,28 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // Redirect logged-in user to the right dashboard for their role
 async function redirectToDashboard(userId){
   if(userId){
-    const { data: profile } = await sb.from('profiles').select('role, is_admin').eq('id', userId).single();
+    let { data: profile } = await sb.from('profiles').select('role, is_admin, created_at, verification_status').eq('id', userId).single();
+
+    // ── GOOGLE SIGN-IN ROLE FIXUP ──
+    // The DB trigger defaults Google signups to 'worker' because Google
+    // sends no role. Apply the role they picked before the redirect.
+    const isFresh = profile && (Date.now() - new Date(profile.created_at).getTime()) < 10 * 60 * 1000;
+    let pendingRole = localStorage.getItem('rp_pending_role');
+
+    // Fallback: brand-new Google profile but no saved choice → ask once
+    if(isFresh && !pendingRole && !profile.is_admin){
+      const isEmployer = confirm('Welcome to RigPass! One quick question:\n\nAre you signing up as an EMPLOYER (hiring workers)?\n\nOK = Employer · Cancel = Worker (looking for jobs)');
+      pendingRole = isEmployer ? 'employer' : 'worker';
+    }
+
+    if(pendingRole && isFresh && !profile.is_admin && profile.role !== pendingRole){
+      const updates = { role: pendingRole };
+      if(pendingRole === 'employer') updates.verification_status = 'pending';
+      const { error } = await sb.from('profiles').update(updates).eq('id', userId);
+      if(!error) profile.role = pendingRole;
+    }
+    localStorage.removeItem('rp_pending_role');
+
     let dest = 'dashboard.html';
     if(profile?.is_admin) dest = 'admin.html';
     else if(profile?.role === 'employer') dest = 'employer-dashboard.html';
@@ -657,10 +678,13 @@ async function signUp(){
 async function signInWithGoogle(){
   const role = getSelectedRole(document.getElementById('signup').classList.contains('on') ? 'signup' : 'signin');
 
+  // Remember which role they chose — applied after Google returns
+  localStorage.setItem('rp_pending_role', role);
+
   const { data, error } = await sb.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/dashboard.html',
+      redirectTo: window.location.origin + '/login.html',
       queryParams: {
         access_type: 'offline',
         prompt: 'consent'
@@ -669,6 +693,7 @@ async function signInWithGoogle(){
   });
 
   if(error){
+    localStorage.removeItem('rp_pending_role');
     const panelId = document.getElementById('signup').classList.contains('on') ? 'signup' : 'signin';
     showMsg(panelId, 'error', 'Google sign-in failed: ' + error.message);
   }
