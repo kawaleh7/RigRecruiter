@@ -9,387 +9,217 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a;display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+
 :root{
-  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
-  --navy:#0a1228;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#94a3b8;
-  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--red-bg:#fef2f2;
-  --amber:#92400e;--amber-bg:#fefce8;--gold:#b8923a;--gold-border:#c9963a;
-  --off:#f8fafc;
-  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
-  --shadow:0 4px 14px rgba(15,23,42,.08);
-  --shadow-lg:0 16px 40px rgba(15,23,42,.12);
+  --navy:#0a1228;
+  --blue:#1e3a8a;
+  --blue-mid:#1e40af;
+  --blue-soft:#eef2ff;
+  --gold:#b8923a;
+  --text:#0f172a;
+  --text-2:#475569;
+  --muted:#64748b;
+  --light:#94a3b8;
+  --line:#e2e8f0;
+  --line-soft:#f1f5f9;
+  --ok:#15803d;
+  --ok-soft:#f0fdf4;
+  --warn:#a16207;
+  --warn-soft:#fefce8;
+  --danger:#b91c1c;
+  --danger-soft:#fef2f2;
 }
 
-/* ── SIDEBAR ── */
-.sidebar{
-  width:248px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);
-  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;
-}
-.sb-logo{padding:22px 22px 0;display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:32px}
-.logo-mark{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 10px rgba(30,58,138,.25)}
-.logo-mark svg{width:16px;height:16px;fill:#fff}
-.logo-name{font-size:1.12rem;font-weight:800;color:var(--text)}
-.logo-name span{color:var(--blue-mid)}
+/* SIDEBAR */
+.sidebar{width:240px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sb-top{padding:22px 22px 18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line-soft)}
+.sb-logo{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+.sb-logo svg{width:16px;height:16px;fill:#fff}
+.sb-brand{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.sb-brand span{color:var(--blue)}
 
-.sb-section{padding:0 12px;margin-bottom:6px}
-.sb-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--light);padding:0 12px;margin-bottom:8px}
-.sb-link{
-  display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;
-  font-size:.88rem;font-weight:500;color:var(--muted);text-decoration:none;
-  transition:all .15s;margin-bottom:2px;position:relative;
-}
-.sb-link:hover{background:#f1f5f9;color:var(--text)}
-.sb-link.active{
-  background:var(--blue-lt);color:var(--blue);font-weight:700;
-}
-.sb-link.active::before{
-  content:'';position:absolute;left:-12px;top:8px;bottom:8px;width:3px;
-  background:var(--blue);border-radius:0 3px 3px 0;
-}
-.sb-link svg{width:17px;height:17px;flex-shrink:0}
-.sb-badge{
-  margin-left:auto;background:var(--red);color:#fff;
-  font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:100px;
-}
+.sb-nav{flex:1;padding:18px 12px;overflow-y:auto}
+.sb-section + .sb-section{margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.sb-label{font-size:.66rem;font-weight:800;color:var(--light);text-transform:uppercase;letter-spacing:1.2px;padding:0 10px 6px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;font-size:.86rem;font-weight:600;color:var(--text-2);text-decoration:none;margin-bottom:2px;transition:all .15s}
+.sb-link:hover{background:var(--line-soft);color:var(--text)}
+.sb-link.active{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.sb-link svg{width:17px;height:17px;flex-shrink:0;stroke-width:2}
 
-.sb-divider{height:1px;background:var(--border);margin:14px 22px}
-
-/* PRO UPGRADE CARD */
-.pro-card{
-  margin:0 16px 12px;padding:16px;
-  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
-  border-radius:11px;color:#fff;
-  position:relative;overflow:hidden;
-}
-.pro-card::before{
-  content:'';position:absolute;top:-20px;right:-20px;
-  width:80px;height:80px;border-radius:50%;
-  background:rgba(147,197,253,.15);
-}
-.pro-card-title{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#93c5fd;margin-bottom:6px;position:relative}
-.pro-card p{font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.5;margin-bottom:12px;position:relative}
-.pro-card button{
-  width:100%;padding:8px;background:#fff;color:var(--blue);
-  border:none;border-radius:7px;font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:.78rem;font-weight:700;cursor:pointer;
-  transition:all .15s;position:relative;
-}
-.pro-card button:hover{background:#f1f5f9}
-
-.sb-bottom{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
-.sb-user{display:flex;align-items:center;gap:11px;padding:10px;border-radius:9px;cursor:pointer;transition:background .15s}
-.sb-user:hover{background:#f1f5f9}
-.sb-avatar{width:36px;height:36px;border-radius:9px;background:var(--blue);display:grid;place-items:center;font-weight:800;font-size:.78rem;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(30,58,138,.25)}
-.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2}
-.sb-urole{font-size:.7rem;color:var(--muted);margin-top:2px}
+.sb-bottom{padding:14px;border-top:1px solid var(--line-soft)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;cursor:pointer;transition:background .15s;position:relative}
+.sb-user:hover{background:var(--line-soft)}
+.sb-avatar{width:34px;height:34px;border-radius:9px;background:var(--blue);display:grid;place-items:center;color:#fff;font-size:.74rem;font-weight:800;flex-shrink:0}
+.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.sb-urole{font-size:.72rem;color:var(--muted);margin-top:2px}
 .sb-arrow{margin-left:auto;color:var(--light)}
 
-/* ── MAIN ── */
-.main{margin-left:248px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+/* MAIN */
+.main{flex:1;padding:32px 40px 60px;min-width:0;max-width:1280px}
 
-/* TOPBAR */
-.topbar{
-  background:#fff;border-bottom:1px solid var(--border);
-  padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:50;
-}
-.topbar-title{font-size:1.02rem;font-weight:800;color:var(--text)}
-.topbar-right{display:flex;align-items:center;gap:10px}
+.greet{margin-bottom:28px}
+.greet-date{font-size:.76rem;color:var(--muted);font-weight:600;letter-spacing:.4px;margin-bottom:6px;text-transform:uppercase}
+.greet h1{font-size:1.75rem;font-weight:800;color:var(--text);letter-spacing:-.6px;margin-bottom:8px}
+.greet p{font-size:.94rem;color:var(--text-2);line-height:1.55;max-width:560px}
 
-.search-bar{
-  position:relative;width:280px;
-}
-.search-bar input{
-  width:100%;padding:8px 12px 8px 36px;border-radius:9px;
-  border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:.85rem;color:var(--text);outline:none;background:var(--off);
-  transition:all .15s;
-}
-.search-bar input:focus{background:#fff;border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,58,138,.08)}
-.search-bar svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--light)}
+.topbar-actions{display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap}
 
-.icon-btn{
-  width:38px;height:38px;border-radius:9px;border:1.5px solid var(--border);
-  background:#fff;display:grid;place-items:center;cursor:pointer;
-  position:relative;transition:all .15s;
-}
-.icon-btn:hover{border-color:var(--light);background:var(--off)}
-.notif-dot{
-  position:absolute;top:7px;right:7px;width:8px;height:8px;
-  background:var(--red);border-radius:50%;border:2px solid #fff;
-}
+/* STATS — minimal strip */
+.stats-strip{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 4px;margin-bottom:26px}
+.stat-item{flex:1;padding:0 24px;text-align:left;border-right:1px solid var(--line-soft);min-width:0}
+.stat-item:last-child{border-right:none}
+.stat-num{font-size:1.7rem;font-weight:800;color:var(--text);letter-spacing:-.6px;line-height:1}
+.stat-num.warn{color:var(--warn)}
+.stat-label{font-size:.78rem;color:var(--muted);margin-top:6px;font-weight:600}
 
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:7px;
-  padding:9px 18px;border-radius:9px;
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:700;
-  cursor:pointer;border:none;text-decoration:none;transition:all .15s;
-}
-.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 10px rgba(30,58,138,.2)}
-.btn-blue:hover{background:var(--blue-mid);transform:translateY(-1px);box-shadow:0 8px 16px rgba(30,58,138,.25)}
-.btn-ghost{background:#fff;color:var(--muted);border:1.5px solid var(--border)}
-.btn-ghost:hover{color:var(--text);border-color:var(--light)}
+/* LAYOUT */
+.dash-grid{display:grid;grid-template-columns:1fr 320px;gap:24px}
 
-/* CONTENT */
-.content{padding:28px 32px;flex:1}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+.card-head{padding:18px 22px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.card-title{font-size:.92rem;font-weight:800;color:var(--text);letter-spacing:-.2px}
+.card-sub{font-size:.76rem;color:var(--muted);margin-top:2px}
+.card-link{font-size:.78rem;font-weight:700;color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.card-link:hover{text-decoration:underline}
 
-/* ── HERO GREETING ── */
-.greeting-card{
-  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
-  border-radius:14px;padding:28px 32px;color:#fff;
-  margin-bottom:28px;position:relative;overflow:hidden;
-  display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;
-}
-.greeting-card::before{
-  content:'';position:absolute;inset:0;opacity:.05;
-  background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);
-  background-size:36px 36px;
-}
-.greeting-card::after{
-  content:'';position:absolute;top:-40px;right:-40px;
-  width:200px;height:200px;border-radius:50%;
-  background:radial-gradient(circle,rgba(147,197,253,.15) 0%,transparent 70%);
-}
-.greeting-left{position:relative;z-index:2}
-.greeting-meta{font-size:.78rem;color:rgba(255,255,255,.55);margin-bottom:6px;font-weight:600}
-.greeting-card h1{font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:8px}
-.greeting-card p{font-size:.9rem;color:rgba(255,255,255,.65);max-width:520px;line-height:1.6}
-.greeting-actions{position:relative;z-index:2;display:flex;gap:10px}
-.btn-white{background:#fff;color:var(--blue);box-shadow:0 4px 10px rgba(0,0,0,.1)}
-.btn-white:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.15)}
-.btn-outline-w{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.25)}
-.btn-outline-w:hover{background:rgba(255,255,255,.18)}
+/* JOB MATCH ROWS */
+.job-match{display:block;padding:16px 22px;border-top:1px solid var(--line-soft);text-decoration:none;color:inherit;transition:background .15s}
+.job-match:first-of-type{border-top:none}
+.job-match:hover{background:var(--line-soft)}
+.jm-row{display:flex;align-items:center;gap:14px}
+.jm-co{width:38px;height:38px;border-radius:8px;background:var(--line-soft);color:var(--text);display:grid;place-items:center;font-size:.7rem;font-weight:800;flex-shrink:0;border:1px solid var(--line)}
+.jm-info{flex:1;min-width:0}
+.jm-title{font-size:.92rem;font-weight:700;color:var(--text);letter-spacing:-.1px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jm-meta{font-size:.76rem;color:var(--muted);font-weight:500}
+.jm-match{font-size:.78rem;font-weight:800;color:var(--blue);padding:5px 11px;background:var(--blue-soft);border-radius:6px;flex-shrink:0;letter-spacing:.2px}
+.jm-match.partial{color:var(--warn);background:var(--warn-soft)}
 
-/* ── STAT CARDS ── */
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-.stat-card{
-  background:#fff;border-radius:12px;border:1.5px solid var(--gold-border);
-  padding:20px;transition:all .2s;
-  position:relative;overflow:hidden;isolation:isolate;
-}
-.stat-card::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.5) 50%,transparent 60%);
-  transform:translateX(-100%);transition:transform .55s ease;
-  border-radius:inherit;pointer-events:none;z-index:1;
-}
-.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--gold)}
-.stat-card:hover::after{transform:translateX(100%)}
-.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.sc-icon{
-  width:38px;height:38px;border-radius:9px;
-  display:grid;place-items:center;flex-shrink:0;
-}
-.sc-trend{
-  display:inline-flex;align-items:center;gap:3px;
-  font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:5px;
-}
-.sc-trend-up{background:var(--green-bg);color:var(--green)}
-.sc-num{font-size:1.9rem;font-weight:800;color:var(--text);line-height:1;letter-spacing:-1px}
-.sc-label{font-size:.78rem;color:var(--muted);margin-top:6px;font-weight:500}
-
-/* ── GRID LAYOUT ── */
-.dash-grid{display:grid;grid-template-columns:1fr 340px;gap:20px}
-
-/* CARDS */
-.card{
-  background:#fff;border-radius:12px;border:1.5px solid var(--gold-border);
-  padding:24px;margin-bottom:18px;
-  transition:box-shadow .2s;
-}
-.card:hover{box-shadow:var(--shadow-sm)}
-.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.card-title{font-size:.95rem;font-weight:800;color:var(--text);letter-spacing:-.1px}
-.card-action{font-size:.8rem;font-weight:700;color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color .15s}
-.card-action:hover{color:var(--blue-mid)}
-
-/* CERT LIST */
-.cert-row{
-  display:flex;align-items:center;gap:14px;
-  padding:14px 0;border-bottom:1px solid #f1f5f9;
-  transition:background .15s;
-}
-.cert-row:hover{background:var(--off);margin:0 -10px;padding-left:10px;padding-right:10px;border-radius:8px;border-bottom-color:transparent}
-.cert-row:last-child{border-bottom:none}
-.cert-ico{
-  width:40px;height:40px;border-radius:9px;
-  display:grid;place-items:center;flex-shrink:0;
-  background:var(--blue-lt);
-}
+/* CERT ROWS — clean with dots */
+.cert-row{display:flex;align-items:center;gap:14px;padding:14px 22px;border-top:1px solid var(--line-soft)}
+.cert-row:first-of-type{border-top:none}
+.cert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cert-dot.ok{background:var(--ok)}
+.cert-dot.warn{background:var(--warn)}
+.cert-dot.danger{background:var(--danger)}
 .cert-info{flex:1;min-width:0}
-.cert-name{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:2px}
-.cert-date{font-size:.76rem;color:var(--muted)}
-.tag{
-  display:inline-flex;align-items:center;gap:5px;
-  border-radius:100px;padding:4px 11px;
-  font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;
-  flex-shrink:0;
-}
-.tag::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
-.tg{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
-.tr{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
-.ty{background:var(--amber-bg);color:var(--amber);border:1px solid #fcd34d}
+.cert-name{font-size:.88rem;font-weight:700;color:var(--text);letter-spacing:-.1px;line-height:1.3}
+.cert-meta{font-size:.74rem;color:var(--muted);margin-top:2px}
+.cert-tag{font-size:.66rem;font-weight:800;padding:3px 8px;border-radius:5px;letter-spacing:.4px;text-transform:uppercase;flex-shrink:0}
+.cert-tag.ok{background:var(--ok-soft);color:var(--ok)}
+.cert-tag.warn{background:var(--warn-soft);color:var(--warn)}
+.cert-tag.danger{background:var(--danger-soft);color:var(--danger)}
 
-/* ── PROFILE COMPLETION (NAVY) ── */
-.complete-card{
-  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
-  border-radius:12px;padding:22px;margin-bottom:18px;
-  position:relative;overflow:hidden;color:#fff;
-}
-.complete-card::before{
-  content:'';position:absolute;top:-30px;right:-30px;
-  width:120px;height:120px;border-radius:50%;
-  background:radial-gradient(circle,rgba(147,197,253,.18) 0%,transparent 70%);
-}
-.cc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;position:relative}
-.cc-title{font-size:.95rem;font-weight:800;color:#fff}
-.cc-pct{font-size:1.4rem;font-weight:800;color:#93c5fd;letter-spacing:-.5px}
-.cc-sub{font-size:.78rem;color:rgba(255,255,255,.55);margin-bottom:16px;position:relative}
-.cc-bar{height:6px;background:rgba(255,255,255,.1);border-radius:100px;margin-bottom:18px;position:relative;overflow:hidden}
-.cc-fill{height:100%;background:linear-gradient(90deg,#93c5fd,#fff);border-radius:100px;width:65%;transition:width .8s ease}
-.cc-steps{display:flex;flex-direction:column;gap:9px;position:relative}
-.cc-step{display:flex;align-items:center;gap:9px;font-size:.82rem;color:rgba(255,255,255,.5)}
-.cc-step.done{color:rgba(255,255,255,.85)}
-.cc-step-ico{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2)}
-.cc-step.done .cc-step-ico{background:#22c55e;border-color:#22c55e}
-
-/* ── VIEWS CHART ── */
-.views-card{background:#fff;border-radius:12px;border:1.5px solid var(--gold-border);padding:22px;margin-bottom:18px}
-.views-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
-.views-left{}
-.views-num{font-size:1.9rem;font-weight:800;color:var(--blue);letter-spacing:-1px;line-height:1}
-.views-label{font-size:.78rem;color:var(--muted);margin-top:4px;font-weight:500}
-.views-change{display:inline-flex;align-items:center;gap:3px;background:var(--green-bg);color:var(--green);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:5px}
-.views-bar{display:flex;align-items:flex-end;gap:5px;height:60px;margin-bottom:8px}
-.vbar{flex:1;background:var(--blue-lt);border-radius:4px 4px 0 0;transition:all .25s;cursor:pointer;position:relative}
-.vbar.today{background:var(--blue)}
-.vbar:hover{opacity:.85;transform:translateY(-2px)}
-.views-days{display:flex;justify-content:space-between;font-size:.65rem;color:var(--light);font-weight:600;text-transform:uppercase}
-
-/* ── RECENT ACTIVITY ── */
-.activity-item{
-  display:flex;gap:12px;padding:12px 0;
-  border-bottom:1px solid #f1f5f9;
-}
-.activity-item:last-child{border-bottom:none;padding-bottom:0}
-.activity-item:first-child{padding-top:0}
-.act-ico{
-  width:30px;height:30px;border-radius:7px;
-  display:grid;place-items:center;flex-shrink:0;
-}
-.act-blue{background:var(--blue-lt);color:var(--blue)}
-.act-green{background:var(--green-bg);color:var(--green)}
-.act-amber{background:var(--amber-bg);color:var(--amber)}
+/* ACTIVITY */
+.act-row{display:flex;align-items:flex-start;gap:12px;padding:13px 22px;border-top:1px solid var(--line-soft)}
+.act-row:first-of-type{border-top:none}
+.act-line{width:2px;background:var(--line);align-self:stretch;flex-shrink:0;margin-top:5px;border-radius:2px;min-height:24px}
+.act-line.blue{background:var(--blue)}
+.act-line.warn{background:var(--warn)}
 .act-content{flex:1;min-width:0}
-.act-text{font-size:.82rem;color:var(--text);line-height:1.5;font-weight:500}
+.act-text{font-size:.85rem;color:var(--text);line-height:1.45}
 .act-text strong{font-weight:700}
-.act-time{font-size:.7rem;color:var(--light);margin-top:3px}
+.act-time{font-size:.72rem;color:var(--light);margin-top:3px;font-weight:600}
 
-/* ── JOBS MATCH ── */
-.job-match-card{
-  background:#fff;border:1.5px solid var(--gold-border);border-radius:11px;
-  padding:14px;margin-bottom:10px;transition:all .2s;cursor:pointer;
-}
-.job-match-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
-.job-match-card:last-child{margin-bottom:0}
-.jmc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.jmc-co{font-size:.7rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.jmc-match{
-  background:var(--green-bg);color:var(--green);
-  font-size:.65rem;font-weight:800;padding:2px 7px;border-radius:5px;
-  border:1px solid #86efac;
-}
-.jmc-title{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-.1px}
-.jmc-meta{font-size:.72rem;color:var(--muted)}
+/* PROFILE COMPLETION CARD */
+.complete{background:linear-gradient(135deg,#1e3a8a,#0a1228);color:#fff;padding:22px;border-radius:12px;margin-bottom:18px;position:relative;overflow:hidden}
+.complete::after{content:'';position:absolute;top:-30px;right:-30px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(184,146,58,.18) 0%,transparent 70%);pointer-events:none}
+.cmpl-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;position:relative;z-index:1}
+.cmpl-title{font-size:.85rem;font-weight:700;color:#fff;letter-spacing:-.1px}
+.cmpl-pct{font-size:1.4rem;font-weight:800;color:#fcd34d;letter-spacing:-.5px}
+.cmpl-sub{font-size:.78rem;color:rgba(255,255,255,.7);margin-bottom:14px;line-height:1.45;position:relative;z-index:1}
+.cmpl-bar{height:6px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;margin-bottom:14px;position:relative;z-index:1}
+.cmpl-fill{height:100%;background:#fcd34d;border-radius:3px;transition:width .6s ease}
+.cmpl-step{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:.8rem;color:rgba(255,255,255,.7);position:relative;z-index:1}
+.cmpl-step.done{color:#fff}
+.cmpl-check{width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);display:grid;place-items:center;flex-shrink:0}
+.cmpl-step.done .cmpl-check{background:#fcd34d;border-color:#fcd34d;color:var(--navy)}
+.cmpl-step.done .cmpl-check svg{display:block;width:9px;height:9px}
+.cmpl-step:not(.done) .cmpl-check svg{display:none}
 
-/* RESPONSIVE */
-@media(max-width:1100px){
-  .stat-grid{grid-template-columns:1fr 1fr}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;border:1.5px solid transparent;text-decoration:none;transition:all .15s}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:var(--blue-mid)}
+.btn-ghost{background:#fff;color:var(--text-2);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--light);color:var(--text);background:var(--line-soft)}
+
+.empty{padding:32px 22px;text-align:center;color:var(--muted)}
+.empty p{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.empty span{font-size:.78rem;color:var(--muted)}
+
+@media(max-width:980px){
   .dash-grid{grid-template-columns:1fr}
+  .stats-strip{flex-wrap:wrap}
+  .stat-item{flex:0 0 50%;padding:14px 18px;border-right:none;border-bottom:1px solid var(--line-soft)}
+  .stat-item:nth-last-child(-n+2){border-bottom:none}
 }
-@media(max-width:768px){
-  .sidebar{display:none}
-  .main{margin-left:0}
-  .search-bar{display:none}
-  .greeting-card{grid-template-columns:1fr}
-  .stat-grid{grid-template-columns:1fr 1fr}
+@media(max-width:700px){
+  .sidebar{width:64px}
+  .sb-brand,.sb-link span,.sb-uname,.sb-urole,.sb-arrow,.sb-label{display:none}
+  .sb-link{justify-content:center;padding:9px 0}
+  .sb-user{justify-content:center;padding:0}
+  .main{padding:20px}
+  .stat-item{flex:0 0 100%}
 }
 </style>
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
 <aside class="sidebar">
-  <a class="sb-logo" href="index.html">
-    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
-    <span class="logo-name">Rig<span>Pass</span></span>
-  </a>
-
-  <div class="sb-section">
-    <div class="sb-label">Main</div>
-    <a class="sb-link active" href="dashboard.html">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Dashboard
-    </a>
-    <a class="sb-link" href="profile.html">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      My Profile
-    </a>
-    <a class="sb-link" href="certifications.html">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Safety Tickets
-    </a>
-    <a class="sb-link" href="jobs.html">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-      Job Board
-      <span class="sb-badge">9</span>
-    </a>
-  </div>
-  <div class="sb-divider"></div>
-  <div class="sb-section">
-    <div class="sb-label">Account</div>
-    <a class="sb-link" href="#">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      Messages
-      <span class="sb-badge">2</span>
-    </a>
-    <a class="sb-link" href="#">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      Alerts
-    </a>
-    <a class="sb-link" href="#">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Settings
-    </a>
+  <div class="sb-top">
+    <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <div class="sb-brand">Rig<span>Pass</span></div>
   </div>
 
-  <!-- PRO UPGRADE CARD -->
-  <div class="pro-card" style="margin-top:auto">
-    <div class="pro-card-title">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      Upgrade to Pro
+  <nav class="sb-nav">
+    <div class="sb-section">
+      <div class="sb-label">Main</div>
+      <a class="sb-link active" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="sb-link" href="jobs.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Browse Jobs</span>
+      </a>
+      <a class="sb-link" href="my-applications.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>My Applications</span>
+      </a>
+      <a class="sb-link" href="certifications.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Safety Tickets</span>
+      </a>
+      <a class="sb-link" href="profile.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>My Profile</span>
+      </a>
     </div>
-    <p>Unlimited safety tickets, SMS alerts, and priority visibility.</p>
-    <button>Upgrade — $7.99/mo</button>
-  </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Account</div>
+      <a class="sb-link" href="settings.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+      </a>
+    </div>
+  </nav>
 
   <div class="sb-bottom">
-    <div class="sb-user" onclick="toggleUserMenu(event)" style="position:relative">
+    <div class="sb-user" onclick="toggleUserMenu(event)">
       <div class="sb-avatar" id="sb-avatar">--</div>
       <div style="min-width:0">
         <div class="sb-uname" id="sb-uname">Loading...</div>
         <div class="sb-urole" id="sb-urole">—</div>
       </div>
       <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-
-      <!-- User dropdown menu -->
-      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);overflow:hidden;z-index:200">
-        <a href="profile.html" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--text);text-decoration:none;font-weight:600;transition:background .15s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          My Profile
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.12);overflow:hidden;z-index:200">
+        <a href="settings.html" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--text);text-decoration:none;font-weight:600" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>
+          Settings
         </a>
-        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--red);background:#fff;border:none;border-top:1px solid #f1f5f9;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left;transition:background .15s" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--danger);background:#fff;border:none;border-top:1px solid var(--line-soft);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Sign Out
         </button>
@@ -398,290 +228,225 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
   </div>
 </aside>
 
-<!-- ── MAIN ── -->
-<div class="main">
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="topbar-title">Dashboard</div>
-    <div class="topbar-right">
-      <div class="search-bar">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Search jobs, certifications...">
-      </div>
-      <div class="icon-btn">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <div class="notif-dot"></div>
-      </div>
-      <a href="certifications.html" class="btn btn-blue">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Ticket
-      </a>
+<main class="main">
+
+  <div class="greet">
+    <div class="greet-date" id="greet-date">Loading...</div>
+    <h1 id="greet-hello">Welcome</h1>
+    <p id="greet-msg">Loading your dashboard…</p>
+  </div>
+
+  <div class="topbar-actions">
+    <a href="jobs.html" class="btn btn-blue">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Browse Jobs
+    </a>
+    <a href="certifications.html" class="btn btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Ticket
+    </a>
+  </div>
+
+  <div class="stats-strip">
+    <div class="stat-item">
+      <div class="stat-num" id="s-certs">0</div>
+      <div class="stat-label">Valid Tickets</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="s-expiring">0</div>
+      <div class="stat-label">Expiring Soon</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="s-matches">0</div>
+      <div class="stat-label">Matching Jobs</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="s-applications">0</div>
+      <div class="stat-label">My Applications</div>
     </div>
   </div>
 
-  <div class="content">
+  <div class="dash-grid">
 
-    <!-- ── GREETING ── -->
-    <div class="greeting-card">
-      <div class="greeting-left">
-        <div class="greeting-meta" id="greet-date">Loading...</div>
-        <h1 id="greet-hello">Welcome 👋</h1>
-        <p id="greet-msg">Loading your dashboard...</p>
+    <div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Top Job Matches</div>
+            <div class="card-sub">Based on your trade and certifications</div>
+          </div>
+          <a href="jobs.html" class="card-link">See all <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+        </div>
+        <div id="top-matches-list">
+          <div class="empty"><span>Loading matches…</span></div>
+        </div>
       </div>
-      <div class="greeting-actions">
-        <a href="jobs.html" class="btn btn-white">View Job Matches</a>
-        <a href="certifications.html" class="btn btn-outline-w">Manage Tickets</a>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Safety Tickets</div>
+            <div class="card-sub" id="certs-sub">Your active certifications</div>
+          </div>
+          <a href="certifications.html" class="card-link">Manage <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+        </div>
+        <div id="dash-certs-list">
+          <div class="empty"><span>Loading tickets…</span></div>
+        </div>
       </div>
+
     </div>
 
-    <!-- ── STAT CARDS ── -->
-    <div class="stat-grid">
-      <div class="stat-card">
-        <div class="sc-top">
-          <div class="sc-icon" style="background:var(--green-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
-          <span class="sc-trend sc-trend-up">+1 this month</span>
-        </div>
-        <div class="sc-num">7</div>
-        <div class="sc-label">Valid Certifications</div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-top">
-          <div class="sc-icon" style="background:var(--amber-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-          <span class="sc-trend" style="background:var(--amber-bg);color:var(--amber)">Action needed</span>
-        </div>
-        <div class="sc-num" style="color:var(--amber)">2</div>
-        <div class="sc-label">Expiring Soon</div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-top">
-          <div class="sc-icon" style="background:var(--blue-lt)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
-          <span class="sc-trend sc-trend-up">+12 this week</span>
-        </div>
-        <div class="sc-num">142</div>
-        <div class="sc-label">Profile Views</div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-top">
-          <div class="sc-icon" style="background:#fdf8ee"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-          <span class="sc-trend sc-trend-up">+3 new</span>
-        </div>
-        <div class="sc-num">9</div>
-        <div class="sc-label">Matching Jobs</div>
-      </div>
-    </div>
+    <div>
 
-    <!-- ── GRID LAYOUT ── -->
-    <div class="dash-grid">
-      <!-- LEFT COLUMN -->
-      <div>
-        <!-- CERTIFICATIONS -->
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Your Safety Tickets</div>
-            <a class="card-action" href="certifications.html">Manage all <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
-          </div>
-          <div id="dash-certs-list">
-            <div style="padding:20px;text-align:center;color:var(--light);font-size:.82rem">Loading tickets...</div>
-          </div>
+      <div class="complete">
+        <div class="cmpl-head">
+          <div class="cmpl-title">Profile Strength</div>
+          <div class="cmpl-pct" id="cmpl-pct">0%</div>
         </div>
-
-        <!-- RECENT ACTIVITY -->
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Recent Activity</div>
-          </div>
-          <div id="activity-list">
-            <div style="padding:20px;text-align:center;color:var(--light);font-size:.82rem">Loading activity...</div>
-          </div>
+        <div class="cmpl-sub">Complete your profile to attract more employers.</div>
+        <div class="cmpl-bar"><div class="cmpl-fill" id="cmpl-fill" style="width:0%"></div></div>
+        <div id="cmpl-steps">
+          <div class="cmpl-step"><div class="cmpl-check"></div>Loading...</div>
         </div>
       </div>
 
-      <!-- RIGHT COLUMN -->
-      <div>
-        <!-- PROFILE COMPLETION -->
-        <div class="complete-card">
-          <div class="cc-head">
-            <div class="cc-title">Profile Strength</div>
-            <div class="cc-pct" id="cc-pct">0%</div>
-          </div>
-          <div class="cc-sub">Complete your profile to get noticed by more employers.</div>
-          <div class="cc-bar"><div class="cc-fill" id="cc-fill" style="width:0%"></div></div>
-          <div class="cc-steps" id="cc-steps">
-            <div class="cc-step"><div class="cc-step-ico"></div>Loading...</div>
-          </div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Recent Activity</div>
         </div>
-
-        <!-- JOB MATCHES -->
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Top Matches</div>
-            <a class="card-action" href="jobs.html">See all <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
-          </div>
-          <div id="top-matches-list">
-            <div style="padding:20px;text-align:center;color:var(--light);font-size:.82rem">Loading matches...</div>
-          </div>
+        <div id="activity-list">
+          <div class="empty"><span>Loading…</span></div>
         </div>
       </div>
+
     </div>
   </div>
-</div>
+
+</main>
 
 <script>
-// ════════════════════════════════════════════════════════════════════
-// SUPABASE
-// ════════════════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ════════════════════════════════════════════════════════════════════
-// AUTH GUARD + PROFILE LOAD
-// ════════════════════════════════════════════════════════════════════
-async function loadDashboard(){
+let currentUser = null;
+let currentProfile = null;
+let myCerts = [];
+
+async function init(){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session){
-    window.location.href = 'login.html';
-    return;
-  }
+  if(!session){ window.location.href = 'login.html'; return; }
+  currentUser = session.user;
 
-  // Fetch user profile from Supabase
-  const { data: profile, error } = await sb
-    .from('profiles')
-    .select('*')
-    .eq('id', session.user.id)
-    .single();
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
 
-  // Employers belong on the employer dashboard
-  if(profile && profile.role === 'employer'){
-    window.location.href = 'employer-dashboard.html';
-    return;
-  }
-
-  // Admins belong on the admin console
-  if(profile && profile.is_admin){
-    window.location.href = 'admin.html';
-    return;
-  }
+  if(profile && profile.role === 'employer'){ window.location.href = 'employer-dashboard.html'; return; }
+  if(profile && profile.is_admin){ window.location.href = 'admin.html'; return; }
 
   if(error || !profile){
-    console.error('Profile load error:', error);
-    // Fallback display with email only
-    const email = session.user.email;
+    const email = currentUser.email;
     document.getElementById('sb-uname').textContent = email.split('@')[0];
     document.getElementById('sb-urole').textContent = 'Setup pending';
     document.getElementById('sb-avatar').textContent = email.substring(0,2).toUpperCase();
-    document.getElementById('greet-hello').textContent = 'Welcome 👋';
-    document.getElementById('greet-msg').innerHTML = 'Finish setting up your profile to see job matches.';
+    document.getElementById('greet-hello').textContent = 'Welcome';
+    document.getElementById('greet-msg').textContent = 'Finish setting up your profile to see job matches.';
     setDate();
     return;
   }
 
-  // Build display name + initials
+  currentProfile = profile;
+
   const first = profile.first_name || '';
   const last = profile.last_name || '';
-  const fullName = (first + ' ' + last).trim() || session.user.email.split('@')[0];
-  const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || session.user.email.substring(0,2).toUpperCase();
-
-  // Sidebar
+  const fullName = (first + ' ' + last).trim() || currentUser.email.split('@')[0];
+  const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
   document.getElementById('sb-avatar').textContent = initials;
   document.getElementById('sb-uname').textContent = fullName;
-  const roleLabel = profile.role === 'employer' ? 'Employer' : (profile.trade || 'Worker');
-  const planLabel = profile.plan === 'pro' ? 'Pro Plan' : (profile.plan === 'employer_pro' ? 'Employer Pro' : 'Free Plan');
-  document.getElementById('sb-urole').textContent = roleLabel + ' · ' + planLabel;
+  document.getElementById('sb-urole').textContent = (profile.trade || 'Worker') + ' · ' + (profile.plan === 'pro' ? 'Pro' : 'Free');
 
-  // Greeting
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-  document.getElementById('greet-hello').textContent = `${greeting}, ${first || fullName} 👋`;
+  document.getElementById('greet-hello').textContent = `${greeting}, ${first || fullName}`;
   setDate();
 
-  // Load real data
-  await Promise.all([loadCerts(profile), loadMatches(profile), loadActivity(profile)]);
+  await Promise.all([loadCerts(), loadMatches(), loadActivity(), loadApplicationsCount()]);
   renderProfileStrength(profile);
+  updateGreetingMsg();
+}
 
-  // Smart greeting message based on data
-  const certs = window._dashCerts || [];
-  const expiring = certs.filter(c => {
+function setDate(){
+  const d = new Date();
+  document.getElementById('greet-date').textContent = d.toLocaleDateString('en-CA', { weekday:'long', month:'long', day:'numeric' });
+}
+
+async function loadCerts(){
+  const { data: certs } = await sb.from('certifications').select('*').eq('worker_id', currentUser.id).order('expiry_date', { ascending: true });
+  myCerts = certs || [];
+  const list = document.getElementById('dash-certs-list');
+
+  const validCount = myCerts.filter(c => !c.expiry_date || new Date(c.expiry_date) > new Date()).length;
+  const expiring = myCerts.filter(c => {
     if(!c.expiry_date) return false;
     const days = Math.ceil((new Date(c.expiry_date) - new Date()) / (1000*60*60*24));
     return days >= 0 && days <= 60;
   }).length;
-  const expired = certs.filter(c => c.expiry_date && new Date(c.expiry_date) < new Date()).length;
+  document.getElementById('s-certs').textContent = validCount;
+  document.getElementById('s-expiring').textContent = expiring;
+  if(expiring > 0) document.getElementById('s-expiring').classList.add('warn');
+  document.getElementById('certs-sub').textContent = myCerts.length === 0
+    ? 'No tickets added yet' : `${validCount} of ${myCerts.length} currently valid`;
 
-  let msg = '';
-  if(certs.length === 0){
-    msg = `Welcome to RigPass. <strong style="color:#fff">Add your safety tickets</strong> to start matching with jobs.`;
-  } else if(expired > 0){
-    msg = `You have <strong style="color:#fcd34d">${expired} expired certification${expired === 1 ? '' : 's'}</strong>. Renew to unlock more job matches.`;
-  } else if(expiring > 0){
-    msg = `<strong style="color:#fcd34d">${expiring} certification${expiring === 1 ? '' : 's'}</strong> expiring soon. Plan renewal to stay job-ready.`;
-  } else {
-    msg = `All your safety tickets are valid. Browse <strong style="color:#fff">jobs that match your trade</strong>.`;
-  }
-  document.getElementById('greet-msg').innerHTML = msg;
-}
-
-async function loadCerts(profile){
-  const { data: certs } = await sb.from('certifications').select('*').eq('worker_id', profile.id).order('expiry_date', { ascending: true });
-  const list = document.getElementById('dash-certs-list');
-  if(!list) return;
-  if(!certs || certs.length === 0){
-    list.innerHTML = `<div style="padding:30px 22px;text-align:center;color:var(--muted)">
-      <p style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:6px">No safety tickets yet</p>
-      <p style="font-size:.78rem;margin-bottom:14px">Add your tickets to attract employers.</p>
-      <a href="certifications.html" class="btn btn-blue" style="display:inline-flex">Add Tickets</a>
+  if(myCerts.length === 0){
+    list.innerHTML = `<div class="empty">
+      <p>No safety tickets yet</p>
+      <span>Add your tickets to start matching with jobs.</span>
+      <div style="margin-top:14px"><a href="certifications.html" class="btn btn-blue">Add Your First Ticket</a></div>
     </div>`;
-    window._dashCerts = [];
     return;
   }
-  window._dashCerts = certs;
 
-  // Show top 5
-  list.innerHTML = certs.slice(0,5).map(c => {
-    const days = Math.ceil((new Date(c.expiry_date) - new Date()) / (1000*60*60*24));
-    const status = days < 0 ? 'expired' : days <= 60 ? 'expiring' : 'valid';
-    const tagCls = status === 'valid' ? 'tg' : status === 'expiring' ? 'ty' : 'tr';
-    const tagLabel = status === 'valid' ? 'Valid' : status === 'expiring' ? 'Expiring' : 'Expired';
-    const bg = status === 'valid' ? 'var(--green-bg)' : status === 'expiring' ? 'var(--amber-bg)' : 'var(--red-bg)';
-    const stroke = status === 'valid' ? 'var(--green)' : status === 'expiring' ? 'var(--amber)' : 'var(--red)';
+  list.innerHTML = myCerts.slice(0, 5).map(c => {
+    const days = c.expiry_date ? Math.ceil((new Date(c.expiry_date) - new Date()) / (1000*60*60*24)) : null;
+    const status = days === null ? 'ok' : days < 0 ? 'danger' : days <= 60 ? 'warn' : 'ok';
+    const label = status === 'ok' ? 'Valid' : status === 'warn' ? 'Expiring' : 'Expired';
     const expLabel = c.expiry_date
-      ? (days < 0 ? `Expired ${Math.abs(days)} days ago` : days === 0 ? 'Expires today' : `Expires in ${days} days`)
+      ? (days < 0 ? `Expired ${Math.abs(days)} days ago`
+         : days === 0 ? 'Expires today'
+         : `Expires in ${days} day${days===1?'':'s'}`)
       : 'No expiry date';
-    const icon = status === 'valid'
-      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`
-      : status === 'expiring'
-      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`
-      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
     return `<div class="cert-row">
-      <div class="cert-ico" style="background:${bg}">${icon}</div>
-      <div class="cert-info"><div class="cert-name">${c.name}</div><div class="cert-date">${expLabel}</div></div>
-      <span class="tag ${tagCls}">${tagLabel}</span>
+      <div class="cert-dot ${status}"></div>
+      <div class="cert-info">
+        <div class="cert-name">${c.name}</div>
+        <div class="cert-meta">${expLabel}</div>
+      </div>
+      <span class="cert-tag ${status}">${label}</span>
     </div>`;
   }).join('');
 }
 
-async function loadMatches(profile){
-  const certs = window._dashCerts || [];
-  const validCertNames = certs.filter(c => !c.expiry_date || new Date(c.expiry_date) > new Date()).map(c => c.name.toLowerCase());
+async function loadMatches(){
+  const validCertNames = myCerts.filter(c => !c.expiry_date || new Date(c.expiry_date) > new Date()).map(c => c.name.toLowerCase());
 
-  const { data: jobs } = await sb
-    .from('jobs')
+  const { data: jobs } = await sb.from('jobs')
     .select('*, employer:profiles!jobs_employer_id_fkey(company_name, first_name, last_name)')
     .eq('status', 'active')
     .order('published_at', { ascending: false })
     .limit(20);
 
   const list = document.getElementById('top-matches-list');
-  if(!list) return;
 
   if(!jobs || jobs.length === 0){
-    list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:.82rem">
-      No jobs posted yet — check back soon.
+    list.innerHTML = `<div class="empty">
+      <p>No jobs available yet</p>
+      <span>New postings will appear here as employers add them.</span>
     </div>`;
+    document.getElementById('s-matches').textContent = '0';
     return;
   }
 
-  // Calculate match per job, sort by match
   const scored = jobs.map(j => {
     const req = j.required_certs || [];
     let matchPct = 100;
@@ -690,121 +455,137 @@ async function loadMatches(profile){
       matchPct = Math.round((matched / req.length) * 100);
     }
     return { ...j, matchPct };
-  }).sort((a,b) => b.matchPct - a.matchPct).slice(0, 3);
+  }).sort((a,b) => b.matchPct - a.matchPct);
 
-  list.innerHTML = scored.map(j => {
+  const top3 = scored.slice(0, 3);
+  const matchingCount = scored.filter(j => j.matchPct >= 50).length;
+  document.getElementById('s-matches').textContent = matchingCount;
+
+  list.innerHTML = top3.map(j => {
     const company = j.employer?.company_name || ((j.employer?.first_name || '') + ' ' + (j.employer?.last_name || '')).trim() || 'Employer';
+    const initials = company.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
     const loc = [j.city, j.province].filter(Boolean).join(', ') || 'Location TBD';
     const pay = j.pay_min && j.pay_max ? `$${j.pay_min}–$${j.pay_max}${j.pay_type==='hourly'?'/hr':''}` : 'Pay TBD';
-    const matchStyle = j.matchPct === 100 ? '' : j.matchPct >= 50 ? 'style="background:var(--amber-bg);color:var(--amber);border-color:#fcd34d"' : 'style="background:#f1f5f9;color:var(--muted);border-color:var(--border)"';
-    return `<a href="jobs.html" class="job-match-card" style="text-decoration:none;display:block">
-      <div class="jmc-top">
-        <span class="jmc-co">${company}</span>
-        <span class="jmc-match" ${matchStyle}>${j.matchPct}% MATCH</span>
+    const matchCls = j.matchPct === 100 ? '' : 'partial';
+    return `<a href="jobs.html" class="job-match">
+      <div class="jm-row">
+        <div class="jm-co">${initials}</div>
+        <div class="jm-info">
+          <div class="jm-title">${j.title}</div>
+          <div class="jm-meta">${company} · ${loc} · ${pay}</div>
+        </div>
+        <div class="jm-match ${matchCls}">${j.matchPct}%</div>
       </div>
-      <div class="jmc-title">${j.title}</div>
-      <div class="jmc-meta">${loc} · ${pay}</div>
     </a>`;
   }).join('');
 }
 
-async function loadActivity(profile){
-  const list = document.getElementById('activity-list');
-  if(!list) return;
+async function loadActivity(){
   const activity = [];
 
-  // Recent applications
-  const { data: apps } = await sb
-    .from('applications')
+  const { data: apps } = await sb.from('applications')
     .select('*, job:jobs!applications_job_id_fkey(title, employer:profiles!jobs_employer_id_fkey(company_name))')
-    .eq('worker_id', profile.id)
+    .eq('worker_id', currentUser.id)
     .order('applied_at', { ascending: false })
-    .limit(5);
+    .limit(3);
 
   (apps || []).forEach(a => {
     const company = a.job?.employer?.company_name || 'an employer';
     const title = a.job?.title || 'a posting';
     activity.push({
-      type: 'app',
-      icon: 'green',
-      text: `Application submitted to <strong>${company} — ${title}</strong>`,
+      line: 'blue',
+      text: `Applied to <strong>${company}</strong> — ${title}`,
       time: a.applied_at
     });
   });
 
-  // Expiring certs (within 60 days)
-  const certs = window._dashCerts || [];
-  certs.forEach(c => {
+  myCerts.forEach(c => {
     if(!c.expiry_date) return;
     const days = Math.ceil((new Date(c.expiry_date) - new Date()) / (1000*60*60*24));
     if(days >= 0 && days <= 60){
       activity.push({
-        type: 'cert',
-        icon: 'amber',
-        text: `<strong>${c.name}</strong> expires in ${days} day${days === 1 ? '' : 's'} — renew soon`,
+        line: 'warn',
+        text: `<strong>${c.name}</strong> expires in ${days} day${days === 1 ? '' : 's'}`,
         time: new Date(Date.now() - 60*60*1000).toISOString()
       });
-    } else if(days < 0){
+    } else if(days < 0 && days >= -90){
       activity.push({
-        type: 'cert-exp',
-        icon: 'amber',
-        text: `<strong>${c.name}</strong> expired ${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'} ago`,
+        line: 'warn',
+        text: `<strong>${c.name}</strong> expired — renew to unlock more jobs`,
         time: c.expiry_date
       });
     }
   });
 
-  // Profile creation event
-  activity.push({
-    type: 'signup',
-    icon: 'blue',
-    text: 'Welcome to RigPass! Your account was created',
-    time: profile.created_at
-  });
-
-  // Sort by time desc
-  activity.sort((a,b) => new Date(b.time) - new Date(a.time));
-
-  if(activity.length === 0){
-    list.innerHTML = `<div style="padding:24px;text-align:center;color:var(--muted);font-size:.82rem">No activity yet.</div>`;
-    return;
+  if(currentProfile?.created_at){
+    activity.push({
+      line: '',
+      text: 'Welcome to RigPass',
+      time: currentProfile.created_at
+    });
   }
 
-  list.innerHTML = activity.slice(0, 5).map(item => {
-    const icons = {
-      green: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
-      blue: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg>',
-      amber: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>'
-    };
-    return `<div class="activity-item">
-      <div class="act-ico act-${item.icon}">${icons[item.icon]}</div>
-      <div class="act-content">
-        <div class="act-text">${item.text}</div>
-        <div class="act-time">${timeAgo(item.time)}</div>
-      </div>
-    </div>`;
-  }).join('');
+  activity.sort((a,b) => new Date(b.time) - new Date(a.time));
+
+  const list = document.getElementById('activity-list');
+  if(activity.length === 0){
+    list.innerHTML = `<div class="empty"><span>No activity yet</span></div>`;
+    return;
+  }
+  list.innerHTML = activity.slice(0, 5).map(item => `<div class="act-row">
+    <div class="act-line ${item.line}"></div>
+    <div class="act-content">
+      <div class="act-text">${item.text}</div>
+      <div class="act-time">${timeAgo(item.time)}</div>
+    </div>
+  </div>`).join('');
+}
+
+async function loadApplicationsCount(){
+  const { count } = await sb.from('applications').select('*', { count: 'exact', head: true }).eq('worker_id', currentUser.id);
+  document.getElementById('s-applications').textContent = count || 0;
 }
 
 function renderProfileStrength(profile){
   const steps = [
-    { key: 'basic', label: 'Add basic info', done: !!(profile.first_name && profile.last_name && profile.trade) },
-    { key: 'tickets', label: 'Upload safety tickets', done: (window._dashCerts || []).length > 0 },
-    { key: 'avail', label: 'Set availability', done: !!profile.availability },
-    { key: 'resume', label: 'Upload resume', done: !!profile.resume_url },
-    { key: 'bio', label: 'Add bio / description', done: !!(profile.bio && profile.bio.length > 20) }
+    { label: 'Basic info added', done: !!(profile.first_name && profile.last_name && profile.trade) },
+    { label: 'Safety tickets uploaded', done: myCerts.length > 0 },
+    { label: 'Availability set', done: !!profile.availability },
+    { label: 'Resume uploaded', done: !!profile.resume_url },
+    { label: 'Bio written', done: !!(profile.bio && profile.bio.length > 20) }
   ];
   const doneCount = steps.filter(s => s.done).length;
   const pct = Math.round((doneCount / steps.length) * 100);
 
-  document.getElementById('cc-pct').textContent = pct + '%';
-  document.getElementById('cc-fill').style.width = pct + '%';
-  document.getElementById('cc-steps').innerHTML = steps.map(s => `
-    <div class="cc-step ${s.done ? 'done' : ''}">
-      <div class="cc-step-ico">${s.done ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+  document.getElementById('cmpl-pct').textContent = pct + '%';
+  document.getElementById('cmpl-fill').style.width = pct + '%';
+  document.getElementById('cmpl-steps').innerHTML = steps.map(s => `
+    <div class="cmpl-step ${s.done ? 'done' : ''}">
+      <div class="cmpl-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
       ${s.label}
     </div>
   `).join('');
+}
+
+function updateGreetingMsg(){
+  const expired = myCerts.filter(c => c.expiry_date && new Date(c.expiry_date) < new Date()).length;
+  const expiring = myCerts.filter(c => {
+    if(!c.expiry_date) return false;
+    const days = Math.ceil((new Date(c.expiry_date) - new Date()) / (1000*60*60*24));
+    return days >= 0 && days <= 60;
+  }).length;
+
+  let msg = '';
+  if(myCerts.length === 0){
+    msg = "Add your safety tickets to start matching with jobs that fit your certifications.";
+  } else if(expired > 0){
+    msg = `You have ${expired} expired ticket${expired === 1 ? '' : 's'}. Renew to unlock more job matches.`;
+  } else if(expiring > 0){
+    msg = `${expiring} ticket${expiring === 1 ? '' : 's'} expiring in the next 60 days. Plan your renewal to stay job-ready.`;
+  } else {
+    msg = "All your tickets are valid. Browse jobs matching your trade and certifications below.";
+  }
+  document.getElementById('greet-msg').textContent = msg;
 }
 
 function timeAgo(dateStr){
@@ -820,36 +601,23 @@ function timeAgo(dateStr){
   return new Date(dateStr).toLocaleDateString('en-CA', { month:'short', day:'numeric' });
 }
 
-function setDate(){
-  const d = new Date();
-  const opts = { weekday:'long', month:'long', day:'numeric' };
-  document.getElementById('greet-date').textContent = d.toLocaleDateString('en-CA', opts);
-}
-
-// ════════════════════════════════════════════════════════════════════
-// SIGN OUT
-// ════════════════════════════════════════════════════════════════════
-async function signOut(){
-  await sb.auth.signOut();
-  window.location.href = 'login.html';
-}
-
-// ════════════════════════════════════════════════════════════════════
-// USER DROPDOWN MENU
-// ════════════════════════════════════════════════════════════════════
 function toggleUserMenu(e){
   e.stopPropagation();
   const menu = document.getElementById('user-menu');
   menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
 }
-document.addEventListener('click', () => {
+
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+
+document.addEventListener('click', (e) => {
   const menu = document.getElementById('user-menu');
-  if(menu) menu.style.display = 'none';
+  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
 });
 
-// Load on page open
-loadDashboard();
+init();
 </script>
-
 </body>
 </html>
