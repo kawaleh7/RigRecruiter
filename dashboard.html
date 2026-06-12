@@ -484,11 +484,7 @@ async function init(){
   const { data: profile, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
 
   if(profile && profile.suspended && !profile.is_admin){
-    alert('Your RigPass account has been suspended.' + (profile.suspended_reason ? '
-
-Reason: ' + profile.suspended_reason : '') + '
-
-Contact support if you believe this is a mistake.');
+    alert('Your RigPass account has been suspended.' + (profile.suspended_reason ? '\n\nReason: ' + profile.suspended_reason : '') + '\n\nContact support if you believe this is a mistake.');
     await sb.auth.signOut();
     window.location.href = 'login.html';
     return;
