@@ -169,7 +169,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
 
 /* RESPONSIVE */
 @media(max-width:1024px){
-  .filter-col{display:none}
+  .filter-col{position:fixed;left:0;top:0;bottom:0;z-index:400;width:270px;transform:translateX(-100%);transition:transform .25s;box-shadow:8px 0 30px rgba(15,23,42,.18)}
+  .filter-col.open{transform:translateX(0)}
+  .jf-toggle{display:inline-flex !important}
   .jobs-col{padding:20px}
 }
 @media(max-width:768px){
@@ -204,11 +206,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
   <div class="sb-section">
     <div class="sb-label">Account</div>
     <a class="sb-link" href="settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
-  </div>
-  <div class="pro-card" style="margin-top:auto">
-    <div class="pro-card-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Upgrade to Pro</div>
-    <p>Unlimited tickets, SMS alerts, priority visibility.</p>
-    <button>Upgrade — $7.99/mo</button>
   </div>
   <div class="sb-bottom">
     <div class="sb-user" onclick="toggleUserMenu(event)" style="position:relative">
@@ -251,42 +248,32 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <aside class="filter-col">
       <div class="fp-head">
         Filters
-        <button class="fp-clear">Clear all</button>
+        <button class="fp-clear" onclick="clearJobFilters()">Clear all</button>
       </div>
 
       <div class="fp-section">
         <div class="fp-label">Province</div>
-        <label class="fp-check"><input type="checkbox" checked><span>Alberta</span><span class="fp-count">18</span></label>
-        <label class="fp-check"><input type="checkbox"><span>British Columbia</span><span class="fp-count">4</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Saskatchewan</span><span class="fp-count">2</span></label>
-        <label class="fp-check"><input type="checkbox"><span>NWT</span><span class="fp-count">1</span></label>
+        <div id="jf-province"></div>
       </div>
       <div class="fp-divider"></div>
 
       <div class="fp-section">
         <div class="fp-label">Trade</div>
-        <label class="fp-check"><input type="checkbox" checked><span>Pipefitter</span><span class="fp-count">9</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Welder</span><span class="fp-count">6</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Electrician</span><span class="fp-count">4</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Instrumentation</span><span class="fp-count">3</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Heavy Equipment</span><span class="fp-count">2</span></label>
+        <div id="jf-trade"></div>
       </div>
       <div class="fp-divider"></div>
 
       <div class="fp-section">
-        <div class="fp-label">Schedule</div>
-        <label class="fp-check"><input type="checkbox"><span>14/7 Rotation</span></label>
-        <label class="fp-check"><input type="checkbox"><span>21/7 Rotation</span></label>
-        <label class="fp-check"><input type="checkbox"><span>10/4 Rotation</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Mon–Fri</span></label>
+        <div class="fp-label">Job Type</div>
+        <div id="jf-type"></div>
       </div>
       <div class="fp-divider"></div>
 
       <div class="fp-section">
         <div class="fp-label">Show Only</div>
-        <label class="fp-check"><input type="checkbox" checked><span>Full cert matches</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Camp provided</span></label>
-        <label class="fp-check"><input type="checkbox"><span>$60+/hr</span></label>
+        <label class="fp-check"><input type="checkbox" id="jf-fullmatch" onchange="render()"><span>Full cert matches</span></label>
+        <label class="fp-check"><input type="checkbox" id="jf-invited" onchange="render()"><span>Invited jobs</span></label>
+        <label class="fp-check"><input type="checkbox" id="jf-hideapplied" onchange="render()"><span>Hide jobs I applied to</span></label>
       </div>
     </aside>
 
@@ -314,7 +301,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
       <!-- HEADER -->
       <div class="jobs-col-head">
         <div class="results-count"><strong id="results-count">0</strong> open positions</div>
-        <select class="sort-select" id="sort-select" onchange="render()">
+        <button class="jf-toggle" onclick="document.querySelector('.filter-col').classList.toggle('open')" style="display:none;align-items:center;gap:6px;padding:8px 13px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:700;color:var(--text);cursor:pointer;margin-right:8px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Filters</button><select class="sort-select" id="sort-select" onchange="render()">
           <option value="match">Best Match</option>
           <option value="newest">Newest First</option>
           <option value="pay">Highest Pay</option>
@@ -438,6 +425,7 @@ async function loadData(){
     sb.from('invitations').update({ status: 'viewed' }).eq('worker_id', currentUser.id).eq('status', 'sent').then(() => {});
   }
 
+  buildJobFilters();
   render();
   renderMatchBanner();
 }
@@ -472,12 +460,59 @@ function renderMatchBanner(){
 // ════════════════════════════════════════════════════════════════════
 // RENDER
 // ════════════════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════════════════
+// JOB FILTERS — built from real postings, real counts
+// ════════════════════════════════════════════════════════════════════
+let jobFilters = { province: new Set(), trade: new Set(), type: new Set() };
+
+function buildJobFilters(){
+  const countBy = (getter) => {
+    const m = {};
+    allJobs.forEach(j => { const v = getter(j); if(v) m[v] = (m[v] || 0) + 1; });
+    return m;
+  };
+  const renderGroup = (containerId, counts, group) => {
+    const el = document.getElementById(containerId);
+    const keys = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
+    el.innerHTML = keys.length === 0
+      ? '<div style="font-size:.76rem;color:var(--light)">No data yet</div>'
+      : keys.map(k => `
+        <label class="fp-check">
+          <input type="checkbox" ${jobFilters[group].has(k) ? 'checked' : ''} onchange="toggleJobFilter('${group}', '${k.replace(/'/g,"\\'")}', this.checked)">
+          <span>${k}</span><span class="fp-count">${counts[k]}</span>
+        </label>`).join('');
+  };
+  renderGroup('jf-province', countBy(j => j.province), 'province');
+  renderGroup('jf-trade', countBy(j => j.trade), 'trade');
+  renderGroup('jf-type', countBy(j => j.employment_type), 'type');
+}
+
+function toggleJobFilter(group, value, on){
+  if(on) jobFilters[group].add(value); else jobFilters[group].delete(value);
+  render();
+}
+
+function clearJobFilters(){
+  jobFilters = { province: new Set(), trade: new Set(), type: new Set() };
+  ['jf-fullmatch','jf-invited','jf-hideapplied'].forEach(id => { const el = document.getElementById(id); if(el) el.checked = false; });
+  document.getElementById('search-input').value = '';
+  buildJobFilters();
+  render();
+}
+
 function render(){
   const list = document.getElementById('jobs-list');
   const search = document.getElementById('search-input').value.toLowerCase().trim();
   const sort = document.getElementById('sort-select').value;
 
   let filtered = allJobs.filter(j => {
+    if(jobFilters.province.size && !jobFilters.province.has(j.province)) return false;
+    if(jobFilters.trade.size && !jobFilters.trade.has(j.trade)) return false;
+    if(jobFilters.type.size && !jobFilters.type.has(j.employment_type)) return false;
+    if(document.getElementById('jf-fullmatch')?.checked && j.matchPct !== 100) return false;
+    if(document.getElementById('jf-invited')?.checked && !j.invited) return false;
+    if(document.getElementById('jf-hideapplied')?.checked && j.appliedRecord) return false;
     if(!search) return true;
     const haystack = [
       j.title, j.trade, j.city, j.province, j.description,
