@@ -620,13 +620,13 @@ footer{background:#0a1228;border-top:none;padding:64px 5% 100px}
     <div class="hero-right">
       <div class="worker-card" id="worker-card">
         <div class="card-head">
-          <div class="avatar" id="wc-avatar">MR</div>
+          <div class="avatar" id="wc-avatar">PF</div>
           <div>
-            <div class="cname" id="wc-name">Mike Robertson</div>
-            <div class="crole" id="wc-role">Journeyman Pipefitter · 12 yrs exp.</div>
+            <div class="cname" id="wc-name">Journeyman Pipefitter</div>
+            <div class="crole" id="wc-role">12 yrs experience</div>
             <div class="cloc" id="wc-loc">Fort McMurray, AB · Available Now</div>
           </div>
-          <div class="ver">✓ Verified</div>
+          <div class="ver" style="background:rgba(148,163,184,.18);color:#94a3b8">Sample Profile</div>
         </div>
         <div class="cert-label">Safety Certifications</div>
         <div class="certs" id="wc-certs">
@@ -637,8 +637,8 @@ footer{background:#0a1228;border-top:none;padding:64px 5% 100px}
           <div class="cert"><div><div class="cn">Ground Disturbance II</div><div class="cd">Expires Jan 10, 2027</div></div><span class="tag tg">Valid</span></div>
         </div>
         <div class="card-btns">
-          <a href="#" class="btn btn-ghost">View Resume</a>
-          <a href="#" class="btn btn-blue">Contact Worker</a>
+          <a href="login.html" class="btn btn-ghost">Create Worker Profile</a>
+          <a href="login.html" class="btn btn-blue">Find Workers</a>
         </div>
       </div>
     </div>
@@ -968,7 +968,7 @@ footer{background:#0a1228;border-top:none;padding:64px 5% 100px}
 <!-- MOBILE BOTTOM NAV -->
 <nav class="bottom-nav">
   <div class="bottom-nav-inner">
-    <a href="#" class="bnav-item active">
+    <a href="index.html" class="bnav-item active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Home
     </a>
@@ -991,9 +991,9 @@ footer{background:#0a1228;border-top:none;padding:64px 5% 100px}
 // Worker card rotation
 const workers = [
   {
-    initials:'MR', avatar:'#1e3a8a',
-    name:'Mike Robertson',
-    role:'Journeyman Pipefitter · 12 yrs exp.',
+    initials:'PF', avatar:'#1e3a8a',
+    name:'Journeyman Pipefitter',
+    role:'12 yrs experience',
     loc:'Fort McMurray, AB · Available Now',
     certs:[
       {n:'H2S Alive', d:'Expires Nov 14, 2026', tag:'Valid', cls:'tg'},
@@ -1004,9 +1004,9 @@ const workers = [
     ]
   },
   {
-    initials:'JT', avatar:'#0369a1',
-    name:'Jason Tran',
-    role:'Red Seal Welder · 8 yrs exp.',
+    initials:'WD', avatar:'#0369a1',
+    name:'Red Seal Welder',
+    role:'8 yrs experience',
     loc:'Edmonton, AB · Available This Week',
     certs:[
       {n:'H2S Alive', d:'Expires Mar 22, 2027', tag:'Valid', cls:'tg'},
@@ -1017,9 +1017,9 @@ const workers = [
     ]
   },
   {
-    initials:'SP', avatar:'#475569',
-    name:'Sarah Payne',
-    role:'Instrumentation Tech · 6 yrs exp.',
+    initials:'IT', avatar:'#475569',
+    name:'Instrumentation Tech',
+    role:'6 yrs experience',
     loc:'Calgary, AB · Available Now',
     certs:[
       {n:'H2S Alive', d:'Expires Jul 8, 2027', tag:'Valid', cls:'tg'},
@@ -1030,9 +1030,9 @@ const workers = [
     ]
   },
   {
-    initials:'CW', avatar:'#065f46',
-    name:'Craig Wallace',
-    role:'Red Seal Pipefitter · 18 yrs exp.',
+    initials:'PF', avatar:'#065f46',
+    name:'Red Seal Pipefitter',
+    role:'18 yrs experience',
     loc:'Edson, AB · Available Now',
     certs:[
       {n:'H2S Alive', d:'Expires Oct 11, 2026', tag:'Valid', cls:'tg'},
@@ -1043,9 +1043,9 @@ const workers = [
     ]
   },
   {
-    initials:'BK', avatar:'#334155',
-    name:'Brad Kowalski',
-    role:'Journeyman Electrician · 15 yrs exp.',
+    initials:'EL', avatar:'#334155',
+    name:'Journeyman Electrician',
+    role:'15 yrs experience',
     loc:'Grande Prairie, AB · Available Now',
     certs:[
       {n:'H2S Alive', d:'Expires Jan 18, 2027', tag:'Valid', cls:'tg'},
@@ -1096,13 +1096,6 @@ function toggleBilling(){
   document.getElementById('emp-price').textContent = isAnnual ? '$999.99' : '$99.99';
   document.getElementById('emp-period').textContent = isAnnual ? '/yr' : '/mo';
   document.getElementById('emp-desc').textContent = isAnnual ? 'Best value — save $200 vs monthly billing.' : 'Full worker pool access. Build certified crews without the paperwork.';
-}
-
-function sw(btn,id){
-  document.querySelectorAll('.rtab').forEach(t=>t.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById('wk').style.display=id==='wk'?'grid':'none';
-  document.getElementById('em').style.display=id==='em'?'grid':'none';
 }
 
 // Certification donut chart
