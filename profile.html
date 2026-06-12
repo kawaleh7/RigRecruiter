@@ -9,248 +9,265 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a;display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+
 :root{
-  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
-  --navy:#0a1228;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#94a3b8;
-  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--red-bg:#fef2f2;
-  --amber:#92400e;--amber-bg:#fefce8;--gold:#b8923a;--gold-border:#c9963a;
-  --off:#f8fafc;
-  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
-  --shadow:0 4px 14px rgba(15,23,42,.08);
+  --navy:#0a1228;
+  --blue:#1e3a8a;
+  --blue-mid:#1e40af;
+  --blue-soft:#eef2ff;
+  --text:#0f172a;
+  --text-2:#475569;
+  --muted:#64748b;
+  --light:#94a3b8;
+  --line:#e2e8f0;
+  --line-soft:#f1f5f9;
+  --ok:#15803d;
+  --ok-soft:#f0fdf4;
+  --warn:#a16207;
+  --warn-soft:#fefce8;
+  --danger:#b91c1c;
+  --danger-soft:#fef2f2;
 }
 
-/* ── SIDEBAR ── */
-.sidebar{width:248px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
-.sb-logo{padding:22px 22px 0;display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:32px}
-.logo-mark{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 10px rgba(30,58,138,.25)}
-.logo-mark svg{width:16px;height:16px;fill:#fff}
-.logo-name{font-size:1.12rem;font-weight:800;color:var(--text)}
-.logo-name span{color:var(--blue-mid)}
-.sb-section{padding:0 12px;margin-bottom:6px}
-.sb-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--light);padding:0 12px;margin-bottom:8px}
-.sb-link{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;font-size:.88rem;font-weight:500;color:var(--muted);text-decoration:none;transition:all .15s;margin-bottom:2px;position:relative}
-.sb-link:hover{background:#f1f5f9;color:var(--text)}
-.sb-link.active{background:var(--blue-lt);color:var(--blue);font-weight:700}
-.sb-link.active::before{content:'';position:absolute;left:-12px;top:8px;bottom:8px;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
-.sb-link svg{width:17px;height:17px;flex-shrink:0}
-.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:100px}
-.sb-divider{height:1px;background:var(--border);margin:14px 22px}
-.pro-card{margin:0 16px 12px;padding:16px;background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);border-radius:11px;color:#fff;position:relative;overflow:hidden}
-.pro-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(147,197,253,.15)}
-.pro-card-title{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#93c5fd;margin-bottom:6px;position:relative}
-.pro-card p{font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.5;margin-bottom:12px;position:relative}
-.pro-card button{width:100%;padding:8px;background:#fff;color:var(--blue);border:none;border-radius:7px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;position:relative}
-.pro-card button:hover{background:#f1f5f9}
-.sb-bottom{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
-.sb-user{display:flex;align-items:center;gap:11px;padding:10px;border-radius:9px;cursor:pointer;transition:background .15s}
-.sb-user:hover{background:#f1f5f9}
-.sb-avatar{width:36px;height:36px;border-radius:9px;background:var(--blue);display:grid;place-items:center;font-weight:800;font-size:.78rem;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(30,58,138,.25)}
-.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2}
-.sb-urole{font-size:.7rem;color:var(--muted);margin-top:2px}
+/* SIDEBAR */
+.sidebar{width:240px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sb-top{padding:22px 22px 18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line-soft)}
+.sb-logo{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+.sb-logo svg{width:16px;height:16px;fill:#fff}
+.sb-brand{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.sb-brand span{color:var(--blue)}
+.sb-nav{flex:1;padding:18px 12px;overflow-y:auto}
+.sb-section + .sb-section{margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.sb-label{font-size:.66rem;font-weight:800;color:var(--light);text-transform:uppercase;letter-spacing:1.2px;padding:0 10px 6px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;font-size:.86rem;font-weight:600;color:var(--text-2);text-decoration:none;margin-bottom:2px;transition:all .15s}
+.sb-link:hover{background:var(--line-soft);color:var(--text)}
+.sb-link.active{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.sb-link svg{width:17px;height:17px;flex-shrink:0;stroke-width:2}
+.sb-bottom{padding:14px;border-top:1px solid var(--line-soft)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;cursor:pointer;transition:background .15s;position:relative}
+.sb-user:hover{background:var(--line-soft)}
+.sb-avatar{width:34px;height:34px;border-radius:9px;background:var(--blue);display:grid;place-items:center;color:#fff;font-size:.74rem;font-weight:800;flex-shrink:0}
+.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.sb-urole{font-size:.72rem;color:var(--muted);margin-top:2px}
 .sb-arrow{margin-left:auto;color:var(--light)}
 
-/* ── MAIN ── */
-.main{margin-left:248px;flex:1;display:flex;flex-direction:column;min-height:100vh}
-.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
-.topbar-title{font-size:1.02rem;font-weight:800;color:var(--text)}
-.topbar-right{display:flex;align-items:center;gap:10px}
-.icon-btn{width:38px;height:38px;border-radius:9px;border:1.5px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer;position:relative;transition:all .15s}
-.icon-btn:hover{border-color:var(--light);background:var(--off)}
-.notif-dot{position:absolute;top:7px;right:7px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid #fff}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:700;cursor:pointer;border:none;text-decoration:none;transition:all .15s;white-space:nowrap}
-.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 10px rgba(30,58,138,.2)}
-.btn-blue:hover{background:var(--blue-mid);transform:translateY(-1px);box-shadow:0 8px 16px rgba(30,58,138,.25)}
-.btn-ghost{background:#fff;color:var(--muted);border:1.5px solid var(--border)}
-.btn-ghost:hover{color:var(--text);border-color:var(--light)}
-.btn-sm{padding:7px 14px;font-size:.78rem}
+/* MAIN */
+.main{flex:1;padding:32px 40px 60px;min-width:0;max-width:1280px}
 
-.content{padding:28px 32px;flex:1;max-width:1200px;margin:0 auto;width:100%}
-
-/* ── PREVIEW BANNER ── */
-.preview-banner{
-  background:var(--blue-lt);border:1.5px solid var(--blue-border);
-  border-radius:11px;padding:13px 18px;margin-bottom:20px;
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
+/* HERO — clean (no dark gradient) */
+.hero{
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  padding:28px 30px;margin-bottom:22px;
 }
-.preview-banner-left{display:flex;align-items:center;gap:10px}
-.preview-banner-left svg{color:var(--blue);flex-shrink:0}
-.preview-banner-text{font-size:.83rem;color:var(--blue);font-weight:600}
-.preview-banner-text span{font-weight:500;opacity:.8}
-
-/* ── HERO PROFILE CARD ── */
-.profile-hero{
-  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
-  border-radius:14px;padding:32px;margin-bottom:20px;
-  color:#fff;position:relative;overflow:hidden;
+.hero-top{display:flex;align-items:flex-start;gap:22px;flex-wrap:wrap}
+.hero-avatar{
+  width:78px;height:78px;border-radius:16px;
+  background:var(--blue);color:#fff;
+  display:grid;place-items:center;font-weight:800;font-size:1.5rem;flex-shrink:0;
 }
-.profile-hero::before{content:'';position:absolute;inset:0;opacity:.05;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:36px 36px}
-.profile-hero::after{content:'';position:absolute;top:-60px;right:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(147,197,253,.18) 0%,transparent 70%)}
-.ph-top{display:flex;align-items:flex-start;gap:24px;position:relative;z-index:2}
-.ph-avatar{width:90px;height:90px;border-radius:18px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:grid;place-items:center;font-weight:800;font-size:1.8rem;color:#fff;flex-shrink:0}
-.ph-info{flex:1;min-width:0}
-.ph-name-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
-.ph-name{font-size:1.6rem;font-weight:800;color:#fff;letter-spacing:-.5px}
-.ph-verified{display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,.2);color:#86efac;border:1px solid rgba(34,197,94,.4);font-size:.7rem;font-weight:800;padding:4px 10px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px}
-.ph-role{font-size:.92rem;color:rgba(255,255,255,.75);margin-bottom:14px}
-.ph-meta{display:flex;flex-wrap:wrap;gap:18px;font-size:.82rem;color:rgba(255,255,255,.6)}
-.ph-meta span{display:flex;align-items:center;gap:6px}
-.ph-meta svg{opacity:.7;flex-shrink:0}
-.ph-actions{position:relative;z-index:2;display:flex;gap:10px;margin-top:22px;padding-top:22px;border-top:1px solid rgba(255,255,255,.1)}
-.btn-white{background:#fff;color:var(--blue);box-shadow:0 4px 10px rgba(0,0,0,.1)}
-.btn-white:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.15)}
-.btn-outline-w{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.25)}
-.btn-outline-w:hover{background:rgba(255,255,255,.18)}
-
-/* ── QUICK STATS ── */
-.quick-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.qs-card{
-  background:#fff;border-radius:12px;border:1.5px solid var(--gold-border);
-  padding:18px 20px;text-align:center;
-  transition:all .2s;position:relative;overflow:hidden;isolation:isolate;
+.hero-info{flex:1;min-width:200px}
+.hero-name-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;flex-wrap:wrap}
+.hero-name{font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-.5px}
+.hero-verified{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.66rem;font-weight:800;
+  background:var(--ok-soft);color:var(--ok);border:1px solid #86efac;
+  padding:3px 8px;border-radius:5px;
+  text-transform:uppercase;letter-spacing:.4px;
 }
-.qs-card::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.5) 50%,transparent 60%);transform:translateX(-100%);transition:transform .55s ease;border-radius:inherit;pointer-events:none;z-index:1}
-.qs-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--gold)}
-.qs-card:hover::after{transform:translateX(100%)}
-.qs-num{font-size:1.7rem;font-weight:800;color:var(--blue);letter-spacing:-.7px;line-height:1}
-.qs-label{font-size:.74rem;color:var(--muted);margin-top:6px;font-weight:600}
+.hero-role{font-size:.92rem;color:var(--muted);font-weight:600;margin-bottom:12px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:18px;font-size:.82rem;color:var(--muted);font-weight:500}
+.hero-meta span{display:inline-flex;align-items:center;gap:6px}
+.hero-meta svg{opacity:.6}
 
-/* ── LAYOUT ── */
+.hero-actions{display:flex;gap:10px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line-soft);flex-wrap:wrap}
+
+/* STATS STRIP */
+.stats-strip{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 4px;margin-bottom:22px}
+.stat-item{flex:1;padding:0 24px;text-align:left;border-right:1px solid var(--line-soft);min-width:0}
+.stat-item:last-child{border-right:none}
+.stat-num{font-size:1.65rem;font-weight:800;color:var(--text);letter-spacing:-.6px;line-height:1}
+.stat-num.ok{color:var(--ok)}
+.stat-num.warn{color:var(--warn)}
+.stat-num.danger{color:var(--danger)}
+.stat-label{font-size:.76rem;color:var(--muted);margin-top:6px;font-weight:600}
+
+/* LAYOUT */
 .profile-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
 
 /* CARDS */
-.card{background:#fff;border-radius:14px;border:1.5px solid var(--gold-border);padding:24px;margin-bottom:18px;transition:box-shadow .2s}
-.card:hover{box-shadow:var(--shadow-sm)}
-.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.card-title{font-size:.95rem;font-weight:800;color:var(--text);letter-spacing:-.1px}
-.card-edit{font-size:.78rem;font-weight:700;color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:4px;background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
-
-/* ABOUT */
-.about-text{font-size:.9rem;color:var(--muted);line-height:1.7}
-
-/* CERTS TABLE */
-.cert-table{display:flex;flex-direction:column}
-.cert-row{
-  display:grid;grid-template-columns:42px 1fr auto auto;gap:14px;align-items:center;
-  padding:14px 0;border-bottom:1px solid #f1f5f9;
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+.card-head{padding:18px 22px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.card-title{font-size:.95rem;font-weight:800;color:var(--text);letter-spacing:-.2px}
+.card-edit{
+  font-size:.78rem;font-weight:700;color:var(--blue);text-decoration:none;
+  background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;
+  display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:6px;
+  transition:background .15s;
 }
-.cert-row:last-child{border-bottom:none}
-.cert-row:first-child{padding-top:0}
-.cert-ico{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;flex-shrink:0}
-.cert-info{min-width:0}
-.cert-name{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:2px}
-.cert-meta{font-size:.73rem;color:var(--muted)}
-.tag{display:inline-flex;align-items:center;gap:5px;border-radius:100px;padding:4px 10px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0}
-.tag::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
-.tg{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
-.tr-tag{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
-.ty{background:var(--amber-bg);color:var(--amber);border:1px solid #fcd34d}
+.card-edit:hover{background:var(--blue-soft)}
 
-/* WORK HISTORY */
-.work-item{
-  display:flex;gap:14px;padding:16px 0;border-bottom:1px solid #f1f5f9;
-}
-.work-item:last-child{border-bottom:none;padding-bottom:0}
-.work-item:first-child{padding-top:0}
-.work-ico{
-  width:42px;height:42px;border-radius:10px;
-  background:var(--navy);display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;flex-shrink:0;
-}
-.work-info{flex:1;min-width:0}
-.work-title{font-size:.92rem;font-weight:800;color:var(--text);margin-bottom:2px;letter-spacing:-.1px}
-.work-co{font-size:.82rem;color:var(--muted);font-weight:600;margin-bottom:4px}
-.work-dates{font-size:.74rem;color:var(--light);margin-bottom:8px}
-.work-desc{font-size:.82rem;color:var(--muted);line-height:1.6}
+.card-body{padding:0 22px 18px}
+.about-text{font-size:.9rem;color:var(--text-2);line-height:1.65}
 
 /* SKILLS */
-.skills-grid{display:flex;flex-wrap:wrap;gap:7px}
+.skills-list{padding:0 22px 18px;display:flex;flex-wrap:wrap;gap:6px}
 .skill{
-  background:var(--off);border:1.5px solid var(--border);border-radius:100px;
-  padding:5px 13px;font-size:.78rem;font-weight:700;color:var(--text);
+  display:inline-flex;align-items:center;
+  background:var(--blue-soft);color:var(--blue);
+  padding:5px 11px;border-radius:6px;font-size:.78rem;font-weight:700;
+  border:1px solid #c7d2fe;
 }
 
-/* SIDE — RESUME CARD */
+/* CERT ROWS — dot indicator pattern */
+.cert-row{display:flex;align-items:center;gap:14px;padding:14px 22px;border-top:1px solid var(--line-soft)}
+.cert-row:first-of-type{border-top:none}
+.cert-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cert-dot.ok{background:var(--ok)}
+.cert-dot.warn{background:var(--warn)}
+.cert-dot.danger{background:var(--danger)}
+.cert-info{flex:1;min-width:0}
+.cert-name{font-size:.9rem;font-weight:700;color:var(--text);letter-spacing:-.1px;margin-bottom:2px}
+.cert-meta{font-size:.74rem;color:var(--muted)}
+.cert-tag{
+  font-size:.66rem;font-weight:800;padding:3px 8px;border-radius:5px;
+  text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;
+}
+.cert-tag.ok{background:var(--ok-soft);color:var(--ok)}
+.cert-tag.warn{background:var(--warn-soft);color:var(--warn)}
+.cert-tag.danger{background:var(--danger-soft);color:var(--danger)}
+
+/* WORK HISTORY */
+.work-item{display:flex;gap:14px;padding:14px 22px;border-top:1px solid var(--line-soft);position:relative}
+.work-item:first-of-type{border-top:none}
+.work-ico{width:42px;height:42px;border-radius:9px;color:#fff;display:grid;place-items:center;font-size:.74rem;font-weight:800;flex-shrink:0}
+.work-info{flex:1;min-width:0;padding-right:32px}
+.work-title{font-size:.92rem;font-weight:700;color:var(--text);letter-spacing:-.1px;margin-bottom:2px}
+.work-co{font-size:.8rem;color:var(--text-2);font-weight:600;margin-bottom:3px}
+.work-dates{font-size:.72rem;color:var(--muted);font-weight:600}
+.work-desc{font-size:.82rem;color:var(--text-2);line-height:1.55;margin-top:6px}
+.work-del{position:absolute;top:14px;right:14px;background:transparent;border:none;color:var(--light);cursor:pointer;padding:6px;border-radius:6px;transition:all .15s}
+.work-del:hover{color:var(--danger);background:var(--danger-soft)}
+
+/* RESUME CARD */
 .resume-card{
-  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
-  border-radius:14px;padding:22px;color:#fff;margin-bottom:18px;
+  background:linear-gradient(135deg,#1e3a8a,#0a1228);color:#fff;
+  border:none;padding:22px;border-radius:12px;margin-bottom:18px;
   position:relative;overflow:hidden;
 }
-.resume-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(147,197,253,.18) 0%,transparent 70%)}
-.resume-ico-big{width:48px;height:48px;background:rgba(147,197,253,.15);border:1px solid rgba(147,197,253,.3);border-radius:11px;display:grid;place-items:center;margin-bottom:14px;position:relative}
-.resume-card h3{font-size:1rem;font-weight:800;color:#fff;margin-bottom:6px;position:relative;letter-spacing:-.2px}
-.resume-card p{font-size:.8rem;color:rgba(255,255,255,.65);line-height:1.55;margin-bottom:16px;position:relative}
-.resume-meta{display:flex;align-items:center;justify-content:space-between;font-size:.74rem;color:rgba(255,255,255,.55);margin-bottom:14px;position:relative}
+.resume-card::after{content:'';position:absolute;top:-30px;right:-30px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(184,146,58,.18) 0%,transparent 70%);pointer-events:none}
+.resume-card-title{font-size:.85rem;font-weight:800;color:#fff;letter-spacing:-.1px;margin-bottom:4px;position:relative}
+.resume-card-desc{font-size:.78rem;color:rgba(255,255,255,.7);margin-bottom:14px;line-height:1.45;position:relative}
+.resume-meta{display:flex;align-items:center;gap:10px;font-size:.74rem;color:rgba(255,255,255,.7);margin-bottom:14px;font-weight:500;position:relative;flex-wrap:wrap}
 .resume-actions{display:flex;gap:8px;position:relative}
 
-/* VISIBILITY */
-.vis-card{padding:20px}
-.vis-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f1f5f9}
-.vis-row:last-child{border-bottom:none;padding-bottom:0}
-.vis-row:first-child{padding-top:0}
-.vis-label{font-size:.85rem;font-weight:600;color:var(--text)}
-.vis-sub{font-size:.72rem;color:var(--muted);margin-top:2px}
-.toggle{position:relative;width:38px;height:22px;background:#cbd5e1;border-radius:100px;cursor:pointer;transition:background .2s;flex-shrink:0}
-.toggle.on{background:var(--blue)}
-.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.toggle.on::after{transform:translateX(16px)}
-
-/* INSIGHTS */
-.insight-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9;font-size:.84rem}
-.insight-row:last-child{border-bottom:none;padding-bottom:0}
-.insight-row:first-child{padding-top:0}
-.insight-label{color:var(--muted);font-weight:500}
-.insight-val{font-weight:800;color:var(--text)}
-
-/* RESPONSIVE */
-@media(max-width:900px){
-  .profile-grid{grid-template-columns:1fr}
-  .quick-stats{grid-template-columns:1fr 1fr}
-  .ph-top{flex-direction:column;align-items:flex-start}
+/* SIDE ACCOUNT INFO */
+.info-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:18px}
+.info-title{font-size:.78rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.info-row{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line-soft);font-size:.83rem;gap:10px}
+.info-row:first-of-type{border-top:none;padding-top:0}
+.info-label{color:var(--muted);font-weight:600}
+.info-value{color:var(--text);font-weight:700;text-align:right;word-break:break-word;min-width:0}
+.info-link{
+  display:flex;align-items:center;justify-content:space-between;padding:11px 0;
+  border-top:1px solid var(--line-soft);font-size:.84rem;font-weight:600;color:var(--blue);
+  text-decoration:none;transition:padding .15s;
 }
-@media(max-width:768px){
-  .sidebar{display:none}
-  .main{margin-left:0}
+.info-link:hover{padding-left:4px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;border:1.5px solid transparent;text-decoration:none;transition:all .15s}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:var(--blue-mid)}
+.btn-ghost{background:#fff;color:var(--text-2);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--light);color:var(--text);background:var(--line-soft)}
+.btn-white-out{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.25)}
+.btn-white-out:hover{background:rgba(255,255,255,.2)}
+.btn-gold{background:#fcd34d;color:var(--navy)}
+.btn-gold:hover{background:#fbbf24}
+.btn-sm{padding:7px 12px;font-size:.78rem}
+
+.empty{padding:32px 22px;text-align:center;color:var(--muted)}
+.empty p{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.empty span{font-size:.78rem}
+
+/* MODAL */
+.modal-bd{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:300;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal{background:#fff;border-radius:14px;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(15,23,42,.3)}
+.modal-head{padding:22px 24px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.modal-sub{font-size:.78rem;color:var(--muted);margin-top:2px}
+.modal-close{background:transparent;border:none;cursor:pointer;color:var(--muted);padding:6px;border-radius:6px;line-height:0}
+.modal-close:hover{background:var(--line-soft);color:var(--text)}
+.modal-body{padding:22px 24px}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--line-soft);display:flex;justify-content:flex-end;gap:10px}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:5px}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;color:var(--text);
+  outline:none;transition:border-color .15s,box-shadow .15s;background:#fff;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,58,138,.1)}
+.field textarea{resize:vertical;min-height:80px;line-height:1.5}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.msg{padding:10px 12px;border-radius:8px;margin-top:10px;font-size:.82rem;font-weight:600;display:none;line-height:1.4}
+.msg.success{background:var(--ok-soft);color:var(--ok);border:1px solid #86efac;display:block}
+.msg.error{background:var(--danger-soft);color:var(--danger);border:1px solid #fda4af;display:block}
+
+@media(max-width:980px){
+  .profile-grid{grid-template-columns:1fr}
+  .stats-strip{flex-wrap:wrap}
+  .stat-item{flex:0 0 50%;padding:14px 18px;border-right:none;border-bottom:1px solid var(--line-soft)}
+  .stat-item:nth-last-child(-n+2){border-bottom:none}
+}
+@media(max-width:700px){
+  .sidebar{width:64px}
+  .sb-brand,.sb-link span,.sb-uname,.sb-urole,.sb-arrow,.sb-label{display:none}
+  .sb-link{justify-content:center;padding:9px 0}
+  .sb-user{justify-content:center;padding:0}
+  .main{padding:20px}
+  .stat-item{flex:0 0 100%}
+  .two-col{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
 <aside class="sidebar">
-  <a class="sb-logo" href="index.html">
-    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
-    <span class="logo-name">Rig<span>Pass</span></span>
-  </a>
-  <div class="sb-section">
-    <div class="sb-label">Main</div>
-    <a class="sb-link" href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
-    <a class="sb-link active" href="profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile</a>
-    <a class="sb-link" href="certifications.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Safety Tickets</a>
-    <a class="sb-link" href="jobs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Job Board<span class="sb-badge">9</span></a>
+  <div class="sb-top">
+    <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <div class="sb-brand">Rig<span>Pass</span></div>
   </div>
-  <div class="sb-divider"></div>
-  <div class="sb-section">
-    <div class="sb-label">Account</div>
-    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages<span class="sb-badge">2</span></a>
-    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Alerts</a>
-    <a class="sb-link" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
-  </div>
-  <div class="pro-card" style="margin-top:auto">
-    <div class="pro-card-title"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Upgrade to Pro</div>
-    <p>Unlimited tickets, SMS alerts, priority visibility.</p>
-    <button>Upgrade — $7.99/mo</button>
-  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section">
+      <div class="sb-label">Main</div>
+      <a class="sb-link" href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+      <a class="sb-link" href="jobs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg><span>Browse Jobs</span></a>
+      <a class="sb-link" href="my-applications.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>My Applications</span></a>
+      <a class="sb-link" href="certifications.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Safety Tickets</span></a>
+      <a class="sb-link" href="training.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.65 3.36 3 6 3s6-1.35 6-3v-5"/></svg><span>Training</span></a>
+      <a class="sb-link active" href="profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>My Profile</span></a>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Account</div>
+      <a class="sb-link" href="settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/></svg><span>Settings</span></a>
+    </div>
+  </nav>
+
   <div class="sb-bottom">
-    <div class="sb-user" onclick="toggleUserMenu(event)" style="position:relative">
+    <div class="sb-user" onclick="toggleUserMenu(event)">
       <div class="sb-avatar" id="sb-avatar">--</div>
-      <div style="min-width:0"><div class="sb-uname" id="sb-uname">Loading...</div><div class="sb-urole" id="sb-urole">—</div></div>
+      <div style="min-width:0">
+        <div class="sb-uname" id="sb-uname">Loading...</div>
+        <div class="sb-urole" id="sb-urole">—</div>
+      </div>
       <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);overflow:hidden;z-index:200">
-        <a href="dashboard.html" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--text);text-decoration:none;font-weight:600" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Dashboard
-        </a>
-        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--red);background:#fff;border:none;border-top:1px solid #f1f5f9;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.12);overflow:hidden;z-index:200">
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--danger);background:#fff;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Sign Out
         </button>
@@ -259,251 +276,190 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
   </div>
 </aside>
 
-<!-- ── MAIN ── -->
-<div class="main">
-  <div class="topbar">
-    <div class="topbar-title">My Profile</div>
-    <div class="topbar-right">
-      <div class="icon-btn">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <div class="notif-dot"></div>
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-top">
+      <div class="hero-avatar" id="ph-avatar">--</div>
+      <div class="hero-info">
+        <div class="hero-name-row">
+          <h1 class="hero-name" id="ph-name">Loading...</h1>
+          <span class="hero-verified" id="ph-verified" style="display:none">✓ Verified</span>
+        </div>
+        <div class="hero-role" id="ph-role">—</div>
+        <div class="hero-meta">
+          <span id="ph-location"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>Location not set</span>
+          <span id="ph-availability"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Availability not set</span>
+          <span id="ph-pay" style="display:none"></span>
+        </div>
       </div>
-      <button class="btn btn-blue">
+    </div>
+    <div class="hero-actions">
+      <button class="btn btn-blue" onclick="openEditModal()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Edit Profile
       </button>
+      <a class="btn btn-ghost" href="settings.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>
+        Privacy & Visibility
+      </a>
     </div>
   </div>
 
-  <div class="content">
+  <!-- STATS -->
+  <div class="stats-strip">
+    <div class="stat-item">
+      <div class="stat-num ok" id="qs-valid">0</div>
+      <div class="stat-label">Valid Tickets</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="qs-experience">0</div>
+      <div class="stat-label">Years Experience</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="qs-isn">—</div>
+      <div class="stat-label">ISN-Ready</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="qs-completion">0%</div>
+      <div class="stat-label">Profile Complete</div>
+    </div>
+  </div>
 
-    <!-- PREVIEW BANNER -->
-    <div class="preview-banner">
-      <div class="preview-banner-left">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        <div class="preview-banner-text">
-          This is how employers see your profile
-          <span>· Public preview mode</span>
+  <!-- LAYOUT -->
+  <div class="profile-grid">
+
+    <!-- LEFT -->
+    <div>
+
+      <!-- ABOUT -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">About</div>
+          <button class="card-edit" onclick="openEditModal()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+          </button>
+        </div>
+        <div class="card-body">
+          <p class="about-text" id="profile-bio">No bio added yet. Click <strong>Edit Profile</strong> to add a description.</p>
         </div>
       </div>
-      <button class="btn btn-ghost btn-sm">Privacy Settings</button>
+
+      <!-- SAFETY CERTIFICATIONS -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Safety Certifications</div>
+          <a class="card-edit" href="certifications.html">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Manage
+          </a>
+        </div>
+        <div id="profile-cert-list">
+          <div class="empty"><span>Loading…</span></div>
+        </div>
+      </div>
+
+      <!-- WORK HISTORY -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Work History</div>
+          <button class="card-edit" onclick="openWorkModal()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Job
+          </button>
+        </div>
+        <div id="work-history-list">
+          <div class="empty"><span>Loading…</span></div>
+        </div>
+      </div>
+
+      <!-- SKILLS -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Skills & Specializations</div>
+          <button class="card-edit" onclick="openSkillsModal()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+          </button>
+        </div>
+        <div class="skills-list" id="skills-list">
+          <div style="padding:6px 0;color:var(--muted);font-size:.85rem;font-style:italic">No skills added yet.</div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- HERO PROFILE -->
-    <div class="profile-hero">
-      <div class="ph-top">
-        <div class="ph-avatar" id="ph-avatar">--</div>
-        <div class="ph-info">
-          <div class="ph-name-row">
-            <h1 class="ph-name" id="ph-name">Loading...</h1>
-            <span class="ph-verified" id="ph-verified" style="display:none">✓ Verified</span>
-          </div>
-          <div class="ph-role" id="ph-role">—</div>
-          <div class="ph-meta">
-            <span id="ph-location"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Location not set</span>
-            <span id="ph-availability"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Availability not set</span>
-            <span id="ph-pay" style="display:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
-          </div>
+    <!-- RIGHT -->
+    <div>
+
+      <!-- RESUME -->
+      <div class="resume-card">
+        <div class="resume-card-title" id="resume-title">Resume</div>
+        <p class="resume-card-desc" id="resume-desc">Upload your resume PDF so employers can see your full work history with one click.</p>
+        <div class="resume-meta" id="resume-meta" style="display:none">
+          <span id="resume-filename"></span>
+          <span style="opacity:.6">·</span>
+          <span id="resume-uploaded"></span>
         </div>
-      </div>
-      <div class="ph-actions">
-        <button class="btn btn-white" onclick="openEditModal()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Edit Profile
-        </button>
-        <button class="btn btn-outline-w">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-          Share Profile Link
-        </button>
-      </div>
-    </div>
-
-    <!-- QUICK STATS -->
-    <div class="quick-stats">
-      <div class="qs-card"><div class="qs-num" id="qs-valid">0</div><div class="qs-label">Valid Tickets</div></div>
-      <div class="qs-card"><div class="qs-num" id="qs-experience">0</div><div class="qs-label">Years Experience</div></div>
-      <div class="qs-card"><div class="qs-num" id="qs-views">0</div><div class="qs-label">Profile Views</div></div>
-      <div class="qs-card"><div class="qs-num" id="qs-isn" style="color:var(--green)">—</div><div class="qs-label">ISN-Ready</div></div>
-    </div>
-
-    <!-- ── MAIN GRID ── -->
-    <div class="profile-grid">
-      <!-- LEFT: profile content -->
-      <div>
-        <!-- ABOUT -->
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">About</div>
-            <button class="card-edit">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Edit
-            </button>
-          </div>
-          <p class="about-text" id="profile-bio">No bio added yet. Click <strong>Edit Profile</strong> to add a description that helps employers find you.</p>
-        </div>
-
-        <!-- CERTIFICATIONS -->
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Safety Certifications</div>
-            <a class="card-edit" href="certifications.html">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Manage
-            </a>
-          </div>
-          <div class="cert-table" id="profile-cert-list">
-            <div style="padding:24px;text-align:center;color:var(--light);font-size:.85rem">Loading certifications...</div>
-          </div>
-        </div>
-
-        <!-- WORK HISTORY -->
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Work History</div>
-            <button class="card-edit" onclick="openWorkModal()">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Add Job
-            </button>
-          </div>
-          <div id="work-history-list">
-            <div style="padding:24px;text-align:center;color:var(--light);font-size:.85rem">Loading...</div>
-          </div>
-        </div>
-
-        <!-- SKILLS -->
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Skills & Specializations</div>
-            <button class="card-edit" onclick="openSkillsModal()">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Edit
-            </button>
-          </div>
-          <div class="skills-grid" id="skills-list">
-            <div style="padding:14px;color:var(--light);font-size:.85rem;font-style:italic">No skills added yet. Click Edit to add your specializations.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT: side panels -->
-      <div>
-        <!-- RESUME CARD -->
-        <div class="resume-card" id="resume-card">
-          <div class="resume-ico-big">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </div>
-          <h3 id="resume-title">Resume</h3>
-          <p id="resume-desc">Upload your resume PDF so employers can see your full work history with one click.</p>
-          <div class="resume-meta" id="resume-meta" style="display:none">
-            <span id="resume-filename">📄 resume.pdf</span>
-            <span id="resume-uploaded">Just uploaded</span>
-          </div>
-          <div class="resume-actions">
-            <button class="btn btn-white btn-sm" id="resume-primary-btn" style="flex:1" onclick="onResumePrimaryClick()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <span id="resume-primary-text">Upload Resume</span>
-            </button>
-            <button class="btn btn-outline-w btn-sm" id="resume-secondary-btn" style="display:none" onclick="deleteResume()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
-              Delete
-            </button>
-          </div>
-          <!-- Hidden file input -->
+        <div class="resume-actions">
+          <button class="btn btn-gold" id="resume-primary-btn" onclick="onResumePrimaryClick()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span id="resume-primary-text">Upload Resume</span>
+          </button>
+          <button class="btn btn-white-out btn-sm" id="resume-secondary-btn" onclick="deleteResume()" style="display:none">Delete</button>
           <input type="file" id="resume-file-input" accept=".pdf,.doc,.docx" style="display:none" onchange="uploadResume(this)">
         </div>
-
-        <!-- VISIBILITY -->
-        <div class="card vis-card">
-          <div class="card-head">
-            <div class="card-title">Profile Visibility</div>
-          </div>
-          <div class="vis-row">
-            <div>
-              <div class="vis-label">Public to employers</div>
-              <div class="vis-sub">Verified employers can find you</div>
-            </div>
-            <div class="toggle" id="toggle-is-public" onclick="toggleVisibility('is_public', this)"></div>
-          </div>
-          <div class="vis-row">
-            <div>
-              <div class="vis-label">Show contact info</div>
-              <div class="vis-sub">Phone & email visible after contact request</div>
-            </div>
-            <div class="toggle" id="toggle-show-contact" onclick="toggleVisibility('show_contact', this)"></div>
-          </div>
-          <div class="vis-row">
-            <div>
-              <div class="vis-label">Open to opportunities</div>
-              <div class="vis-sub">Show "Available Now" badge</div>
-            </div>
-            <div class="toggle" id="toggle-open-to-opps" onclick="toggleVisibility('open_to_opportunities', this)"></div>
-          </div>
-          <div class="vis-row">
-            <div>
-              <div class="vis-label">Allow training requests</div>
-              <div class="vis-sub">Employers can send cert requirements</div>
-            </div>
-            <div class="toggle" id="toggle-allow-training" onclick="toggleVisibility('allow_training_requests', this)"></div>
-          </div>
-        </div>
-
-        <!-- INSIGHTS -->
-        <div class="card">
-          <div class="card-head">
-            <div class="card-title">Profile Insights</div>
-            <span style="font-size:.72rem;color:var(--light);font-weight:600">Last 30 days</span>
-          </div>
-          <div class="insight-row"><span class="insight-label">Profile views</span><span class="insight-val">142</span></div>
-          <div class="insight-row"><span class="insight-label">Employers searched you</span><span class="insight-val">28</span></div>
-          <div class="insight-row"><span class="insight-label">Saved by employers</span><span class="insight-val">7</span></div>
-          <div class="insight-row"><span class="insight-label">Contact requests</span><span class="insight-val">4</span></div>
-          <div class="insight-row"><span class="insight-label">Search rank</span><span class="insight-val" style="color:var(--green)">Top 12%</span></div>
-        </div>
       </div>
+
+      <!-- ACCOUNT INFO -->
+      <div class="info-card">
+        <div class="info-title">Account</div>
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value" id="info-email">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Member since</span>
+          <span class="info-value" id="info-joined">—</span>
+        </div>
+        <a class="info-link" href="settings.html">
+          <span>Manage account settings</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+
     </div>
-  </div>
-</div>
 
-<!-- ── EDIT PROFILE MODAL ── -->
-<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:300;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.2)">
-    <div style="padding:22px 26px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+  </div>
+
+</main>
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modal-bd" id="edit-modal">
+  <div class="modal">
+    <div class="modal-head">
       <div>
-        <div style="font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.2px">Edit Profile</div>
-        <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Make sure your details are accurate for employer searches.</div>
+        <div class="modal-title">Edit Profile</div>
+        <div class="modal-sub">Update what employers see about you</div>
       </div>
-      <button onclick="closeEditModal()" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--muted)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <button class="modal-close" onclick="closeEditModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div style="padding:20px 26px">
-      <div id="edit-msg" style="display:none;padding:10px 13px;border-radius:9px;font-size:.82rem;margin-bottom:14px;line-height:1.5"></div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-        <div>
-          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">First Name</label>
-          <input type="text" id="edit-first" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
-        </div>
-        <div>
-          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Last Name</label>
-          <input type="text" id="edit-last" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
-        </div>
+    <div class="modal-body">
+      <div class="two-col">
+        <div class="field"><label>First Name</label><input type="text" id="edit-first"></div>
+        <div class="field"><label>Last Name</label><input type="text" id="edit-last"></div>
       </div>
-
-      <div style="margin-bottom:14px">
-        <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Phone Number</label>
-        <input type="tel" id="edit-phone" placeholder="+1 587 555 0123" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-        <div>
-          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">City</label>
-          <input type="text" id="edit-city" placeholder="Fort McMurray" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
-        </div>
-        <div>
-          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Province</label>
-          <select id="edit-province" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none;background:#fff">
-            <option value="">Select...</option>
+      <div class="field"><label>Phone</label><input type="tel" id="edit-phone" placeholder="(780) 555-0123"></div>
+      <div class="two-col">
+        <div class="field"><label>City</label><input type="text" id="edit-city"></div>
+        <div class="field">
+          <label>Province</label>
+          <select id="edit-province">
+            <option value="">Select…</option>
             <option value="AB">Alberta</option>
             <option value="BC">British Columbia</option>
             <option value="MB">Manitoba</option>
@@ -522,23 +478,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
       </div>
 
       <div id="worker-only-fields">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-          <div>
-            <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Trade</label>
-            <select id="edit-trade" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none;background:#fff">
-              <option value="">Select...</option>
-              <option>Pipefitter</option><option>Welder</option><option>Electrician</option><option>Instrumentation Tech</option><option>Heavy Equipment Op.</option><option>Millwright</option><option>Labourer</option><option>Other</option>
+        <div class="two-col">
+          <div class="field">
+            <label>Trade</label>
+            <select id="edit-trade">
+              <option value="">Select…</option>
+              <option>Pipefitter</option><option>Welder</option><option>Electrician</option>
+              <option>Instrumentation Tech</option><option>Heavy Equipment Op.</option>
+              <option>Millwright</option><option>Labourer</option><option>Other</option>
             </select>
           </div>
-          <div>
-            <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Experience (years)</label>
-            <input type="number" id="edit-experience" min="0" max="60" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
+          <div class="field">
+            <label>Experience (years)</label>
+            <input type="number" id="edit-experience" min="0" max="60">
           </div>
         </div>
-
-        <div style="margin-bottom:14px">
-          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Availability</label>
-          <select id="edit-availability" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none;background:#fff">
+        <div class="field">
+          <label>Availability</label>
+          <select id="edit-availability">
             <option value="">Not set</option>
             <option value="available_now">Available now</option>
             <option value="within_2_weeks">Within 2 weeks</option>
@@ -546,40 +503,69 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
             <option value="not_available">Not available</option>
           </select>
         </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-          <div>
-            <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Pay min ($/hr)</label>
-            <input type="number" id="edit-pay-min" min="0" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
-          </div>
-          <div>
-            <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Pay max ($/hr)</label>
-            <input type="number" id="edit-pay-max" min="0" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
-          </div>
+        <div class="two-col">
+          <div class="field"><label>Pay min ($/hr)</label><input type="number" id="edit-pay-min" min="0"></div>
+          <div class="field"><label>Pay max ($/hr)</label><input type="number" id="edit-pay-max" min="0"></div>
         </div>
       </div>
 
-      <div id="employer-only-fields" style="display:none;margin-bottom:14px">
-        <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Company Name</label>
-        <input type="text" id="edit-company" style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none">
+      <div id="employer-only-fields" style="display:none">
+        <div class="field"><label>Company Name</label><input type="text" id="edit-company"></div>
       </div>
 
-      <div style="margin-bottom:14px">
-        <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px">Bio / About</label>
-        <textarea id="edit-bio" rows="4" placeholder="Tell employers about your experience, specializations, and what makes you a great hire..." style="width:100%;padding:11px 14px;border-radius:9px;border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--text);outline:none;resize:vertical"></textarea>
-      </div>
+      <div class="field"><label>Bio / About</label><textarea id="edit-bio" rows="4" placeholder="Tell employers about your experience…"></textarea></div>
+
+      <div id="edit-msg" class="msg"></div>
     </div>
-    <div style="padding:18px 26px;border-top:1px solid var(--border);display:flex;gap:10px">
-      <button class="btn btn-blue" style="flex:1" onclick="saveProfile()" id="save-btn">Save Changes</button>
+    <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-blue" id="save-btn" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- WORK HISTORY MODAL -->
+<div class="modal-bd" id="work-modal-bd">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Add Work Experience</div>
+        <div class="modal-sub">Tell employers about your background</div>
+      </div>
+      <button class="modal-close" onclick="closeWorkModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Job Title *</label><input id="wm-title" type="text" placeholder="e.g., Journeyman Pipefitter"></div>
+      <div class="field"><label>Company *</label><input id="wm-company" type="text" placeholder="e.g., Suncor Energy"></div>
+      <div class="field"><label>Location</label><input id="wm-location" type="text" placeholder="e.g., Fort McMurray, AB"></div>
+      <div class="two-col">
+        <div class="field"><label>Start Date</label><input id="wm-start" type="month"></div>
+        <div class="field"><label>End Date</label><input id="wm-end" type="month"></div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--text);cursor:pointer;font-weight:600;margin-bottom:14px">
+        <input id="wm-current" type="checkbox" style="width:16px;height:16px">
+        I currently work here
+      </label>
+      <div class="field">
+        <label>Employment Type</label>
+        <select id="wm-type">
+          <option value="">— Select —</option>
+          <option>Full-time</option><option>Contract</option><option>Part-time</option>
+          <option>Casual</option><option>Apprenticeship</option>
+        </select>
+      </div>
+      <div class="field"><label>Description</label><textarea id="wm-desc" rows="3" placeholder="Key responsibilities, scale, achievements."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeWorkModal()">Cancel</button>
+      <button class="btn btn-blue" onclick="saveWorkEntry()">Save Entry</button>
     </div>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════════════
-// SUPABASE
-// ════════════════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -587,48 +573,37 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let currentProfile = null;
 
-// ════════════════════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════════════════════
 async function init(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ window.location.href = 'login.html'; return; }
   currentUser = session.user;
 
+  document.getElementById('info-email').textContent = currentUser.email;
+
   await loadProfile();
   await loadCerts();
 }
 
-// ════════════════════════════════════════════════════════════════════
-// LOAD PROFILE
-// ════════════════════════════════════════════════════════════════════
 async function loadProfile(){
   const { data: profile, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-  if(error || !profile){
-    console.error(error);
-    return;
-  }
+  if(error || !profile){ console.error(error); return; }
   currentProfile = profile;
 
-  // Sidebar
   const first = profile.first_name || '';
   const last = profile.last_name || '';
   const fullName = (first + ' ' + last).trim() || currentUser.email.split('@')[0];
   const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
+
+  // Sidebar
   document.getElementById('sb-avatar').textContent = initials;
   document.getElementById('sb-uname').textContent = fullName;
-  const roleLabel = profile.role === 'employer' ? 'Employer' : (profile.trade || 'Worker');
-  const planLabel = profile.plan === 'pro' ? 'Pro Plan' : (profile.plan === 'employer_pro' ? 'Employer Pro' : 'Free Plan');
-  document.getElementById('sb-urole').textContent = roleLabel + ' · ' + planLabel;
+  document.getElementById('sb-urole').textContent = (profile.trade || (profile.role === 'employer' ? 'Employer' : 'Worker')) + ' · ' + (profile.plan === 'pro' ? 'Pro' : 'Free');
 
   // Hero
   document.getElementById('ph-avatar').textContent = initials;
   document.getElementById('ph-name').textContent = fullName;
-  if(profile.is_verified){
-    document.getElementById('ph-verified').style.display = 'inline-flex';
-  }
+  if(profile.is_verified) document.getElementById('ph-verified').style.display = 'inline-flex';
 
-  // Role line
   if(profile.role === 'worker'){
     const exp = profile.experience_years ? `${profile.experience_years} year${profile.experience_years === 1 ? '' : 's'} experience` : 'New on RigPass';
     document.getElementById('ph-role').textContent = `${profile.trade || 'Worker'} · ${exp}`;
@@ -636,13 +611,11 @@ async function loadProfile(){
     document.getElementById('ph-role').textContent = profile.company_name || 'Employer';
   }
 
-  // Location
   const locParts = [profile.city, profile.province].filter(Boolean);
   if(locParts.length){
-    document.getElementById('ph-location').innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${locParts.join(', ')}`;
+    document.getElementById('ph-location').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>${locParts.join(', ')}`;
   }
 
-  // Availability
   const availMap = {
     'available_now': 'Available Now',
     'within_2_weeks': 'Available in 2 weeks',
@@ -650,69 +623,102 @@ async function loadProfile(){
     'not_available': 'Not currently available'
   };
   if(profile.availability && availMap[profile.availability]){
-    document.getElementById('ph-availability').innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${availMap[profile.availability]}`;
+    document.getElementById('ph-availability').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${availMap[profile.availability]}`;
   }
 
-  // Pay
   if(profile.expected_pay_min || profile.expected_pay_max){
     const min = profile.expected_pay_min || '?';
     const max = profile.expected_pay_max || '?';
     const payEl = document.getElementById('ph-pay');
     payEl.style.display = 'inline-flex';
-    payEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>$${min}–$${max}/hr expected`;
+    payEl.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>$${min}–$${max}/hr expected`;
   }
 
-  // Bio
   if(profile.bio && profile.bio.trim()){
     document.getElementById('profile-bio').textContent = profile.bio;
   }
 
-  // Quick stats — experience
   document.getElementById('qs-experience').textContent = profile.experience_years || 0;
 
-  // Resume card
+  // Account info
+  if(profile.created_at){
+    document.getElementById('info-joined').textContent = new Date(profile.created_at).toLocaleDateString('en-CA', { month:'long', year:'numeric' });
+  }
+
+  // Profile completion
+  const fields = [
+    !!(profile.first_name && profile.last_name && profile.trade),
+    !!profile.bio,
+    !!profile.availability,
+    !!profile.resume_url,
+    !!(profile.skills && profile.skills.length > 0)
+  ];
+  const pct = Math.round((fields.filter(Boolean).length / fields.length) * 100);
+  document.getElementById('qs-completion').textContent = pct + '%';
+
   renderResumeCard();
-
-  // Visibility toggles — set from saved values
-  document.getElementById('toggle-is-public').classList.toggle('on', profile.is_public !== false);
-  document.getElementById('toggle-show-contact').classList.toggle('on', profile.show_contact !== false);
-  document.getElementById('toggle-open-to-opps').classList.toggle('on', profile.open_to_opportunities !== false);
-  document.getElementById('toggle-allow-training').classList.toggle('on', profile.allow_training_requests !== false);
-
-  // Skills
   renderSkills(profile.skills || []);
-
-  // Work history
   loadWorkHistory();
 }
 
-// ════════════════════════════════════════════════════════════════════
-// VISIBILITY TOGGLES (persisted to Supabase)
-// ════════════════════════════════════════════════════════════════════
-async function toggleVisibility(field, el){
-  el.classList.toggle('on');
-  const newValue = el.classList.contains('on');
-  const update = {};
-  update[field] = newValue;
-  const { error } = await sb.from('profiles').update(update).eq('id', currentUser.id);
-  if(error){
-    console.error(error);
-    el.classList.toggle('on'); // revert UI
-    alert('Failed to save. Try again.');
+async function loadCerts(){
+  const { data: certs } = await sb.from('certifications').select('*').eq('worker_id', currentUser.id).order('expiry_date', { ascending: true });
+  const list = document.getElementById('profile-cert-list');
+
+  function daysUntil(d){return Math.ceil((new Date(d)-new Date())/(1000*60*60*24))}
+  function statusOf(days){return days<0?'danger':days<=60?'warn':'ok'}
+  function fmtDate(s){return s ? new Date(s).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}) : 'N/A'}
+
+  if(!certs || certs.length === 0){
+    list.innerHTML = `<div class="empty">
+      <p>No certifications added yet</p>
+      <span>Add your safety tickets to attract more employers.</span>
+      <div style="margin-top:14px"><a href="certifications.html" class="btn btn-blue">Add Certifications</a></div>
+    </div>`;
+    document.getElementById('qs-valid').textContent = 0;
+    document.getElementById('qs-isn').textContent = '0%';
+    return;
   }
+
+  let validCount = 0;
+  list.innerHTML = certs.map(c => {
+    const days = daysUntil(c.expiry_date);
+    const status = statusOf(days);
+    if(status === 'ok') validCount++;
+    const label = status === 'ok' ? 'Valid' : status === 'warn' ? 'Expiring' : 'Expired';
+    return `<div class="cert-row">
+      <div class="cert-dot ${status}"></div>
+      <div class="cert-info">
+        <div class="cert-name">${c.name}</div>
+        <div class="cert-meta">${c.issued_date ? 'Issued ' + fmtDate(c.issued_date) + ' · ' : ''}Expires ${fmtDate(c.expiry_date)}</div>
+      </div>
+      <span class="cert-tag ${status}">${label}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('qs-valid').textContent = validCount;
+
+  // ISN-Ready
+  const coreCerts = ['H2S', 'WHMIS', 'First Aid', 'Confined Space'];
+  const validNames = certs.filter(c => statusOf(daysUntil(c.expiry_date)) === 'ok').map(c => c.name.toLowerCase());
+  const coverage = coreCerts.filter(core => validNames.some(n => n.includes(core.toLowerCase()))).length;
+  const isnPct = Math.round((coverage / coreCerts.length) * 100);
+  const isnEl = document.getElementById('qs-isn');
+  isnEl.textContent = isnPct + '%';
+  isnEl.classList.remove('ok','warn','danger');
+  if(isnPct >= 75) isnEl.classList.add('ok');
+  else if(isnPct >= 50) isnEl.classList.add('warn');
+  else isnEl.classList.add('danger');
 }
 
-// ════════════════════════════════════════════════════════════════════
-// WORK HISTORY
-// ════════════════════════════════════════════════════════════════════
 async function loadWorkHistory(){
   const { data: history } = await sb.from('work_history').select('*').eq('worker_id', currentUser.id).order('start_date', { ascending: false });
   const list = document.getElementById('work-history-list');
   if(!history || history.length === 0){
-    list.innerHTML = `<div style="padding:30px 22px;text-align:center;color:var(--muted)">
-      <p style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:6px">No work history yet</p>
-      <p style="font-size:.78rem;margin-bottom:14px">Add past jobs so employers can see your experience.</p>
-      <button class="btn btn-blue" style="display:inline-flex" onclick="openWorkModal()">+ Add Your First Job</button>
+    list.innerHTML = `<div class="empty">
+      <p>No work history yet</p>
+      <span>Add past jobs so employers can see your experience.</span>
+      <div style="margin-top:14px"><button class="btn btn-blue" onclick="openWorkModal()">Add Your First Job</button></div>
     </div>`;
     return;
   }
@@ -725,7 +731,7 @@ async function loadWorkHistory(){
     const bg = COLORS[idx % COLORS.length];
     const start = h.start_date ? new Date(h.start_date).toLocaleDateString('en-CA',{month:'short',year:'numeric'}) : '?';
     const end = h.is_current ? 'Present' : (h.end_date ? new Date(h.end_date).toLocaleDateString('en-CA',{month:'short',year:'numeric'}) : '?');
-    return `<div class="work-item" style="position:relative">
+    return `<div class="work-item">
       <div class="work-ico" style="background:${bg}">${initials}</div>
       <div class="work-info">
         <div class="work-title">${h.title}</div>
@@ -733,7 +739,7 @@ async function loadWorkHistory(){
         <div class="work-dates">${start} – ${end}${h.employment_type ? ' · ' + h.employment_type : ''}</div>
         ${h.description ? `<div class="work-desc">${h.description}</div>` : ''}
       </div>
-      <button onclick="deleteWorkEntry('${h.id}')" style="position:absolute;top:14px;right:14px;background:transparent;border:none;color:var(--light);cursor:pointer;padding:4px;border-radius:4px" title="Delete">
+      <button class="work-del" onclick="deleteWorkEntry('${h.id}')" title="Delete">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
       </button>
     </div>`;
@@ -742,7 +748,6 @@ async function loadWorkHistory(){
 
 function openWorkModal(){
   document.getElementById('work-modal-bd').style.display = 'flex';
-  // Reset form
   document.getElementById('wm-title').value = '';
   document.getElementById('wm-company').value = '';
   document.getElementById('wm-location').value = '';
@@ -761,13 +766,11 @@ async function saveWorkEntry(){
   const title = document.getElementById('wm-title').value.trim();
   const company = document.getElementById('wm-company').value.trim();
   const isCurrent = document.getElementById('wm-current').checked;
-
   if(!title || !company){ alert('Title and company are required.'); return; }
 
   const data = {
     worker_id: currentUser.id,
-    title,
-    company,
+    title, company,
     location: document.getElementById('wm-location').value.trim() || null,
     start_date: document.getElementById('wm-start').value || null,
     end_date: isCurrent ? null : (document.getElementById('wm-end').value || null),
@@ -789,13 +792,10 @@ async function deleteWorkEntry(id){
   loadWorkHistory();
 }
 
-// ════════════════════════════════════════════════════════════════════
-// SKILLS
-// ════════════════════════════════════════════════════════════════════
 function renderSkills(skills){
   const list = document.getElementById('skills-list');
   if(!skills || skills.length === 0){
-    list.innerHTML = `<div style="padding:14px;color:var(--light);font-size:.85rem;font-style:italic">No skills added yet. Click Edit to add your specializations.</div>`;
+    list.innerHTML = `<div style="padding:6px 0;color:var(--muted);font-size:.85rem;font-style:italic">No skills added yet.</div>`;
     return;
   }
   list.innerHTML = skills.map(s => `<span class="skill">${s}</span>`).join('');
@@ -816,66 +816,8 @@ async function saveSkills(skills){
   renderSkills(skills);
 }
 
-// ════════════════════════════════════════════════════════════════════
-// LOAD CERTS
-// ════════════════════════════════════════════════════════════════════
-async function loadCerts(){
-  const { data: certs } = await sb.from('certifications').select('*').eq('worker_id', currentUser.id).order('expiry_date', { ascending: true });
-  const list = document.getElementById('profile-cert-list');
-
-  function daysUntil(d){return Math.ceil((new Date(d)-new Date())/(1000*60*60*24))}
-  function statusOf(days){return days<0?'expired':days<=60?'expiring':'valid'}
-  function fmtDate(s){return s ? new Date(s).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}) : 'N/A'}
-
-  if(!certs || certs.length === 0){
-    list.innerHTML = `<div style="padding:30px 0;text-align:center;color:var(--muted)">
-      <p style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:6px">No certifications added yet</p>
-      <p style="font-size:.78rem;margin-bottom:14px">Add your safety tickets to attract more employers.</p>
-      <a href="certifications.html" class="btn btn-blue" style="display:inline-flex">Add Certifications</a>
-    </div>`;
-    document.getElementById('qs-valid').textContent = 0;
-    document.getElementById('qs-isn').textContent = '0%';
-    return;
-  }
-
-  let validCount = 0;
-  list.innerHTML = certs.map(c => {
-    const days = daysUntil(c.expiry_date);
-    const status = statusOf(days);
-    if(status === 'valid') validCount++;
-    const cls = status==='valid'?'tg':status==='expiring'?'ty':'tr-tag';
-    const label = status==='valid'?'Valid':status==='expiring'?'Expiring':'Expired';
-    const bg = status==='valid'?'var(--green-bg)':status==='expiring'?'var(--amber-bg)':'var(--red-bg)';
-    const iconColor = status==='valid'?'var(--green)':status==='expiring'?'var(--amber)':'var(--red)';
-    const icon = status==='valid'
-      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`
-      : status==='expiring'
-      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`
-      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
-    return `<div class="cert-row">
-      <div class="cert-ico" style="background:${bg}">${icon}</div>
-      <div class="cert-info"><div class="cert-name">${c.name}</div><div class="cert-meta">${c.issued_date ? 'Issued ' + fmtDate(c.issued_date) + ' · ' : ''}Expires ${fmtDate(c.expiry_date)}</div></div>
-      <span class="tag ${cls}">${label}</span>
-    </div>`;
-  }).join('');
-
-  document.getElementById('qs-valid').textContent = validCount;
-
-  // ISN-Ready = % of core safety certs (H2S, WHMIS, First Aid, Confined Space) that are valid
-  const coreCerts = ['H2S', 'WHMIS', 'First Aid', 'Confined Space'];
-  const validNames = certs.filter(c => statusOf(daysUntil(c.expiry_date)) === 'valid').map(c => c.name.toLowerCase());
-  const coverage = coreCerts.filter(core => validNames.some(n => n.includes(core.toLowerCase()))).length;
-  const isnPct = Math.round((coverage / coreCerts.length) * 100);
-  document.getElementById('qs-isn').textContent = isnPct + '%';
-  document.getElementById('qs-isn').style.color = isnPct >= 75 ? 'var(--green)' : isnPct >= 50 ? 'var(--amber)' : 'var(--red)';
-}
-
-// ════════════════════════════════════════════════════════════════════
-// EDIT MODAL
-// ════════════════════════════════════════════════════════════════════
 function openEditModal(){
   if(!currentProfile) return;
-  // Pre-fill
   document.getElementById('edit-first').value = currentProfile.first_name || '';
   document.getElementById('edit-last').value = currentProfile.last_name || '';
   document.getElementById('edit-phone').value = currentProfile.phone || '';
@@ -896,13 +838,13 @@ function openEditModal(){
     document.getElementById('employer-only-fields').style.display = 'block';
     document.getElementById('edit-company').value = currentProfile.company_name || '';
   }
-
   document.getElementById('edit-modal').style.display = 'flex';
 }
 
 function closeEditModal(){
   document.getElementById('edit-modal').style.display = 'none';
-  document.getElementById('edit-msg').style.display = 'none';
+  document.getElementById('edit-msg').className = 'msg';
+  document.getElementById('edit-msg').textContent = '';
 }
 
 async function saveProfile(){
@@ -933,37 +875,21 @@ async function saveProfile(){
   }
 
   const { error } = await sb.from('profiles').update(updates).eq('id', currentUser.id);
-
   btn.disabled = false;
   btn.style.opacity = '1';
 
   const msg = document.getElementById('edit-msg');
   if(error){
-    msg.style.display = 'block';
-    msg.style.background = '#fef2f2';
-    msg.style.border = '1.5px solid #fda4af';
-    msg.style.color = '#991b1b';
+    msg.className = 'msg error';
     msg.textContent = 'Error: ' + error.message;
     return;
   }
-
-  msg.style.display = 'block';
-  msg.style.background = '#f0fdf4';
-  msg.style.border = '1.5px solid #86efac';
-  msg.style.color = '#166534';
-  msg.textContent = '✓ Profile saved!';
-
-  // Reload profile data
+  msg.className = 'msg success';
+  msg.textContent = '✓ Profile saved';
   await loadProfile();
-
-  setTimeout(() => {
-    closeEditModal();
-  }, 1000);
+  setTimeout(() => closeEditModal(), 900);
 }
 
-// ════════════════════════════════════════════════════════════════════
-// RESUME UPLOAD / DOWNLOAD / DELETE
-// ════════════════════════════════════════════════════════════════════
 function renderResumeCard(){
   if(!currentProfile) return;
   const hasResume = currentProfile.resume_url && currentProfile.resume_filename;
@@ -998,7 +924,6 @@ function renderResumeCard(){
 }
 
 async function onResumePrimaryClick(){
-  // If resume exists, download; otherwise trigger upload
   if(currentProfile && currentProfile.resume_url && currentProfile.resume_filename){
     await downloadResume();
   } else {
@@ -1009,8 +934,6 @@ async function onResumePrimaryClick(){
 async function uploadResume(input){
   const file = input.files[0];
   if(!file) return;
-
-  // Validate
   const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
   if(!validTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx)$/i)){
     alert('Please upload a PDF or Word document.');
@@ -1023,58 +946,30 @@ async function uploadResume(input){
     return;
   }
 
-  // Show loading state
   const btnText = document.getElementById('resume-primary-text');
   const originalText = btnText.textContent;
-  btnText.textContent = 'Uploading...';
+  btnText.textContent = 'Uploading…';
   const primaryBtn = document.getElementById('resume-primary-btn');
   primaryBtn.disabled = true;
   primaryBtn.style.opacity = '.6';
 
   try {
-    // Path: <user_id>/resume.<ext>  (deterministic so re-upload replaces)
     const ext = file.name.split('.').pop().toLowerCase();
     const path = `${currentUser.id}/resume.${ext}`;
-
-    // Delete any existing resume at other extensions for this user first
-    if(currentProfile.resume_url){
-      const oldPath = currentProfile.resume_url;
-      if(oldPath !== path){
-        await sb.storage.from('resumes').remove([oldPath]);
-      }
+    if(currentProfile.resume_url && currentProfile.resume_url !== path){
+      await sb.storage.from('resumes').remove([currentProfile.resume_url]);
     }
-
-    // Upload
-    const { data, error } = await sb.storage
-      .from('resumes')
-      .upload(path, file, {
-        cacheControl: '3600',
-        upsert: true
-      });
-
+    const { error } = await sb.storage.from('resumes').upload(path, file, { cacheControl: '3600', upsert: true });
     if(error) throw error;
-
-    // Update profile
-    const { error: updateError } = await sb
-      .from('profiles')
-      .update({
-        resume_url: path,
-        resume_filename: file.name,
-        resume_uploaded_at: new Date().toISOString()
-      })
-      .eq('id', currentUser.id);
-
+    const { error: updateError } = await sb.from('profiles').update({
+      resume_url: path, resume_filename: file.name, resume_uploaded_at: new Date().toISOString()
+    }).eq('id', currentUser.id);
     if(updateError) throw updateError;
-
-    // Refresh state
     await loadProfile();
-    renderResumeCard();
   } catch(err){
     console.error(err);
     alert('Upload failed: ' + (err.message || 'Unknown error'));
     btnText.textContent = originalText;
-    primaryBtn.disabled = false;
-    primaryBtn.style.opacity = '1';
   } finally {
     primaryBtn.disabled = false;
     primaryBtn.style.opacity = '1';
@@ -1084,13 +979,8 @@ async function uploadResume(input){
 
 async function downloadResume(){
   if(!currentProfile.resume_url) return;
-  const { data, error } = await sb.storage
-    .from('resumes')
-    .createSignedUrl(currentProfile.resume_url, 60); // 60 sec signed URL
-  if(error){
-    alert('Could not generate download link: ' + error.message);
-    return;
-  }
+  const { data, error } = await sb.storage.from('resumes').createSignedUrl(currentProfile.resume_url, 60);
+  if(error){ alert('Could not generate download link: ' + error.message); return; }
   window.open(data.signedUrl, '_blank');
 }
 
@@ -1100,21 +990,13 @@ async function deleteResume(){
     if(currentProfile.resume_url){
       await sb.storage.from('resumes').remove([currentProfile.resume_url]);
     }
-    await sb.from('profiles').update({
-      resume_url: null,
-      resume_filename: null,
-      resume_uploaded_at: null
-    }).eq('id', currentUser.id);
+    await sb.from('profiles').update({ resume_url: null, resume_filename: null, resume_uploaded_at: null }).eq('id', currentUser.id);
     await loadProfile();
-    renderResumeCard();
   } catch(err){
     alert('Delete failed: ' + (err.message || 'Unknown error'));
   }
 }
 
-// ════════════════════════════════════════════════════════════════════
-// USER MENU + SIGN OUT
-// ════════════════════════════════════════════════════════════════════
 function toggleUserMenu(e){
   e.stopPropagation();
   const menu = document.getElementById('user-menu');
@@ -1131,68 +1013,5 @@ document.addEventListener('click', (e) => {
 
 init();
 </script>
-
-<!-- ═════ WORK HISTORY MODAL ═════ -->
-<div id="work-modal-bd" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:300;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)">
-  <div style="background:#fff;border-radius:16px;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(15,23,42,.3)">
-    <div style="padding:22px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.3px">Add Work Experience</div>
-        <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Tell employers about your background</div>
-      </div>
-      <button onclick="closeWorkModal()" style="background:transparent;border:none;cursor:pointer;color:var(--muted);padding:6px;border-radius:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div style="padding:22px 24px">
-      <div style="display:grid;gap:14px">
-        <div>
-          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:5px">Job Title *</label>
-          <input id="wm-title" type="text" placeholder="e.g., Journeyman Pipefitter" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;outline:none">
-        </div>
-        <div>
-          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:5px">Company *</label>
-          <input id="wm-company" type="text" placeholder="e.g., Suncor Energy" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;outline:none">
-        </div>
-        <div>
-          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:5px">Location</label>
-          <input id="wm-location" type="text" placeholder="e.g., Fort McMurray, AB" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;outline:none">
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div>
-            <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:5px">Start Date</label>
-            <input id="wm-start" type="month" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;outline:none">
-          </div>
-          <div>
-            <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:5px">End Date</label>
-            <input id="wm-end" type="month" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;outline:none">
-          </div>
-        </div>
-        <label style="display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--text);cursor:pointer;font-weight:600">
-          <input id="wm-current" type="checkbox" style="width:16px;height:16px;cursor:pointer">
-          I currently work here
-        </label>
-        <div>
-          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:5px">Employment Type</label>
-          <select id="wm-type" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;outline:none;background:#fff">
-            <option value="">— Select —</option>
-            <option>Full-time</option>
-            <option>Contract</option>
-            <option>Part-time</option>
-            <option>Casual</option>
-            <option>Apprenticeship</option>
-          </select>
-        </div>
-        <div>
-          <label style="display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:5px">Description (optional)</label>
-          <textarea id="wm-desc" placeholder="What did you do? Key responsibilities, scale, achievements." rows="4" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;outline:none;resize:vertical"></textarea>
-        </div>
-      </div>
-    </div>
-    <div style="padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px">
-      <button class="btn btn-ghost" onclick="closeWorkModal()">Cancel</button>
-      <button class="btn btn-blue" onclick="saveWorkEntry()">Save Entry</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>

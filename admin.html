@@ -9,137 +9,141 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;min-height:100vh;display:flex}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a;display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+
 :root{
-  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
-  --navy:#0a1228;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#94a3b8;
-  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--red-bg:#fef2f2;
-  --amber:#92400e;--amber-bg:#fefce8;--gold:#b8923a;--gold-border:#c9963a;
-  --off:#f8fafc;--shadow:0 2px 8px rgba(15,23,42,.06);--shadow-lg:0 12px 28px rgba(15,23,42,.1);
+  --navy:#0a1228;
+  --blue:#1e3a8a;
+  --blue-mid:#1e40af;
+  --blue-soft:#eef2ff;
+  --text:#0f172a;
+  --text-2:#475569;
+  --muted:#64748b;
+  --light:#94a3b8;
+  --line:#e2e8f0;
+  --line-soft:#f1f5f9;
+  --ok:#15803d;
+  --ok-soft:#f0fdf4;
+  --warn:#a16207;
+  --warn-soft:#fefce8;
+  --danger:#b91c1c;
+  --danger-soft:#fef2f2;
 }
 
-/* ── SIDEBAR ── */
-.sidebar{width:240px;flex-shrink:0;background:var(--navy);color:#fff;display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
-.sb-top{padding:22px 22px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:11px}
-.sb-logo{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;box-shadow:0 4px 10px rgba(30,58,138,.4);flex-shrink:0}
+/* SIDEBAR — light, with red admin distinction */
+.sidebar{width:240px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sb-top{padding:22px 22px 18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line-soft)}
+.sb-logo{width:34px;height:34px;background:var(--navy);border-radius:8px;display:grid;place-items:center;flex-shrink:0}
 .sb-logo svg{width:16px;height:16px;fill:#fff}
-.sb-brand{font-size:1.05rem;font-weight:800;color:#fff;letter-spacing:-.2px;line-height:1.1}
-.sb-brand span{color:#93c5fd}
-.sb-tag{display:inline-block;font-size:.58rem;font-weight:800;color:var(--red);background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.7px;margin-top:3px}
+.sb-brand{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.3px;line-height:1.1}
+.sb-brand span{color:var(--blue)}
+.sb-tag{display:inline-block;font-size:.6rem;font-weight:800;color:var(--danger);background:var(--danger-soft);padding:1px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;border:1px solid #fda4af}
 
-.sb-nav{flex:1;padding:14px 0;overflow-y:auto}
-.sb-section{padding:0 12px;margin-bottom:6px}
-.sb-title{font-size:.66rem;font-weight:800;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1.2px;padding:8px 10px 4px}
-.sb-link{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:7px;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.65);text-decoration:none;margin-bottom:2px;transition:all .15s;position:relative}
-.sb-link:hover{background:rgba(255,255,255,.05);color:#fff}
-.sb-link.active{background:rgba(30,58,138,.4);color:#fff;font-weight:700}
-.sb-link.active::before{content:'';position:absolute;left:-12px;top:6px;bottom:6px;width:3px;background:var(--gold);border-radius:0 3px 3px 0}
+.sb-nav{flex:1;padding:18px 12px;overflow-y:auto}
+.sb-section + .sb-section{margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.sb-label{font-size:.66rem;font-weight:800;color:var(--light);text-transform:uppercase;letter-spacing:1.2px;padding:0 10px 6px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;font-size:.86rem;font-weight:600;color:var(--text-2);text-decoration:none;margin-bottom:2px;transition:all .15s;position:relative}
+.sb-link:hover{background:var(--line-soft);color:var(--text)}
+.sb-link.active{background:var(--blue-soft);color:var(--blue);font-weight:700}
 .sb-link svg{width:17px;height:17px;flex-shrink:0;stroke-width:2}
-.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;font-weight:800;padding:1px 7px;border-radius:100px;min-width:18px;text-align:center}
+.sb-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:.62rem;font-weight:800;padding:1px 7px;border-radius:100px;min-width:18px;text-align:center}
 
-.sb-bottom{padding:14px 14px;border-top:1px solid rgba(255,255,255,.08)}
-.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;position:relative;transition:background .15s}
-.sb-user:hover{background:rgba(255,255,255,.05)}
-.sb-avatar{width:34px;height:34px;border-radius:8px;background:var(--gold);display:grid;place-items:center;color:var(--navy);font-size:.74rem;font-weight:800;flex-shrink:0}
-.sb-uname{font-size:.86rem;font-weight:700;color:#fff;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
-.sb-urole{font-size:.7rem;color:rgba(255,255,255,.5);margin-top:2px}
-.sb-arrow{margin-left:auto;color:rgba(255,255,255,.4)}
+.sb-bottom{padding:14px;border-top:1px solid var(--line-soft)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;cursor:pointer;transition:background .15s;position:relative}
+.sb-user:hover{background:var(--line-soft)}
+.sb-avatar{width:34px;height:34px;border-radius:9px;background:var(--navy);display:grid;place-items:center;color:#fff;font-size:.74rem;font-weight:800;flex-shrink:0}
+.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.sb-urole{font-size:.72rem;color:var(--muted);margin-top:2px}
+.sb-arrow{margin-left:auto;color:var(--light)}
 
-/* ── MAIN ── */
-.main{flex:1;padding:32px 40px;min-width:0}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.tb-title{font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-.5px}
-.tb-sub{font-size:.78rem;color:var(--muted);margin-top:3px}
+/* MAIN */
+.main{flex:1;padding:32px 40px 60px;min-width:0;max-width:1280px}
 
-/* ── GREETING ── */
-.greeting-card{background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);border-radius:16px;padding:26px 30px;color:#fff;margin-bottom:24px;position:relative;overflow:hidden}
-.greeting-card::before{content:'';position:absolute;inset:0;opacity:.05;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:36px 36px}
-.greeting-card::after{content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(184,146,58,.18) 0%,transparent 70%)}
-.greeting-meta{font-size:.78rem;color:rgba(255,255,255,.55);margin-bottom:6px;font-weight:600;letter-spacing:.3px;position:relative;z-index:2}
-.greeting-card h1{font-size:1.45rem;font-weight:800;color:#fff;letter-spacing:-.4px;margin-bottom:6px;position:relative;z-index:2}
-.greeting-card p{font-size:.92rem;color:rgba(255,255,255,.7);line-height:1.55;position:relative;z-index:2}
-.greeting-card p strong{color:#fcd34d;font-weight:700}
+.greet{margin-bottom:28px}
+.greet-date{font-size:.76rem;color:var(--muted);font-weight:600;letter-spacing:.4px;margin-bottom:6px;text-transform:uppercase}
+.greet h1{font-size:1.75rem;font-weight:800;color:var(--text);letter-spacing:-.6px;margin-bottom:8px}
+.greet p{font-size:.94rem;color:var(--text-2);line-height:1.55;max-width:680px}
+.greet p strong{color:var(--text);font-weight:700}
 
-/* ── STAT CARDS ── */
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-.stat-card{background:#fff;border-radius:12px;border:1.5px solid var(--gold-border);padding:18px 20px;display:flex;align-items:center;gap:14px;transition:all .2s;position:relative;overflow:hidden}
-.stat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 0%,rgba(184,146,58,.04) 100%);pointer-events:none}
-.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
-.sc-ico{width:40px;height:40px;border-radius:9px;display:grid;place-items:center;flex-shrink:0;position:relative;z-index:1}
-.sc-num{font-size:1.6rem;font-weight:800;color:var(--text);line-height:1;letter-spacing:-.4px;position:relative;z-index:1}
-.sc-label{font-size:.72rem;color:var(--muted);margin-top:4px;font-weight:600;position:relative;z-index:1}
+/* STATS STRIP */
+.stats-strip{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 4px;margin-bottom:26px}
+.stat-item{flex:1;padding:0 24px;text-align:left;border-right:1px solid var(--line-soft);min-width:0}
+.stat-item:last-child{border-right:none}
+.stat-num{font-size:1.7rem;font-weight:800;color:var(--text);letter-spacing:-.6px;line-height:1}
+.stat-num.danger{color:var(--danger)}
+.stat-num.ok{color:var(--ok)}
+.stat-label{font-size:.78rem;color:var(--muted);margin-top:6px;font-weight:600}
 
-/* ── CARDS ── */
-.card{background:#fff;border-radius:12px;border:1.5px solid var(--gold-border);margin-bottom:18px;overflow:hidden}
-.card-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+/* CARDS */
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+.card-head{padding:18px 22px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .card-title{font-size:.95rem;font-weight:800;color:var(--text);letter-spacing:-.2px}
-.card-sub{font-size:.75rem;color:var(--muted);margin-top:2px}
-.card-link{font-size:.78rem;font-weight:700;color:var(--blue);text-decoration:none}
+.card-sub{font-size:.76rem;color:var(--muted);margin-top:2px}
+.card-link{font-size:.78rem;font-weight:700;color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
 .card-link:hover{text-decoration:underline}
 
-/* ── ACTION QUEUE ── */
-.queue-row{display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid #f1f5f9}
-.queue-row:last-child{border-bottom:none}
+/* QUEUE ROWS — dot indicators */
+.queue-row{display:flex;align-items:center;gap:14px;padding:14px 22px;border-top:1px solid var(--line-soft)}
+.queue-row:first-of-type{border-top:none}
 .q-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.q-dot.red{background:var(--red)}
-.q-dot.amber{background:var(--amber)}
-.q-dot.green{background:var(--green)}
+.q-dot.danger{background:var(--danger)}
+.q-dot.warn{background:var(--warn)}
+.q-dot.ok{background:var(--ok)}
 .q-info{flex:1;min-width:0}
-.q-title{font-size:.92rem;font-weight:700;color:var(--text);letter-spacing:-.1px}
-.q-sub{font-size:.76rem;color:var(--muted);margin-top:3px}
+.q-title{font-size:.9rem;font-weight:700;color:var(--text);letter-spacing:-.1px;line-height:1.3;margin-bottom:2px}
+.q-sub{font-size:.76rem;color:var(--muted);font-weight:500}
 .q-action{flex-shrink:0}
 
-/* ── USER ROW ── */
-.user-row{display:flex;align-items:center;gap:14px;padding:13px 22px;border-bottom:1px solid #f1f5f9;transition:background .15s}
-.user-row:last-child{border-bottom:none}
-.user-row:hover{background:#fafbfc}
-.u-avatar{width:36px;height:36px;border-radius:9px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:.74rem;font-weight:800;flex-shrink:0}
+/* USER ROWS */
+.user-row{display:flex;align-items:center;gap:14px;padding:14px 22px;border-top:1px solid var(--line-soft);transition:background .15s}
+.user-row:first-of-type{border-top:none}
+.user-row:hover{background:var(--line-soft)}
+.u-avatar{width:36px;height:36px;border-radius:9px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:.72rem;font-weight:800;flex-shrink:0}
 .u-info{flex:1;min-width:0}
-.u-name{font-size:.88rem;font-weight:700;color:var(--text);letter-spacing:-.1px}
-.u-meta{display:flex;align-items:center;gap:10px;font-size:.74rem;color:var(--muted);margin-top:3px;flex-wrap:wrap}
-.u-time{font-size:.74rem;color:var(--light);flex-shrink:0}
+.u-name{font-size:.9rem;font-weight:700;color:var(--text);letter-spacing:-.1px;line-height:1.3;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.76rem;color:var(--muted);font-weight:500}
+.u-time{font-size:.74rem;color:var(--light);font-weight:600;flex-shrink:0}
 
-.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:.66rem;font-weight:800;letter-spacing:.2px;text-transform:uppercase}
-.tag-worker{background:var(--blue-lt);color:var(--blue);border:1px solid var(--blue-border)}
-.tag-employer{background:#fdf8ee;color:var(--gold);border:1px solid #f3e3b8}
-.tag-admin{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
-.tag-pending{background:var(--amber-bg);color:var(--amber);border:1px solid #fde047}
-.tag-approved{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
-.tag-rejected{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
+/* TAGS — quieter */
+.tag{display:inline-flex;align-items:center;font-size:.66rem;font-weight:800;padding:2px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px}
+.tag-worker{background:var(--blue-soft);color:var(--blue)}
+.tag-employer{background:#fdf8ee;color:#b8923a}
+.tag-admin{background:var(--danger-soft);color:var(--danger)}
+.tag-pending{background:var(--warn-soft);color:var(--warn)}
+.tag-approved{background:var(--ok-soft);color:var(--ok)}
+.tag-rejected{background:var(--danger-soft);color:var(--danger)}
 
-/* ── HEALTH SECTION ── */
-.health-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;padding:18px 22px}
-.health-stat{padding:14px 16px;background:var(--off);border-radius:10px;border:1px solid var(--border)}
-.h-label{font-size:.7rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.h-value{font-size:1.15rem;font-weight:800;color:var(--text);letter-spacing:-.2px}
-.h-meta{font-size:.72rem;color:var(--muted);margin-top:2px}
+/* PLATFORM HEALTH */
+.health-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.health-item{padding:18px 22px;border-right:1px solid var(--line-soft)}
+.health-item:last-child{border-right:none}
+.h-label{font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.h-num{font-size:1.4rem;font-weight:800;color:var(--text);letter-spacing:-.5px;line-height:1}
+.h-sub{font-size:.74rem;color:var(--muted);margin-top:3px;font-weight:500}
 
-/* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 14px;border-radius:7px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid transparent;text-decoration:none;transition:all .15s}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 14px;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;border:1.5px solid transparent;text-decoration:none;transition:all .15s}
 .btn-blue{background:var(--blue);color:#fff}
 .btn-blue:hover{background:var(--blue-mid)}
-.btn-green{background:var(--green);color:#fff}
-.btn-green:hover{background:#15803d}
-.btn-red{background:#fff;color:var(--red);border-color:var(--red)}
-.btn-red:hover{background:var(--red-bg)}
-.btn-ghost{background:#fff;color:var(--muted);border-color:var(--border)}
-.btn-ghost:hover{border-color:var(--light);color:var(--text)}
+.btn-ghost{background:#fff;color:var(--text-2);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--light);color:var(--text);background:var(--line-soft)}
 
-/* ── EMPTY STATE ── */
-.empty-state{padding:30px 22px;text-align:center;color:var(--muted)}
-.empty-state p{font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:4px}
-.empty-state span{font-size:.78rem;color:var(--muted)}
+.empty{padding:32px 22px;text-align:center;color:var(--muted)}
+.empty p{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.empty span{font-size:.78rem}
 
-@media(max-width:1000px){
-  .stat-grid{grid-template-columns:repeat(2,1fr)}
-  .health-grid{grid-template-columns:1fr}
+@media(max-width:980px){
+  .stats-strip,.health-grid{flex-wrap:wrap;display:flex}
+  .stat-item,.health-item{flex:0 0 50%;padding:14px 18px;border-right:none;border-bottom:1px solid var(--line-soft)}
+  .stat-item:nth-last-child(-n+2),.health-item:nth-last-child(-n+2){border-bottom:none}
 }
 @media(max-width:700px){
   .sidebar{width:64px}
-  .sb-brand,.sb-link span:not(.sb-badge),.sb-uname,.sb-urole,.sb-arrow,.sb-title,.sb-tag{display:none}
+  .sb-brand,.sb-link span:not(.sb-badge),.sb-uname,.sb-urole,.sb-arrow,.sb-label,.sb-tag{display:none}
   .sb-link{justify-content:center;padding:9px 0}
   .sb-user{justify-content:center;padding:0}
   .main{padding:20px}
+  .stat-item,.health-item{flex:0 0 100%}
 }
 </style>
 </head>
@@ -150,12 +154,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
     <div>
       <div class="sb-brand">Rig<span>Pass</span></div>
-      <span class="sb-tag">Admin Console</span>
+      <span class="sb-tag">Admin</span>
     </div>
   </div>
 
   <nav class="sb-nav">
     <div class="sb-section">
+      <div class="sb-label">Console</div>
       <a class="sb-link active" href="admin.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         <span>Dashboard</span>
@@ -163,29 +168,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
       <a class="sb-link" href="admin-verification.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <span>Verification</span>
-        <span class="sb-badge" id="nav-verify-count">0</span>
+        <span class="sb-badge" id="nav-verify-count" style="display:none">0</span>
       </a>
       <a class="sb-link" href="admin-users.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
         <span>All Users</span>
       </a>
-      <a class="sb-link" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        <span>All Postings</span>
-      </a>
-      <a class="sb-link" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>Analytics</span>
-      </a>
     </div>
 
     <div class="sb-section">
-      <div class="sb-title">Platform</div>
-      <a class="sb-link" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span>Support Tickets</span>
-      </a>
-      <a class="sb-link" href="#">
+      <div class="sb-label">Account</div>
+      <a class="sb-link" href="settings.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>Settings</span>
       </a>
@@ -200,8 +193,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
         <div class="sb-urole">Platform Admin</div>
       </div>
       <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.4);overflow:hidden;z-index:200">
-        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--red);background:#fff;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.12);overflow:hidden;z-index:200">
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--danger);background:#fff;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Sign Out
         </button>
@@ -211,37 +204,30 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
 </aside>
 
 <main class="main">
-  <div class="topbar">
-    <div>
-      <div class="tb-title">Admin Console</div>
-      <div class="tb-sub">Platform overview, action queues, and operations</div>
-    </div>
-  </div>
 
-  <!-- GREETING -->
-  <div class="greeting-card">
-    <div class="greeting-meta" id="greet-date">Loading...</div>
-    <h1 id="greet-hello">Welcome 👋</h1>
-    <p id="greet-msg">Loading platform status...</p>
+  <div class="greet">
+    <div class="greet-date" id="greet-date">Loading...</div>
+    <h1 id="greet-hello">Admin Console</h1>
+    <p id="greet-msg">Loading platform status…</p>
   </div>
 
   <!-- STATS -->
-  <div class="stat-grid">
-    <div class="stat-card">
-      <div class="sc-ico" style="background:var(--blue-lt)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
-      <div><div class="sc-num" id="stat-users">0</div><div class="sc-label">Total Users</div></div>
+  <div class="stats-strip">
+    <div class="stat-item">
+      <div class="stat-num" id="stat-users">0</div>
+      <div class="stat-label">Total Users</div>
     </div>
-    <div class="stat-card">
-      <div class="sc-ico" style="background:var(--green-bg)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
-      <div><div class="sc-num" id="stat-new-24h" style="color:var(--green)">0</div><div class="sc-label">New (24h)</div></div>
+    <div class="stat-item">
+      <div class="stat-num ok" id="stat-new-24h">0</div>
+      <div class="stat-label">New (24h)</div>
     </div>
-    <div class="stat-card">
-      <div class="sc-ico" style="background:#fdf8ee"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-      <div><div class="sc-num" id="stat-jobs">0</div><div class="sc-label">Active Jobs</div></div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-jobs">0</div>
+      <div class="stat-label">Active Jobs</div>
     </div>
-    <div class="stat-card">
-      <div class="sc-ico" style="background:var(--red-bg)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-      <div><div class="sc-num" id="stat-pending" style="color:var(--red)">0</div><div class="sc-label">Pending Actions</div></div>
+    <div class="stat-item">
+      <div class="stat-num danger" id="stat-pending">0</div>
+      <div class="stat-label">Pending Actions</div>
     </div>
   </div>
 
@@ -254,7 +240,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
       </div>
     </div>
     <div id="queue-list">
-      <div class="empty-state"><p style="color:var(--muted);font-weight:500">Loading...</p></div>
+      <div class="empty"><span>Loading…</span></div>
     </div>
   </div>
 
@@ -265,10 +251,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
         <div class="card-title">Recent Signups</div>
         <div class="card-sub">Last 10 users to join the platform</div>
       </div>
-      <a href="admin-users.html" class="card-link">View all users →</a>
+      <a href="admin-users.html" class="card-link">View all users <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
     </div>
     <div id="signups-list">
-      <div class="empty-state"><p style="color:var(--muted);font-weight:500">Loading...</p></div>
+      <div class="empty"><span>Loading…</span></div>
     </div>
   </div>
 
@@ -281,20 +267,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
       </div>
     </div>
     <div class="health-grid">
-      <div class="health-stat">
-        <div class="h-label">Worker / Employer Split</div>
-        <div class="h-value" id="h-split">— / —</div>
-        <div class="h-meta" id="h-split-pct">—</div>
+      <div class="health-item">
+        <div class="h-label">Worker / Employer</div>
+        <div class="h-num" id="h-split">0 / 0</div>
+        <div class="h-sub" id="h-split-pct">—</div>
       </div>
-      <div class="health-stat">
+      <div class="health-item">
         <div class="h-label">Avg Certs per Worker</div>
-        <div class="h-value" id="h-certs">—</div>
-        <div class="h-meta">Tickets uploaded</div>
+        <div class="h-num" id="h-certs">0</div>
+        <div class="h-sub">Safety tickets uploaded</div>
       </div>
-      <div class="health-stat">
-        <div class="h-label">Jobs Posted (7d)</div>
-        <div class="h-value" id="h-jobs-week">—</div>
-        <div class="h-meta">Across all employers</div>
+      <div class="health-item">
+        <div class="h-label">Jobs This Week</div>
+        <div class="h-num" id="h-jobs-week">0</div>
+        <div class="h-sub">Posted in last 7 days</div>
       </div>
     </div>
   </div>
@@ -316,20 +302,22 @@ async function init(){
 
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
   if(!profile || !profile.is_admin){
-    alert('Admin access only.');
-    window.location.href = 'dashboard.html';
+    alert('Admin access required.');
+    window.location.href = 'login.html';
     return;
   }
   currentProfile = profile;
 
-  const display = ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || currentUser.email.split('@')[0];
-  const initials = display.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || 'AD';
+  const first = profile.first_name || '';
+  const last = profile.last_name || '';
+  const display = (first + ' ' + last).trim() || currentUser.email.split('@')[0];
+  const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
   document.getElementById('sb-avatar').textContent = initials;
   document.getElementById('sb-uname').textContent = display;
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-  document.getElementById('greet-hello').textContent = `${greeting}, ${display.split(' ')[0]} 👋`;
+  document.getElementById('greet-hello').textContent = `${greeting}, ${display.split(' ')[0]}`;
 
   const d = new Date();
   document.getElementById('greet-date').textContent = d.toLocaleDateString('en-CA', { weekday:'long', month:'long', day:'numeric' });
@@ -338,19 +326,16 @@ async function init(){
 }
 
 async function loadData(){
-  // Fetch all profiles
   const { data: allProfiles } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
   const profiles = allProfiles || [];
   const workers = profiles.filter(p => p.role === 'worker');
   const employers = profiles.filter(p => p.role === 'employer');
   const pendingEmployers = employers.filter(p => p.verification_status === 'pending');
 
-  // Fetch jobs
   const { data: allJobs } = await sb.from('jobs').select('*');
   const jobs = allJobs || [];
   const activeJobs = jobs.filter(j => j.status === 'active');
 
-  // Stats
   document.getElementById('stat-users').textContent = profiles.length;
   const oneDayAgo = new Date(Date.now() - 24*60*60*1000);
   const new24h = profiles.filter(p => new Date(p.created_at) > oneDayAgo).length;
@@ -359,9 +344,9 @@ async function loadData(){
   document.getElementById('stat-pending').textContent = pendingEmployers.length;
 
   // Sidebar badge
-  document.getElementById('nav-verify-count').textContent = pendingEmployers.length;
-  if(pendingEmployers.length === 0){
-    document.getElementById('nav-verify-count').style.display = 'none';
+  if(pendingEmployers.length > 0){
+    document.getElementById('nav-verify-count').textContent = pendingEmployers.length;
+    document.getElementById('nav-verify-count').style.display = 'inline-flex';
   }
 
   // Greeting message
@@ -373,17 +358,14 @@ async function loadData(){
     if(new24h > 0) parts.push(`<strong>${new24h} new signup${new24h === 1 ? '' : 's'}</strong> in the last 24 hours`);
     if(pendingEmployers.length > 0) parts.push(`<strong>${pendingEmployers.length} employer${pendingEmployers.length === 1 ? '' : 's'}</strong> awaiting verification`);
     if(parts.length === 0){
-      msg = 'No urgent items today. Platform is running smoothly.';
+      msg = 'No urgent items. Platform is running smoothly.';
     } else {
       msg = parts.join(' · ');
     }
   }
   document.getElementById('greet-msg').innerHTML = msg;
 
-  // Action queue
   renderQueue(pendingEmployers);
-
-  // Recent signups (last 10)
   renderSignups(profiles.slice(0, 10));
 
   // Platform health
@@ -394,52 +376,40 @@ async function loadData(){
     document.getElementById('h-split-pct').textContent = `${wPct}% workers · ${ePct}% employers`;
   }
 
-  // Avg certs per worker
   if(workers.length > 0){
     const { count: certCount } = await sb.from('certifications').select('*', { count: 'exact', head: true });
-    const avg = ((certCount || 0) / workers.length).toFixed(1);
-    document.getElementById('h-certs').textContent = avg;
-  } else {
-    document.getElementById('h-certs').textContent = '0';
+    document.getElementById('h-certs').textContent = ((certCount || 0) / workers.length).toFixed(1);
   }
 
-  // Jobs this week
   const oneWeekAgo = new Date(Date.now() - 7*24*60*60*1000);
-  const jobsThisWeek = jobs.filter(j => new Date(j.created_at) > oneWeekAgo).length;
-  document.getElementById('h-jobs-week').textContent = jobsThisWeek;
+  document.getElementById('h-jobs-week').textContent = jobs.filter(j => new Date(j.created_at) > oneWeekAgo).length;
 }
 
 function renderQueue(pendingEmployers){
   const list = document.getElementById('queue-list');
   const items = [
     {
-      type: 'verification',
-      count: pendingEmployers.length,
       title: pendingEmployers.length === 0 ? 'No employers awaiting verification' : `${pendingEmployers.length} employer${pendingEmployers.length === 1 ? '' : 's'} awaiting verification`,
       sub: pendingEmployers.length === 0 ? 'All employers approved' : 'Review and approve to unlock job posting',
       action: pendingEmployers.length > 0 ? `<a href="admin-verification.html" class="btn btn-blue">Review</a>` : '',
-      dotCls: pendingEmployers.length > 0 ? 'red' : 'green'
+      dot: pendingEmployers.length > 0 ? 'danger' : 'ok'
     },
     {
-      type: 'flagged',
-      count: 0,
       title: '0 flagged postings',
       sub: 'Content moderation queue',
       action: '',
-      dotCls: 'green'
+      dot: 'ok'
     },
     {
-      type: 'support',
-      count: 0,
       title: '0 open support requests',
       sub: 'User issues awaiting reply',
       action: '',
-      dotCls: 'green'
+      dot: 'ok'
     }
   ];
 
   list.innerHTML = items.map(item => `<div class="queue-row">
-    <div class="q-dot ${item.dotCls}"></div>
+    <div class="q-dot ${item.dot}"></div>
     <div class="q-info">
       <div class="q-title">${item.title}</div>
       <div class="q-sub">${item.sub}</div>
@@ -451,7 +421,7 @@ function renderQueue(pendingEmployers){
 function renderSignups(profiles){
   const list = document.getElementById('signups-list');
   if(profiles.length === 0){
-    list.innerHTML = `<div class="empty-state">
+    list.innerHTML = `<div class="empty">
       <p>No users yet</p>
       <span>New signups will appear here as people join.</span>
     </div>`;
@@ -461,12 +431,11 @@ function renderSignups(profiles){
   list.innerHTML = profiles.map(p => {
     const first = p.first_name || '';
     const last = p.last_name || '';
-    const fullName = (first + ' ' + last).trim() || (p.company_name || p.email.split('@')[0]);
-    const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || (p.company_name || p.email).substring(0,2).toUpperCase();
+    const fullName = (first + ' ' + last).trim() || (p.company_name || (p.email || '').split('@')[0]);
+    const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || (p.company_name || p.email || 'U').substring(0,2).toUpperCase();
     const roleTag = p.is_admin ? 'admin' : p.role;
     const roleTagCls = p.is_admin ? 'tag-admin' : (p.role === 'employer' ? 'tag-employer' : 'tag-worker');
     const verifTag = p.verification_status || 'pending';
-    const verifTagCls = `tag-${verifTag}`;
     const sub = p.role === 'worker' ? (p.trade || 'Worker') : (p.company_name || 'Employer');
     const ago = timeAgo(p.created_at);
 
@@ -476,9 +445,8 @@ function renderSignups(profiles){
         <div class="u-name">${fullName}</div>
         <div class="u-meta">
           <span class="tag ${roleTagCls}">${roleTag}</span>
-          ${p.role === 'employer' ? `<span class="tag ${verifTagCls}">${verifTag}</span>` : ''}
+          ${p.role === 'employer' ? `<span class="tag tag-${verifTag}">${verifTag}</span>` : ''}
           <span>${sub}</span>
-          <span>· ${p.email}</span>
         </div>
       </div>
       <div class="u-time">${ago}</div>
