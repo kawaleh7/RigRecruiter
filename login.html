@@ -13,491 +13,352 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',sans-serif;color:#0f172a;min-height:100vh}
 :root{
-  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
-  --navy:#0a1228;--border:#cbd5e1;--text:#0f172a;--muted:#475569;--light:#94a3b8;
-  --green:#166534;--green-bg:#f0fdf4;--gold:#b8923a;--gold-border:#c9963a;
-  --red:#991b1b;--red-bg:#fef2f2;--amber:#92400e;
-  --shadow:0 6px 20px rgba(15,23,42,.08);
-  --shadow-lg:0 20px 60px rgba(15,23,42,.16);
+  --navy:#0a1228;--blue:#1e3a8a;--blue-mid:#1e40af;--blue-soft:#eef2ff;
+  --gold:#b8923a;--gold-soft:#fdf8ee;
+  --text:#0f172a;--text-2:#475569;--muted:#64748b;--light:#94a3b8;
+  --line:#e2e8f0;--line-soft:#f1f5f9;
+  --ok:#15803d;--ok-soft:#f0fdf4;--danger:#b91c1c;--danger-soft:#fef2f2;
 }
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:var(--text);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
 
-/* LAYOUT */
-.auth-shell{
-  display:grid;grid-template-columns:1fr 1fr;
-  min-height:100vh;
-}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 26px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand-logo{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center}
+.brand-logo svg{width:16px;height:16px;fill:#fff}
+.brand-name{font-size:1.1rem;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.brand-name span{color:var(--blue)}
+.topbar a.home-link{font-size:.82rem;font-weight:700;color:var(--text-2);text-decoration:none}
+.topbar a.home-link:hover{color:var(--blue)}
 
-/* ── LEFT SIDE (NAVY SHOWCASE) ── */
-.auth-left{
-  background:var(--navy);
-  position:relative;overflow:hidden;
-  display:flex;flex-direction:column;
-  padding:48px 56px;color:#fff;
-}
-.auth-left::before{
-  content:'';position:absolute;inset:0;opacity:.04;
-  background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);
-  background-size:48px 48px;
-}
-.auth-left::after{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 80% 60% at 70% 80%,rgba(30,58,138,.45) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 15% 20%,rgba(30,58,138,.2) 0%,transparent 60%);
-  pointer-events:none;
-}
-.auth-left > *{position:relative;z-index:2}
+.wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:20px 16px 60px}
+.screen{width:100%;max-width:470px;display:none}
+.screen.on{display:block}
 
-.al-logo{display:flex;align-items:center;gap:11px;text-decoration:none;margin-bottom:auto}
-.al-logo-mark{width:36px;height:36px;background:var(--blue);border-radius:8px;display:grid;place-items:center;box-shadow:0 6px 14px rgba(30,58,138,.3)}
-.al-logo-mark svg{width:17px;height:17px;fill:#fff}
-.al-logo-name{font-size:1.15rem;font-weight:800;color:#fff}
-.al-logo-name span{color:#93c5fd}
-
-.al-content{padding:60px 0 40px}
-.al-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);border-radius:100px;padding:5px 14px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:24px}
-.al-content h1{font-size:2.2rem;font-weight:800;color:#fff;letter-spacing:-.8px;line-height:1.15;margin-bottom:16px}
-.al-content h1 span{color:#93c5fd}
-.al-content p{font-size:.95rem;color:rgba(255,255,255,.55);line-height:1.72;max-width:380px;margin-bottom:36px}
-
-/* WORKER CARD PREVIEW */
-.preview-card{
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.12);
-  backdrop-filter:blur(8px);
-  border-radius:14px;padding:20px;
-  max-width:380px;
-  box-shadow:0 20px 50px rgba(0,0,0,.3);
+/* ── CHOOSER ── */
+.choose-head{text-align:center;margin-bottom:26px}
+.choose-head h1{font-size:1.6rem;font-weight:800;letter-spacing:-.5px;margin-bottom:6px}
+.choose-head p{font-size:.9rem;color:var(--text-2)}
+.role-card{
+  display:flex;align-items:center;gap:16px;width:100%;text-align:left;
+  background:#fff;border:1.5px solid var(--line);border-radius:14px;
+  padding:20px;margin-bottom:14px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;
+  transition:all .15s;
 }
-.pc-head{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:14px}
-.pc-avatar{width:42px;height:42px;border-radius:9px;background:var(--blue);display:grid;place-items:center;font-weight:800;font-size:.85rem;color:#fff;flex-shrink:0}
-.pc-name{font-size:.95rem;font-weight:700;color:#fff;letter-spacing:-.1px}
-.pc-role{font-size:.78rem;color:rgba(255,255,255,.55);margin-top:2px}
-.pc-ver{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3);border-radius:100px;padding:3px 9px;font-size:.65rem;font-weight:700;margin-left:auto;text-transform:uppercase;letter-spacing:.5px}
-.pc-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)}
-.pc-row:last-child{border-bottom:none}
-.pc-cn{font-size:.83rem;color:rgba(255,255,255,.85);font-weight:500}
-.pc-cd{font-size:.7rem;color:rgba(255,255,255,.4);margin-top:1px}
-.pc-tag{border-radius:5px;padding:3px 9px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-.pc-tg{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3)}
-.pc-ty{background:rgba(251,191,36,.15);color:#fcd34d;border:1px solid rgba(251,191,36,.3)}
-.pc-tr{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.role-card:hover{border-color:var(--blue);box-shadow:0 6px 22px rgba(30,58,138,.1);transform:translateY(-1px)}
+.rc-icon{width:50px;height:50px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
+.rc-icon.worker{background:var(--blue-soft)}
+.rc-icon.employer{background:var(--gold-soft)}
+.rc-title{font-size:1.02rem;font-weight:800;letter-spacing:-.2px;margin-bottom:3px}
+.rc-sub{font-size:.8rem;color:var(--muted);line-height:1.45}
+.rc-arrow{margin-left:auto;color:var(--light);flex-shrink:0}
+.signin-link{text-align:center;margin-top:18px;font-size:.86rem;color:var(--text-2)}
+.signin-link a{color:var(--blue);font-weight:700;text-decoration:none;cursor:pointer}
 
-.al-trust{display:flex;gap:18px;margin-top:auto;padding-top:32px;border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap}
-.al-trust-item{display:flex;align-items:center;gap:6px;font-size:.72rem;color:rgba(255,255,255,.4);font-weight:600;letter-spacing:.3px}
+/* ── AUTH PANELS ── */
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 26px}
+.back-link{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;font-weight:700;color:var(--text-2);background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:16px;padding:0}
+.back-link:hover{color:var(--blue)}
+.role-tag{display:inline-block;font-size:.62rem;font-weight:800;padding:3px 9px;border-radius:5px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.role-tag.worker{background:var(--blue-soft);color:var(--blue)}
+.role-tag.employer{background:var(--gold-soft);color:var(--gold);border:1px solid #f3e3b8}
+.panel h2{font-size:1.35rem;font-weight:800;letter-spacing:-.4px;margin-bottom:5px}
+.panel .sub{font-size:.85rem;color:var(--text-2);line-height:1.5;margin-bottom:20px}
 
-/* ── RIGHT SIDE (FORM) ── */
-.auth-right{
-  background:#fff;
-  display:flex;flex-direction:column;
-  padding:32px 56px 48px;overflow-y:auto;
-}
-.auth-right-top{display:flex;align-items:center;justify-content:flex-end;margin-bottom:auto}
-.back-home{
-  display:inline-flex;align-items:center;gap:6px;
-  font-size:.83rem;color:var(--muted);text-decoration:none;
-  padding:8px 14px;border-radius:7px;transition:all .15s;
-}
-.back-home:hover{background:#f1f5f9;color:var(--text)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text);margin-bottom:6px}
+.field input,.field select{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.92rem;outline:none;background:#fff;color:var(--text);transition:border-color .15s}
+.field input:focus,.field select:focus{border-color:var(--blue)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-help{font-size:.72rem;color:var(--muted);margin-top:5px}
 
-.auth-card{
-  width:100%;max-width:440px;
-  margin:24px auto;
-}
+.btn-main{width:100%;padding:13px;border:none;border-radius:10px;background:var(--blue);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;transition:background .15s;margin-top:4px}
+.btn-main:hover{background:var(--blue-mid)}
+.btn-main:disabled{opacity:.6}
 
-/* TABS */
-.auth-tabs{
-  display:flex;background:#f1f5f9;border-radius:10px;
-  padding:4px;margin-bottom:32px;
-  border:1px solid var(--border);gap:4px;
-}
-.atab{
-  flex:1;padding:11px;border-radius:7px;border:none;
-  background:transparent;font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:.88rem;font-weight:700;color:var(--muted);
-  cursor:pointer;transition:all .2s;
-}
-.atab.on{
-  background:#fff;color:var(--blue);
-  box-shadow:0 1px 4px rgba(15,23,42,.1),0 0 0 1px var(--blue-border);
-}
+.divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--light);font-size:.74rem;font-weight:700}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--line)}
 
-/* PANEL */
-.panel{display:none;animation:fadeIn .3s ease}
-.panel.on{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.btn-google{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;font-weight:700;color:var(--text);cursor:pointer;transition:all .15s}
+.btn-google:hover{border-color:var(--light);background:var(--line-soft)}
 
-.panel-head{margin-bottom:24px}
-.panel-head h2{font-size:1.7rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:6px}
-.panel-head p{font-size:.88rem;color:var(--muted);line-height:1.5}
+.switch-line{text-align:center;margin-top:18px;font-size:.84rem;color:var(--text-2)}
+.switch-line a{color:var(--blue);font-weight:700;text-decoration:none;cursor:pointer}
 
-/* ROLE TOGGLE */
-.role-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--light);margin-bottom:8px}
-.role-toggle{
-  display:flex;background:#fff;border-radius:10px;
-  padding:4px;margin-bottom:24px;
-  border:1.5px solid var(--border);gap:4px;
-}
-.rtog{
-  flex:1;padding:11px;border-radius:7px;border:none;
-  background:transparent;font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:.875rem;font-weight:600;color:var(--muted);
-  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px;
-}
-.rtog svg{flex-shrink:0;transition:stroke .2s}
-.rtog.on{
-  background:#fff;color:var(--gold);
-  box-shadow:0 1px 4px rgba(15,23,42,.1),0 0 0 1.5px var(--gold-border);
-}
-.rtog.on svg{stroke:var(--gold)}
+.agree{display:flex;align-items:flex-start;gap:9px;margin:4px 0 14px;font-size:.78rem;color:var(--text-2);line-height:1.5}
+.agree input{width:16px;height:16px;margin-top:1px;accent-color:var(--blue);flex-shrink:0}
+.agree a{color:var(--blue);font-weight:600}
 
-/* FORM */
-.field{margin-bottom:16px}
-.field label{display:flex;align-items:center;justify-content:space-between;font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:7px}
-.field label a{font-size:.74rem;color:var(--blue);text-decoration:none;font-weight:600}
-.field label a:hover{text-decoration:underline}
-.field input,.field select{
-  width:100%;padding:12px 14px;border-radius:9px;
-  border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:.9rem;color:var(--text);outline:none;
-  transition:all .15s;background:#fff;
-}
-.field input:focus,.field select:focus{
-  border-color:var(--blue);
-  box-shadow:0 0 0 3px rgba(30,58,138,.08);
-}
-.field input::placeholder{color:var(--light)}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.verify-note{display:flex;gap:10px;align-items:flex-start;background:var(--gold-soft);border:1px solid #f3e3b8;border-radius:9px;padding:11px 13px;margin-bottom:16px;font-size:.78rem;color:#8a6d2b;line-height:1.5}
+.verify-note svg{flex-shrink:0;margin-top:1px}
 
-/* PASSWORD STRENGTH */
-.pwd-strength{display:flex;gap:4px;margin-top:8px}
-.pwd-bar{flex:1;height:3px;background:#f1f5f9;border-radius:2px;transition:background .2s}
-.pwd-bar.weak{background:#ef4444}
-.pwd-bar.medium{background:#f59e0b}
-.pwd-bar.strong{background:var(--green)}
-.pwd-hint{font-size:.7rem;color:var(--muted);margin-top:6px}
+.auth-msg{display:none;align-items:flex-start;gap:8px;padding:11px 13px;border-radius:9px;font-size:.82rem;font-weight:600;margin-bottom:14px;line-height:1.45}
+.auth-msg.show{display:flex}
+.auth-msg.error{background:var(--danger-soft);color:var(--danger);border:1px solid #fda4af}
+.auth-msg.success{background:var(--ok-soft);color:var(--ok);border:1px solid #bbf7d0}
+.auth-msg.info{background:var(--blue-soft);color:var(--blue);border:1px solid #c7d2fe}
+.auth-msg svg{flex-shrink:0;margin-top:2px}
 
-/* CHECKBOX */
-.checkbox-row{display:flex;align-items:center;gap:8px;margin:14px 0 20px}
-.checkbox-row input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0}
-.checkbox-row label{font-size:.8rem;color:var(--muted);cursor:pointer;line-height:1.5}
+.forgot{font-size:.76rem;font-weight:700;color:var(--blue);text-decoration:none;float:right;cursor:pointer}
 
-/* BUTTONS */
-.btn{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  width:100%;padding:13px;border-radius:9px;
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:.92rem;font-weight:700;
-  cursor:pointer;border:none;text-decoration:none;transition:all .15s;
-}
-.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(30,58,138,.2)}
-.btn-blue:hover{background:var(--blue-mid);transform:translateY(-1px);box-shadow:0 8px 20px rgba(30,58,138,.25)}
-.btn-blue:active{transform:translateY(0)}
-.btn-blue:disabled{opacity:.6;cursor:wait;transform:none}
-
-/* AUTH MESSAGES */
-.auth-msg{
-  padding:10px 13px;border-radius:9px;font-size:.82rem;
-  margin-bottom:14px;line-height:1.5;display:none;
-}
-.auth-msg.show{display:flex;align-items:flex-start;gap:8px}
-.auth-msg svg{flex-shrink:0;margin-top:1px}
-.auth-msg.error{background:#fef2f2;border:1.5px solid #fda4af;color:#991b1b}
-.auth-msg.success{background:#f0fdf4;border:1.5px solid #86efac;color:#166534}
-.auth-msg.info{background:#dbeafe;border:1.5px solid #93c5fd;color:#1e3a8a}
-
-/* SSO */
-.divider{display:flex;align-items:center;gap:14px;margin:24px 0}
-.divider span{font-size:.72rem;color:var(--light);font-weight:600;text-transform:uppercase;letter-spacing:1px}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.sso-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.sso-btn{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:10px;border-radius:9px;
-  border:1.5px solid var(--border);background:#fff;
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:600;color:var(--text);
-  cursor:pointer;transition:all .15s;text-decoration:none;
-}
-.sso-btn:hover{border-color:var(--light);background:#fafbfc}
-
-/* FOOTER LINKS */
-.auth-foot{text-align:center;margin-top:24px}
-.auth-switch{font-size:.85rem;color:var(--muted)}
-.auth-switch a{color:var(--blue);font-weight:600;text-decoration:none}
-.auth-switch a:hover{text-decoration:underline}
-.terms{font-size:.73rem;color:var(--light);margin-top:16px;line-height:1.6}
-.terms a{color:var(--muted);text-decoration:underline}
-.terms a:hover{color:var(--text)}
-
-/* VERIFIED NOTE */
-.verified-note{
-  display:flex;align-items:flex-start;gap:10px;
-  background:var(--green-bg);border:1.5px solid #86efac;
-  border-radius:10px;padding:12px 14px;margin-bottom:20px;
-}
-.verified-note svg{flex-shrink:0;margin-top:1px}
-.verified-note p{font-size:.78rem;color:var(--green);line-height:1.55;font-weight:500}
-
-/* RESPONSIVE */
-@media(max-width:900px){
-  .auth-shell{grid-template-columns:1fr}
-  .auth-left{display:none}
-  .auth-right{padding:24px 24px 40px}
-  .auth-card{margin:16px auto}
-}
 @media(max-width:480px){
-  .auth-right{padding:20px 18px 32px}
-  .panel-head h2{font-size:1.4rem}
-  .sso-row{grid-template-columns:1fr}
+  .panel{padding:22px 18px;border-radius:14px}
+  .two-col{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
-<div class="auth-shell">
+<div class="topbar">
+  <a class="brand" href="index.html">
+    <div class="brand-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <div class="brand-name">Rig<span>Pass</span></div>
+  </a>
+  <a class="home-link" href="index.html">← Back to site</a>
+</div>
 
-  <!-- ── LEFT SIDE ── -->
-  <div class="auth-left">
-    <a class="al-logo" href="index.html">
-      <div class="al-logo-mark"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
-      <span class="al-logo-name">Rig<span>Pass</span></span>
-    </a>
+<div class="wrap">
 
-    <div class="al-content">
-      <div class="al-tag">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Trusted by 12,000+ Workers
-      </div>
-      <h1>Your certifications.<br><span>Always job-ready.</span></h1>
-      <p>Store every safety ticket in one place. Get expiry alerts. Apply to oil patch jobs with one click.</p>
-
-      <div class="preview-card">
-        <div class="pc-head">
-          <div class="pc-avatar">MR</div>
-          <div>
-            <div class="pc-name">Mike Robertson</div>
-            <div class="pc-role">Journeyman Pipefitter · 12 yrs</div>
-          </div>
-          <span class="pc-ver">✓ Verified</span>
-        </div>
-        <div class="pc-row">
-          <div><div class="pc-cn">H2S Alive</div><div class="pc-cd">Expires Nov 14, 2026</div></div>
-          <span class="pc-tag pc-tg">Valid</span>
-        </div>
-        <div class="pc-row">
-          <div><div class="pc-cn">WHMIS 2018</div><div class="pc-cd">Expires Aug 19, 2025</div></div>
-          <span class="pc-tag pc-ty">Expiring</span>
-        </div>
-        <div class="pc-row">
-          <div><div class="pc-cn">Confined Space Entry</div><div class="pc-cd">Expires Mar 28, 2027</div></div>
-          <span class="pc-tag pc-tg">Valid</span>
-        </div>
-      </div>
+  <!-- ════ SCREEN: CHOOSE ════ -->
+  <div class="screen on" id="screen-choose">
+    <div class="choose-head">
+      <h1>Welcome to RigPass</h1>
+      <p>How will you be using RigPass?</p>
     </div>
 
-    <div class="al-trust">
-      <div class="al-trust-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>SSL Secured</div>
-      <div class="al-trust-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>PIPEDA Compliant</div>
-      <div class="al-trust-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>5-Min Signup</div>
+    <button class="role-card" onclick="goTo('worker')">
+      <div class="rc-icon worker">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1e3a8a" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11h-6"/><path d="M19 8v6"/></svg>
+      </div>
+      <div>
+        <div class="rc-title">I'm looking for work</div>
+        <div class="rc-sub">Find oil & gas jobs that match your safety tickets. Free for workers.</div>
+      </div>
+      <svg class="rc-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+
+    <button class="role-card" onclick="goTo('employer')">
+      <div class="rc-icon employer">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#b8923a" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      </div>
+      <div>
+        <div class="rc-title">I'm hiring</div>
+        <div class="rc-sub">Post jobs and build crews from certified, ready-to-work tradespeople.</div>
+      </div>
+      <svg class="rc-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+
+    <div class="signin-link">Already have an account? <a onclick="goTo('signin')">Sign in</a></div>
+  </div>
+
+  <!-- ════ SCREEN: SIGN IN (no role needed — account knows) ════ -->
+  <div class="screen" id="screen-signin">
+    <div class="panel">
+      <button class="back-link" onclick="goTo('choose')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <h2>Sign in</h2>
+      <p class="sub">Welcome back — we'll take you to the right dashboard.</p>
+
+      <div class="auth-msg" id="signin-msg"></div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="signin-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Password <a class="forgot" onclick="resetPassword(event)">Forgot?</a></label>
+        <input type="password" id="signin-password" placeholder="Your password" autocomplete="current-password">
+      </div>
+
+      <button class="btn-main" id="signin-btn" onclick="signIn()"><span id="signin-btn-text">Sign In</span></button>
+
+      <div class="divider">or</div>
+      <button class="btn-google" onclick="googleAuth(null)">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="switch-line">New to RigPass? <a onclick="goTo('choose')">Create an account</a></div>
     </div>
   </div>
 
-  <!-- ── RIGHT SIDE ── -->
-  <div class="auth-right">
-    <div class="auth-right-top">
-      <a class="back-home" href="index.html">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        Back to home
-      </a>
-    </div>
+  <!-- ════ SCREEN: WORKER SIGN UP ════ -->
+  <div class="screen" id="screen-worker">
+    <div class="panel">
+      <button class="back-link" onclick="goTo('choose')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <span class="role-tag worker">Worker Account</span>
+      <h2>Find your next job</h2>
+      <p class="sub">Free forever for workers. Your tickets do the talking.</p>
 
-    <div class="auth-card">
-      <div class="auth-tabs">
-        <button class="atab on" onclick="authTab(this,'signin')">Sign In</button>
-        <button class="atab" onclick="authTab(this,'signup')">Create Account</button>
-      </div>
+      <div class="auth-msg" id="worker-msg"></div>
 
-      <!-- SIGN IN -->
-      <div class="panel on" id="signin">
-        <div class="panel-head">
-          <h2>Welcome back</h2>
-          <p>Sign in to access your RigPass account.</p>
-        </div>
-
-        <div class="role-label">Sign in as</div>
-        <div class="role-toggle" id="signin-role">
-          <button class="rtog on" data-role="worker">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Worker
-          </button>
-          <button class="rtog" data-role="employer">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-            Employer
-          </button>
-        </div>
-
-        <div class="auth-msg" id="signin-msg"></div>
-
+      <div class="two-col">
         <div class="field">
-          <label>Email Address</label>
-          <input type="email" id="signin-email" placeholder="you@example.com" autocomplete="email">
+          <label>First Name</label>
+          <input type="text" id="w-first" placeholder="Ahmed" autocomplete="given-name">
         </div>
         <div class="field">
-          <label>Password <a href="forgot-password.html">Forgot?</a></label>
-          <input type="password" id="signin-password" placeholder="••••••••" autocomplete="current-password">
-        </div>
-        <button class="btn btn-blue" id="signin-btn" style="margin-top:8px;width:100%" onclick="signIn()">
-          <span id="signin-btn-text">Sign In</span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-
-        <div class="divider"><span>or continue with</span></div>
-        <div class="sso-row">
-          <button type="button" class="sso-btn" onclick="signInWithGoogle()">
-            <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            Google
-          </button>
-          <a href="#" class="sso-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#0a1228"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-            Apple
-          </a>
-        </div>
-
-        <div class="auth-foot">
-          <div class="auth-switch">New to RigPass? <a href="#" onclick="authTab(document.querySelectorAll('.atab')[1],'signup')">Create an account</a></div>
-          <div class="terms">By signing in you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>.</div>
+          <label>Last Name</label>
+          <input type="text" id="w-last" placeholder="Hassan" autocomplete="family-name">
         </div>
       </div>
-
-      <!-- SIGN UP -->
-      <div class="panel" id="signup">
-        <div class="panel-head">
-          <h2>Create your account</h2>
-          <p>Join thousands of oil patch professionals.</p>
-        </div>
-
-        <div class="role-label">I am a</div>
-        <div class="role-toggle" id="signup-role">
-          <button class="rtog on" data-role="worker">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Worker
-          </button>
-          <button class="rtog" data-role="employer">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-            Employer
-          </button>
-        </div>
-
-        <!-- Worker-only note -->
-        <div class="verified-note" id="worker-note">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-          <p>Your profile and safety tickets are only visible to verified, paying employers.</p>
-        </div>
-
-        <!-- Employer-only note -->
-        <div class="verified-note" id="employer-note" style="display:none;background:var(--blue-lt);border-color:var(--blue-border)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-          <p style="color:var(--blue)">Hire qualified, certified workers across Western Canada. Get verified after signup to unlock full talent access.</p>
-        </div>
-
-        <div class="auth-msg" id="signup-msg"></div>
-
-        <div class="field-row">
-          <div class="field">
-            <label>First Name</label>
-            <input type="text" id="signup-first" placeholder="Mike" autocomplete="given-name">
-          </div>
-          <div class="field">
-            <label>Last Name</label>
-            <input type="text" id="signup-last" placeholder="Robertson" autocomplete="family-name">
-          </div>
-        </div>
-
-        <!-- Employer-only: Company Name -->
-        <div class="field" id="company-field" style="display:none">
-          <label>Company Name</label>
-          <input type="text" id="signup-company" placeholder="e.g. Suncor Energy, Independent Contractor" autocomplete="organization">
-        </div>
-
-        <div class="field">
-          <label>Email Address</label>
-          <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email">
-        </div>
-        <div class="field">
-          <label>Password</label>
-          <input type="password" placeholder="At least 8 characters" autocomplete="new-password" id="signup-password" oninput="checkPwd(this.value)">
-          <div class="pwd-strength" id="pwd-strength">
-            <div class="pwd-bar"></div>
-            <div class="pwd-bar"></div>
-            <div class="pwd-bar"></div>
-          </div>
-          <div class="pwd-hint" id="pwd-hint">Use 8+ characters with letters and numbers.</div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Province</label>
-            <select id="signup-province">
-              <option value="">Select...</option>
-              <option value="AB">Alberta</option>
-              <option value="BC">British Columbia</option>
-              <option value="MB">Manitoba</option>
-              <option value="NB">New Brunswick</option>
-              <option value="NL">Newfoundland and Labrador</option>
-              <option value="NS">Nova Scotia</option>
-              <option value="ON">Ontario</option>
-              <option value="PE">Prince Edward Island</option>
-              <option value="QC">Quebec</option>
-              <option value="SK">Saskatchewan</option>
-              <option value="NWT">Northwest Territories</option>
-              <option value="NU">Nunavut</option>
-              <option value="YT">Yukon</option>
-            </select>
-          </div>
-          <!-- Worker-only: Primary Trade -->
-          <div class="field" id="trade-field">
-            <label>Primary Trade</label>
-            <select id="signup-trade">
-              <option value="">Select...</option>
-              <option>Pipefitter</option><option>Welder</option><option>Electrician</option><option>Instrumentation Tech</option><option>Heavy Equipment Op.</option><option>Millwright</option><option>Labourer</option><option>Other</option>
-            </select>
-          </div>
-        </div>
-        <div class="checkbox-row" style="margin:18px 0 18px;align-items:flex-start">
-          <input type="checkbox" id="agree-terms" style="margin-top:2px" onchange="toggleAgree(this)">
-          <label for="agree-terms">I agree to the <a href="terms.html" target="_blank" style="color:var(--blue);font-weight:600">Terms of Service</a> and <a href="privacy.html" target="_blank" style="color:var(--blue);font-weight:600">Privacy Policy</a></label>
-        </div>
-        <button class="btn btn-blue" id="signup-btn" style="opacity:.5;pointer-events:none;width:100%" onclick="signUp()">
-          <span id="signup-btn-text">Create Account — Free</span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </button>
-
-        <div class="auth-foot">
-          <div class="auth-switch" style="margin-top:16px">Already have an account? <a href="#" onclick="authTab(document.querySelectorAll('.atab')[0],'signin')">Sign in</a></div>
-        </div>
+      <div class="field">
+        <label>Your Trade</label>
+        <select id="w-trade">
+          <option value="">Select your trade…</option>
+          <option>Pipefitter</option><option>Welder</option><option>Electrician</option>
+          <option>Instrumentation Tech</option><option>Heavy Equipment Op.</option>
+          <option>Millwright</option><option>Boilermaker</option><option>Ironworker</option>
+          <option>Insulator</option><option>Scaffolder</option><option>Crane Operator</option>
+          <option>Labourer</option><option>Other</option>
+        </select>
       </div>
+      <div class="field">
+        <label>Province</label>
+        <select id="w-province">
+          <option value="">Select…</option>
+          <option>Alberta</option><option>British Columbia</option><option>Saskatchewan</option>
+          <option>Manitoba</option><option>Ontario</option><option>Northwest Territories</option><option>Yukon</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="w-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="w-password" placeholder="At least 8 characters" autocomplete="new-password">
+      </div>
+
+      <label class="agree">
+        <input type="checkbox" id="w-agree">
+        <span>I agree to the <a href="terms.html" target="_blank">Terms of Service</a> and <a href="privacy.html" target="_blank">Privacy Policy</a></span>
+      </label>
+
+      <button class="btn-main" id="worker-btn" onclick="signUp('worker')"><span id="worker-btn-text">Create Worker Account — Free</span></button>
+
+      <div class="divider">or</div>
+      <button class="btn-google" onclick="googleAuth('worker')">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Sign up with Google
+      </button>
+
+      <div class="switch-line">Hiring instead? <a onclick="goTo('employer')">Create an employer account</a> · <a onclick="goTo('signin')">Sign in</a></div>
     </div>
   </div>
+
+  <!-- ════ SCREEN: EMPLOYER SIGN UP ════ -->
+  <div class="screen" id="screen-employer">
+    <div class="panel">
+      <button class="back-link" onclick="goTo('choose')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <span class="role-tag employer">Employer Account</span>
+      <h2>Hire certified crews</h2>
+      <p class="sub">Post jobs and search workers by trade, tickets, and availability.</p>
+
+      <div class="verify-note">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        New employer accounts are verified by our team — usually under 24 hours. You can build job drafts right away; publishing unlocks on approval.
+      </div>
+
+      <div class="auth-msg" id="employer-msg"></div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" id="e-first" placeholder="Sarah" autocomplete="given-name">
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" id="e-last" placeholder="Mitchell" autocomplete="family-name">
+        </div>
+      </div>
+      <div class="field">
+        <label>Company Name</label>
+        <input type="text" id="e-company" placeholder="e.g. Northstar Contracting Ltd." autocomplete="organization">
+      </div>
+      <div class="field">
+        <label>Province</label>
+        <select id="e-province">
+          <option value="">Select…</option>
+          <option>Alberta</option><option>British Columbia</option><option>Saskatchewan</option>
+          <option>Manitoba</option><option>Ontario</option><option>Northwest Territories</option><option>Yukon</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Work Email</label>
+        <input type="email" id="e-email" placeholder="you@company.com" autocomplete="email">
+        <div class="field-help">A company email speeds up verification.</div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="e-password" placeholder="At least 8 characters" autocomplete="new-password">
+      </div>
+
+      <label class="agree">
+        <input type="checkbox" id="e-agree">
+        <span>I agree to the <a href="terms.html" target="_blank">Terms of Service</a> and <a href="privacy.html" target="_blank">Privacy Policy</a></span>
+      </label>
+
+      <button class="btn-main" id="employer-btn" onclick="signUp('employer')"><span id="employer-btn-text">Create Employer Account</span></button>
+
+      <div class="divider">or</div>
+      <button class="btn-google" onclick="googleAuth('employer')">
+        <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Sign up with Google
+      </button>
+
+      <div class="switch-line">Looking for work? <a onclick="goTo('worker')">Create a worker account</a> · <a onclick="goTo('signin')">Sign in</a></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
 // ════════════════════════════════════════════════════════════════════
-// SUPABASE CONFIGURATION
+// SUPABASE
 // ════════════════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Redirect logged-in user to the right dashboard for their role
+// ════════════════════════════════════════════════════════════════════
+// SCREEN NAVIGATION — worker and employer fully separated
+// ════════════════════════════════════════════════════════════════════
+function goTo(screen){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById('screen-' + screen).classList.add('on');
+  window.scrollTo(0, 0);
+}
+
+// Deep links: login.html?role=employer / ?role=worker / ?screen=signin
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const role = params.get('role');
+  if(role === 'worker' || role === 'employer') goTo(role);
+  else if(params.get('screen') === 'signin') goTo('signin');
+})();
+
+// ════════════════════════════════════════════════════════════════════
+// REDIRECT + GOOGLE ROLE FIXUP
+// The DB trigger defaults Google signups to 'worker' because Google
+// sends no role metadata. Apply the role they picked before redirect.
+// ════════════════════════════════════════════════════════════════════
 async function redirectToDashboard(userId){
   if(userId){
     let { data: profile } = await sb.from('profiles').select('role, is_admin, created_at, verification_status').eq('id', userId).single();
 
-    // ── GOOGLE SIGN-IN ROLE FIXUP ──
-    // The DB trigger defaults Google signups to 'worker' because Google
-    // sends no role. Apply the role they picked before the redirect.
     const isFresh = profile && (Date.now() - new Date(profile.created_at).getTime()) < 10 * 60 * 1000;
     let pendingRole = localStorage.getItem('rp_pending_role');
 
-    // Fallback: brand-new Google profile but no saved choice → ask once
+    // Brand-new Google profile but no saved choice → ask once
     if(isFresh && !pendingRole && !profile.is_admin){
       const isEmployer = confirm('Welcome to RigPass! One quick question:\n\nAre you signing up as an EMPLOYER (hiring workers)?\n\nOK = Employer · Cancel = Worker (looking for jobs)');
       pendingRole = isEmployer ? 'employer' : 'worker';
@@ -520,12 +381,10 @@ async function redirectToDashboard(userId){
   }
 }
 
-// If user is already logged in, send them to dashboard
+// Already signed in? Straight to dashboard.
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    redirectToDashboard(session.user.id);
-  }
+  if(session) redirectToDashboard(session.user.id);
 })();
 
 // ════════════════════════════════════════════════════════════════════
@@ -549,21 +408,15 @@ function setLoading(btnId, isLoading, originalText){
   const text = document.getElementById(btnId + '-text');
   if(isLoading){
     btn.disabled = true;
-    btn.style.pointerEvents = 'none';
     if(text) text.textContent = 'Please wait...';
   } else {
     btn.disabled = false;
-    btn.style.pointerEvents = 'auto';
     if(text) text.textContent = originalText;
   }
 }
-function getSelectedRole(panelId){
-  const active = document.querySelector('#' + panelId + '-role .rtog.on');
-  return active ? active.dataset.role : 'worker';
-}
 
 // ════════════════════════════════════════════════════════════════════
-// SIGN IN
+// SIGN IN — no role needed; the account already knows what it is
 // ════════════════════════════════════════════════════════════════════
 async function signIn(){
   hideMsg('signin');
@@ -576,7 +429,6 @@ async function signIn(){
   }
 
   setLoading('signin-btn', true);
-
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
 
   if(error){
@@ -592,52 +444,40 @@ async function signIn(){
   }
 
   showMsg('signin', 'success', 'Signed in! Redirecting...');
-  setTimeout(() => { redirectToDashboard(data.user.id); }, 800);
+  setTimeout(() => { redirectToDashboard(data.user.id); }, 600);
 }
 
 // ════════════════════════════════════════════════════════════════════
-// SIGN UP
+// SIGN UP — role comes from which screen you're on, never a tab
 // ════════════════════════════════════════════════════════════════════
-async function signUp(){
-  hideMsg('signup');
+async function signUp(role){
+  const p = role === 'worker' ? 'worker' : 'employer';
+  const f = (id) => document.getElementById(id);
+  hideMsg(p);
 
-  if(!document.getElementById('agree-terms').checked){
-    showMsg('signup', 'error', 'Please accept the Terms of Service to continue.');
-    return;
-  }
-
-  const role = getSelectedRole('signup');
-  const firstName = document.getElementById('signup-first').value.trim();
-  const lastName = document.getElementById('signup-last').value.trim();
-  const email = document.getElementById('signup-email').value.trim();
-  const password = document.getElementById('signup-password').value;
-  const province = document.getElementById('signup-province').value;
-  const trade = document.getElementById('signup-trade').value;
-  const company = document.getElementById('signup-company').value.trim();
-
-  // Validation
-  if(!firstName || !lastName){
-    showMsg('signup', 'error', 'Please enter your first and last name.');
-    return;
-  }
-  if(!email){
-    showMsg('signup', 'error', 'Please enter your email.');
-    return;
-  }
-  if(password.length < 8){
-    showMsg('signup', 'error', 'Password must be at least 8 characters.');
-    return;
-  }
-  if(role === 'worker' && !trade){
-    showMsg('signup', 'error', 'Please select your primary trade.');
-    return;
-  }
-  if(role === 'employer' && !company){
-    showMsg('signup', 'error', 'Please enter your company name.');
+  const prefix = role === 'worker' ? 'w' : 'e';
+  if(!f(prefix + '-agree').checked){
+    showMsg(p, 'error', 'Please accept the Terms of Service to continue.');
     return;
   }
 
-  setLoading('signup-btn', true);
+  const firstName = f(prefix + '-first').value.trim();
+  const lastName = f(prefix + '-last').value.trim();
+  const email = f(prefix + '-email').value.trim();
+  const password = f(prefix + '-password').value;
+  const province = f(prefix + '-province').value;
+  const trade = role === 'worker' ? f('w-trade').value : null;
+  const company = role === 'employer' ? f('e-company').value.trim() : null;
+
+  if(!firstName || !lastName){ showMsg(p, 'error', 'Please enter your first and last name.'); return; }
+  if(role === 'worker' && !trade){ showMsg(p, 'error', 'Please select your primary trade.'); return; }
+  if(role === 'employer' && !company){ showMsg(p, 'error', 'Please enter your company name.'); return; }
+  if(!email){ showMsg(p, 'error', 'Please enter your email.'); return; }
+  if(password.length < 8){ showMsg(p, 'error', 'Password must be at least 8 characters.'); return; }
+
+  const btnId = p + '-btn';
+  const btnLabel = role === 'worker' ? 'Create Worker Account — Free' : 'Create Employer Account';
+  setLoading(btnId, true);
 
   const { data, error } = await sb.auth.signUp({
     email,
@@ -647,59 +487,53 @@ async function signUp(){
         role: role,
         first_name: firstName,
         last_name: lastName,
-        trade: role === 'worker' ? trade : null,
+        trade: trade,
         province: province || null,
-        company_name: role === 'employer' ? company : null
+        company_name: company
       }
     }
   });
 
   if(error){
-    setLoading('signup-btn', false, 'Create Account — Free');
+    setLoading(btnId, false, btnLabel);
     if(error.message.includes('already registered') || error.message.includes('already been registered')){
-      showMsg('signup', 'error', 'This email is already registered. Try signing in instead.');
+      showMsg(p, 'error', 'This email is already registered. Try signing in instead.');
     } else {
-      showMsg('signup', 'error', error.message);
+      showMsg(p, 'error', error.message);
     }
     return;
   }
 
-  // Check if email confirmation is needed
   if(data.user && !data.session){
-    showMsg('signup', 'success', '✓ Account created! Please check your email to confirm, then sign in.');
-    setLoading('signup-btn', false, 'Create Account — Free');
+    showMsg(p, 'success', '✓ Account created! Please check your email to confirm, then sign in.');
+    setLoading(btnId, false, btnLabel);
   } else {
-    showMsg('signup', 'success', 'Account created! Redirecting to dashboard...');
-    // Use role-based redirect (we know the role from the form)
+    showMsg(p, 'success', 'Account created! Redirecting...');
     const dest = role === 'employer' ? 'employer-dashboard.html' : 'dashboard.html';
-    setTimeout(() => { window.location.href = dest; }, 1000);
+    setTimeout(() => { window.location.href = dest; }, 800);
   }
 }
 
 // ════════════════════════════════════════════════════════════════════
-// GOOGLE SIGN-IN
+// GOOGLE — role saved before redirect; null = signing in (role unknown,
+// existing accounts keep theirs; brand-new ones get asked once)
 // ════════════════════════════════════════════════════════════════════
-async function signInWithGoogle(){
-  const role = getSelectedRole(document.getElementById('signup').classList.contains('on') ? 'signup' : 'signin');
+async function googleAuth(role){
+  if(role) localStorage.setItem('rp_pending_role', role);
+  else localStorage.removeItem('rp_pending_role');
 
-  // Remember which role they chose — applied after Google returns
-  localStorage.setItem('rp_pending_role', role);
-
-  const { data, error } = await sb.auth.signInWithOAuth({
+  const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: window.location.origin + '/login.html',
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent'
-      }
+      queryParams: { access_type: 'offline', prompt: 'consent' }
     }
   });
 
   if(error){
     localStorage.removeItem('rp_pending_role');
-    const panelId = document.getElementById('signup').classList.contains('on') ? 'signup' : 'signin';
-    showMsg(panelId, 'error', 'Google sign-in failed: ' + error.message);
+    const panel = role || 'signin';
+    showMsg(panel === 'worker' ? 'worker' : panel === 'employer' ? 'employer' : 'signin', 'error', 'Google sign-in failed: ' + error.message);
   }
 }
 
@@ -720,83 +554,6 @@ async function resetPassword(e){
     showMsg('signin', 'error', error.message);
   } else {
     showMsg('signin', 'success', 'Password reset link sent to ' + email);
-  }
-}
-
-// ════════════════════════════════════════════════════════════════════
-// TAB SWITCHING
-// ════════════════════════════════════════════════════════════════════
-function authTab(btn,id){
-  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('on'));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
-  btn.classList.add('on');
-  document.getElementById(id).classList.add('on');
-}
-
-// Role toggle (each row independent) + swap visible fields on signup
-document.querySelectorAll('.role-toggle').forEach(tog=>{
-  tog.querySelectorAll('.rtog').forEach(btn=>{
-    btn.addEventListener('click',function(){
-      tog.querySelectorAll('.rtog').forEach(t=>t.classList.remove('on'));
-      this.classList.add('on');
-
-      // If this is the SIGNUP role toggle, swap fields
-      if(tog.id === 'signup-role'){
-        const role = this.dataset.role;
-        const isEmployer = role === 'employer';
-        document.getElementById('worker-note').style.display = isEmployer ? 'none' : 'flex';
-        document.getElementById('employer-note').style.display = isEmployer ? 'flex' : 'none';
-        document.getElementById('company-field').style.display = isEmployer ? 'block' : 'none';
-        document.getElementById('trade-field').style.display = isEmployer ? 'none' : 'block';
-      }
-    });
-  });
-});
-
-// Terms acceptance
-function toggleAgree(cb){
-  const btn = document.getElementById('signup-btn');
-  if(cb.checked){
-    btn.style.opacity = '1';
-    btn.style.pointerEvents = 'auto';
-  } else {
-    btn.style.opacity = '.5';
-    btn.style.pointerEvents = 'none';
-  }
-}
-function checkAgree(e){
-  if(!document.getElementById('agree-terms').checked){
-    e.preventDefault();
-    alert('Please accept the Terms of Service and Privacy Policy to continue.');
-    return false;
-  }
-  return true;
-}
-
-// Password strength
-function checkPwd(v){
-  const bars = document.querySelectorAll('#pwd-strength .pwd-bar');
-  const hint = document.getElementById('pwd-hint');
-  bars.forEach(b=>b.className='pwd-bar');
-  let score = 0;
-  if(v.length >= 8) score++;
-  if(/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
-  if(/[0-9]/.test(v) || /[^a-zA-Z0-9]/.test(v)) score++;
-  if(score === 0){
-    hint.textContent = 'Use 8+ characters with letters and numbers.';
-    hint.style.color = '';
-  } else if(score === 1){
-    bars[0].classList.add('weak');
-    hint.textContent = 'Weak — add letters and numbers.';
-    hint.style.color = '#ef4444';
-  } else if(score === 2){
-    bars[0].classList.add('medium'); bars[1].classList.add('medium');
-    hint.textContent = 'Medium — add a number or symbol.';
-    hint.style.color = '#f59e0b';
-  } else {
-    bars.forEach(b=>b.classList.add('strong'));
-    hint.textContent = 'Strong password ✓';
-    hint.style.color = '#166534';
   }
 }
 </script>
