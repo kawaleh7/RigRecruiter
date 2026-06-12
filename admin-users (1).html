@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — All Users</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a;display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+:root{
+  --navy:#0a1228;
+  --blue:#1e3a8a;
+  --blue-mid:#1e40af;
+  --blue-soft:#eef2ff;
+  --gold:#b8923a;
+  --text:#0f172a;
+  --text-2:#475569;
+  --muted:#64748b;
+  --light:#94a3b8;
+  --line:#e2e8f0;
+  --line-soft:#f1f5f9;
+  --ok:#15803d;
+  --ok-soft:#f0fdf4;
+  --warn:#a16207;
+  --warn-soft:#fefce8;
+  --danger:#b91c1c;
+  --danger-soft:#fef2f2;
+}
+
+/* SIDEBAR */
+.sidebar{width:240px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sb-top{padding:22px 22px 18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line-soft)}
+.sb-logo{width:34px;height:34px;background:var(--navy);border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+.sb-logo svg{width:16px;height:16px;fill:#fff}
+.sb-brand{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.3px;line-height:1.1}
+.sb-brand span{color:var(--blue)}
+.sb-tag{display:inline-block;font-size:.6rem;font-weight:800;color:var(--danger);background:var(--danger-soft);padding:1px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;border:1px solid #fda4af}
+
+.sb-nav{flex:1;padding:18px 12px;overflow-y:auto}
+.sb-section + .sb-section{margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.sb-label{font-size:.66rem;font-weight:800;color:var(--light);text-transform:uppercase;letter-spacing:1.2px;padding:0 10px 6px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;font-size:.86rem;font-weight:600;color:var(--text-2);text-decoration:none;margin-bottom:2px;transition:all .15s}
+.sb-link:hover{background:var(--line-soft);color:var(--text)}
+.sb-link.active{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.sb-link svg{width:17px;height:17px;flex-shrink:0;stroke-width:2}
+
+.sb-bottom{padding:14px;border-top:1px solid var(--line-soft)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;cursor:pointer;transition:background .15s;position:relative}
+.sb-user:hover{background:var(--line-soft)}
+.sb-avatar{width:34px;height:34px;border-radius:9px;background:var(--navy);display:grid;place-items:center;color:#fff;font-size:.74rem;font-weight:800;flex-shrink:0}
+.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.sb-urole{font-size:.72rem;color:var(--muted);margin-top:2px}
+.sb-arrow{margin-left:auto;color:var(--light)}
+
+/* MAIN */
+.main{flex:1;padding:32px 40px 60px;min-width:0;max-width:1280px}
+.page-head{margin-bottom:22px}
+.page-head h1{font-size:1.65rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:6px}
+.page-head p{font-size:.92rem;color:var(--text-2)}
+
+/* STATS */
+.stats-strip{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 4px;margin-bottom:22px}
+.stat-item{flex:1;padding:0 24px;border-right:1px solid var(--line-soft);min-width:0}
+.stat-item:last-child{border-right:none}
+.stat-num{font-size:1.55rem;font-weight:800;color:var(--text);letter-spacing:-.6px;line-height:1}
+.stat-num.ok{color:var(--ok)}
+.stat-label{font-size:.74rem;color:var(--muted);margin-top:6px;font-weight:600}
+
+/* FILTERS */
+.filters{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.search-input{flex:1;min-width:230px;padding:10px 13px;border-radius:9px;border:1.5px solid var(--line);font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;outline:none;transition:border-color .15s}
+.search-input:focus{border-color:var(--blue)}
+.filter-select{padding:10px 13px;border-radius:9px;border:1.5px solid var(--line);background:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.84rem;color:var(--text);cursor:pointer;outline:none}
+.results-info{font-size:.78rem;color:var(--muted);font-weight:600;margin-bottom:12px}
+
+/* USER ROWS */
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.user-row{
+  display:grid;grid-template-columns:minmax(200px,1.4fr) minmax(110px,.8fr) minmax(140px,1fr) minmax(150px,1fr) minmax(90px,.7fr) auto;
+  gap:14px;align-items:center;padding:14px 22px;border-top:1px solid var(--line-soft);
+}
+.user-row:first-of-type{border-top:none}
+.user-row:hover{background:var(--line-soft)}
+.user-cell{display:flex;align-items:center;gap:11px;min-width:0}
+.u-avatar{width:38px;height:38px;border-radius:9px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:.72rem;font-weight:800;flex-shrink:0}
+.u-name{font-size:.88rem;font-weight:700;color:var(--text);letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u-email{font-size:.72rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell-sub{font-size:.82rem;color:var(--text);font-weight:600}
+.cell-meta{font-size:.72rem;color:var(--muted);margin-top:2px}
+
+/* TAGS */
+.tag{display:inline-flex;align-items:center;font-size:.64rem;font-weight:800;padding:2px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.tag-worker{background:var(--blue-soft);color:var(--blue)}
+.tag-employer{background:#fdf8ee;color:#b8923a}
+.tag-admin{background:var(--danger-soft);color:var(--danger)}
+.tag-pending{background:var(--warn-soft);color:var(--warn)}
+.tag-approved{background:var(--ok-soft);color:var(--ok)}
+.tag-rejected{background:var(--danger-soft);color:var(--danger)}
+.tag-suspended{background:var(--danger-soft);color:var(--danger)}
+
+/* PLAN DISPLAY */
+.plan-name{font-size:.8rem;font-weight:800;letter-spacing:-.1px}
+.plan-name.free{color:var(--muted)}
+.plan-name.paid{color:var(--blue)}
+.plan-expiry{font-size:.7rem;font-weight:600;margin-top:2px}
+.plan-expiry.ok{color:var(--ok)}
+.plan-expiry.warn{color:var(--warn)}
+.plan-expiry.danger{color:var(--danger)}
+.plan-expiry.none{color:var(--light)}
+
+/* ACTION MENU */
+.action-menu{position:relative}
+.action-btn{padding:7px 12px;border-radius:7px;border:1.5px solid var(--line);background:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.76rem;font-weight:700;color:var(--text);cursor:pointer;white-space:nowrap;transition:all .15s}
+.action-btn:hover{border-color:var(--light);background:var(--line-soft)}
+.dropdown{position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:0 12px 28px rgba(15,23,42,.14);min-width:170px;z-index:100;overflow:hidden}
+.dropdown button{width:100%;padding:10px 14px;background:#fff;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:600;color:var(--text);cursor:pointer;text-align:left;border-bottom:1px solid var(--line-soft)}
+.dropdown button:last-child{border-bottom:none}
+.dropdown button:hover{background:var(--line-soft)}
+.dropdown button.danger{color:var(--danger)}
+.dropdown button.danger:hover{background:var(--danger-soft)}
+
+.empty-state{padding:50px 22px;text-align:center;color:var(--muted)}
+.empty-state p{font-size:.92rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.empty-state span{font-size:.8rem}
+
+@media(max-width:1080px){
+  .user-row{grid-template-columns:minmax(180px,1.4fr) minmax(100px,.8fr) minmax(130px,1fr) auto;gap:10px}
+  .ur-details,.ur-joined{display:none}
+}
+@media(max-width:980px){
+  .stats-strip{flex-wrap:wrap}
+  .stat-item{flex:0 0 50%;padding:12px 18px;border-right:none;border-bottom:1px solid var(--line-soft)}
+  .stat-item:nth-last-child(-n+2){border-bottom:none}
+}
+@media(max-width:700px){
+  .sidebar{width:64px}
+  .sb-brand,.sb-link span,.sb-uname,.sb-urole,.sb-arrow,.sb-label,.sb-tag{display:none}
+  .sb-link{justify-content:center;padding:9px 0}
+  .sb-user{justify-content:center;padding:0}
+  .main{padding:20px}
+  .user-row{grid-template-columns:1fr auto}
+  .ur-plan,.ur-role{display:none}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <div>
+      <div class="sb-brand">Rig<span>Pass</span></div>
+      <span class="sb-tag">Admin</span>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section">
+      <div class="sb-label">Console</div>
+      <a class="sb-link" href="admin.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="sb-link" href="admin-verification.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Verification</span>
+      </a>
+      <a class="sb-link active" href="admin-users.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        <span>All Users</span>
+      </a>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Account</div>
+      <a class="sb-link" href="settings.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/></svg>
+        <span>Settings</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="sb-bottom">
+    <div class="sb-user" onclick="toggleUserMenu(event)">
+      <div class="sb-avatar" id="sb-avatar">--</div>
+      <div style="min-width:0">
+        <div class="sb-uname" id="sb-uname">Loading...</div>
+        <div class="sb-urole">Platform Admin</div>
+      </div>
+      <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.12);overflow:hidden;z-index:200">
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--danger);background:#fff;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+  <div class="page-head">
+    <h1>All Users</h1>
+    <p>Search, filter, and manage every account — including plans and expiry dates.</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-strip">
+    <div class="stat-item">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-workers">0</div>
+      <div class="stat-label">Workers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-employers">0</div>
+      <div class="stat-label">Employers</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num ok" id="stat-paid">0</div>
+      <div class="stat-label">Paid Plans</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <input class="search-input" type="search" placeholder="Search by name, email, or company…" oninput="filterUsers()" id="search-input">
+    <select class="filter-select" id="filter-role" onchange="filterUsers()">
+      <option value="">All roles</option>
+      <option value="worker">Workers</option>
+      <option value="employer">Employers</option>
+      <option value="admin">Admins</option>
+    </select>
+    <select class="filter-select" id="filter-plan" onchange="filterUsers()">
+      <option value="">All plans</option>
+      <option value="free">Free</option>
+      <option value="pro">Pro (worker)</option>
+      <option value="employer_pro">Employer Pro</option>
+      <option value="expired">⚠ Expired plans</option>
+    </select>
+    <select class="filter-select" id="filter-status" onchange="filterUsers()">
+      <option value="">All statuses</option>
+      <option value="pending">Pending verification</option>
+      <option value="approved">Approved</option>
+      <option value="rejected">Rejected</option>
+      <option value="suspended">Suspended</option>
+    </select>
+  </div>
+
+  <div class="results-info" id="results-info">Loading…</div>
+
+  <div class="card">
+    <div id="users-table">
+      <div class="empty-state"><span>Loading users…</span></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let allUsers = [];
+
+const PLAN_LABELS = {
+  free: 'Free',
+  pro: 'Pro (Worker)',
+  employer_pro: 'Employer Pro'
+};
+
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(!profile || !profile.is_admin){
+    alert('Admin access required.');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const display = ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim() || currentUser.email.split('@')[0];
+  document.getElementById('sb-avatar').textContent = display.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('sb-uname').textContent = display;
+
+  await loadUsers();
+}
+
+async function loadUsers(){
+  const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+  if(error){ console.error(error); return; }
+  allUsers = data || [];
+
+  // Stats
+  document.getElementById('stat-total').textContent = allUsers.length;
+  document.getElementById('stat-workers').textContent = allUsers.filter(u => u.role === 'worker').length;
+  document.getElementById('stat-employers').textContent = allUsers.filter(u => u.role === 'employer').length;
+  document.getElementById('stat-paid').textContent = allUsers.filter(u => u.plan && u.plan !== 'free' && !isPlanExpired(u)).length;
+
+  filterUsers();
+}
+
+function isPlanExpired(u){
+  return u.plan_expires_at && new Date(u.plan_expires_at) < new Date();
+}
+
+function filterUsers(){
+  const search = document.getElementById('search-input').value.toLowerCase().trim();
+  const roleFilter = document.getElementById('filter-role').value;
+  const planFilter = document.getElementById('filter-plan').value;
+  const statusFilter = document.getElementById('filter-status').value;
+
+  let filtered = allUsers.filter(u => {
+    // Role
+    if(roleFilter === 'admin' && !u.is_admin) return false;
+    if(roleFilter && roleFilter !== 'admin' && u.role !== roleFilter) return false;
+
+    // Plan
+    if(planFilter === 'expired'){
+      if(!(u.plan && u.plan !== 'free' && isPlanExpired(u))) return false;
+    } else if(planFilter){
+      if((u.plan || 'free') !== planFilter) return false;
+    }
+
+    // Status
+    if(statusFilter === 'suspended' && !u.suspended) return false;
+    if(statusFilter && statusFilter !== 'suspended' && u.verification_status !== statusFilter) return false;
+
+    // Search
+    if(search){
+      const haystack = [u.first_name, u.last_name, u.email, u.company_name, u.trade, u.city].filter(Boolean).join(' ').toLowerCase();
+      if(!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('results-info').textContent = `Showing ${filtered.length} of ${allUsers.length} users`;
+  renderTable(filtered);
+}
+
+function planDisplay(u){
+  const plan = u.plan || 'free';
+  if(plan === 'free'){
+    return `<div class="plan-name free">Free</div><div class="plan-expiry none">No expiry</div>`;
+  }
+  const label = PLAN_LABELS[plan] || plan;
+  if(!u.plan_expires_at){
+    return `<div class="plan-name paid">${label}</div><div class="plan-expiry ok">No expiry set</div>`;
+  }
+  const exp = new Date(u.plan_expires_at);
+  const days = Math.ceil((exp - new Date()) / (1000*60*60*24));
+  const expStr = exp.toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' });
+  if(days < 0){
+    return `<div class="plan-name paid" style="color:var(--danger)">${label}</div><div class="plan-expiry danger">Expired ${Math.abs(days)}d ago (${expStr})</div>`;
+  }
+  if(days <= 14){
+    return `<div class="plan-name paid">${label}</div><div class="plan-expiry warn">Expires in ${days}d (${expStr})</div>`;
+  }
+  return `<div class="plan-name paid">${label}</div><div class="plan-expiry ok">Until ${expStr}</div>`;
+}
+
+function renderTable(users){
+  const table = document.getElementById('users-table');
+  if(users.length === 0){
+    table.innerHTML = `<div class="empty-state"><p>No users found</p><span>Try adjusting your filters.</span></div>`;
+    return;
+  }
+
+  table.innerHTML = users.map(u => {
+    const first = u.first_name || '';
+    const last = u.last_name || '';
+    const fullName = (first + ' ' + last).trim() || (u.company_name || (u.email || '').split('@')[0]);
+    const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || (u.company_name || u.email || 'U').substring(0,2).toUpperCase();
+    const safeName = fullName.replace(/'/g,"\\'");
+
+    const roleTag = u.is_admin
+      ? '<span class="tag tag-admin">Admin</span>'
+      : u.role === 'employer'
+      ? '<span class="tag tag-employer">Employer</span>'
+      : '<span class="tag tag-worker">Worker</span>';
+
+    let statusTag = '';
+    if(u.suspended){
+      statusTag = '<span class="tag tag-suspended">Suspended</span>';
+    } else if(u.role === 'employer'){
+      const cls = u.verification_status === 'approved' ? 'tag-approved' : u.verification_status === 'rejected' ? 'tag-rejected' : 'tag-pending';
+      statusTag = `<span class="tag ${cls}">${u.verification_status || 'pending'}</span>`;
+    }
+
+    const sub = u.role === 'worker' ? (u.trade || 'Worker') : (u.company_name || '—');
+    const loc = [u.city, u.province].filter(Boolean).join(', ');
+    const joined = new Date(u.created_at).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' });
+
+    return `<div class="user-row">
+      <div class="user-cell">
+        <div class="u-avatar">${initials}</div>
+        <div style="min-width:0">
+          <div class="u-name">${fullName}</div>
+          <div class="u-email">${u.email || ''}</div>
+        </div>
+      </div>
+      <div class="ur-role" style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">${roleTag}${statusTag}</div>
+      <div class="ur-details">
+        <div class="cell-sub">${sub}</div>
+        ${loc ? `<div class="cell-meta">${loc}</div>` : ''}
+      </div>
+      <div class="ur-plan">${planDisplay(u)}</div>
+      <div class="ur-joined cell-meta">${joined}</div>
+      <div class="action-menu">
+        <button class="action-btn" onclick="toggleMenu(event,'${u.id}')">Actions ▾</button>
+        <div class="dropdown" id="menu-${u.id}" style="display:none">
+          <button onclick="setPlan('${u.id}','${safeName}','${u.role}','${u.plan || 'free'}')">💳 Set Plan</button>
+          ${!u.is_admin ? `<button onclick="switchRole('${u.id}','${safeName}','${u.role}')">⇄ Switch to ${u.role === 'employer' ? 'Worker' : 'Employer'}</button>` : ''}
+          ${u.role === 'employer' && u.verification_status === 'pending' ? `<button onclick="approveUser('${u.id}','${safeName}')">✓ Approve</button>` : ''}
+          ${u.role === 'employer' && u.verification_status !== 'rejected' ? `<button class="danger" onclick="rejectUser('${u.id}','${safeName}')">✕ Reject</button>` : ''}
+          ${u.suspended
+            ? `<button onclick="unsuspendUser('${u.id}','${safeName}')">↻ Unsuspend</button>`
+            : `<button class="danger" onclick="suspendUser('${u.id}','${safeName}')">⊘ Suspend</button>`}
+          ${!u.is_admin ? `<button onclick="makeAdmin('${u.id}','${safeName}')">⚙ Make Admin</button>` : `<button class="danger" onclick="removeAdmin('${u.id}','${safeName}')">Remove Admin</button>`}
+          <button class="danger" onclick="deleteUser('${u.id}','${safeName}')">🗑 Delete User</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SET PLAN — manual plan management (works before Stripe exists)
+// ════════════════════════════════════════════════════════════════════
+async function setPlan(id, name, role, currentPlan){
+  const options = role === 'employer'
+    ? '1. Free\n2. Employer Pro'
+    : '1. Free\n2. Pro (Worker)';
+  const pick = prompt(`Set plan for ${name}\nCurrent: ${PLAN_LABELS[currentPlan] || currentPlan}\n\n${options}\n\nEnter the number:`);
+  if(pick === null) return;
+
+  let plan;
+  if(pick.trim() === '1') plan = 'free';
+  else if(pick.trim() === '2') plan = role === 'employer' ? 'employer_pro' : 'pro';
+  else { alert('Invalid choice.'); return; }
+
+  let expiresAt = null;
+  if(plan !== 'free'){
+    const months = prompt(`How many months until ${PLAN_LABELS[plan]} expires for ${name}?\n\nEnter a number (e.g. 1, 3, 12), or 0 for no expiry:`);
+    if(months === null) return;
+    const m = parseInt(months);
+    if(isNaN(m) || m < 0){ alert('Invalid number.'); return; }
+    if(m > 0){
+      const d = new Date();
+      d.setMonth(d.getMonth() + m);
+      expiresAt = d.toISOString();
+    }
+  }
+
+  const { error } = await sb.from('profiles').update({
+    plan,
+    plan_expires_at: expiresAt
+  }).eq('id', id);
+
+  if(error){ alert('Error: ' + error.message); return; }
+  alert(`✓ ${name} is now on ${PLAN_LABELS[plan]}${expiresAt ? ' until ' + new Date(expiresAt).toLocaleDateString('en-CA', {month:'long',day:'numeric',year:'numeric'}) : ''}.`);
+  await loadUsers();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SWITCH ROLE — for users who signed up as the wrong type
+// ════════════════════════════════════════════════════════════════════
+async function switchRole(id, name, currentRole){
+  const newRole = currentRole === 'employer' ? 'worker' : 'employer';
+  if(!confirm(`Switch "${name}" from ${currentRole} to ${newRole}?\n\n${newRole === 'employer'
+    ? 'They will need verification before they can publish jobs.'
+    : 'Their job postings will no longer be manageable, and they\'ll use the worker dashboard.'}`)) return;
+
+  const updates = { role: newRole };
+  if(newRole === 'employer'){
+    updates.verification_status = 'pending';
+    updates.is_verified = false;
+  } else {
+    updates.verification_status = 'approved';
+  }
+
+  const { error } = await sb.from('profiles').update(updates).eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  alert(`✓ ${name} is now a ${newRole}${newRole === 'employer' ? ' (pending verification)' : ''}.`);
+  await loadUsers();
+}
+
+function toggleMenu(e, id){
+  e.stopPropagation();
+  document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
+  const menu = document.getElementById('menu-' + id);
+  if(menu) menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+async function approveUser(id, name){
+  if(!confirm(`Approve "${name}"?`)) return;
+  const { error } = await sb.from('profiles').update({ verification_status: 'approved', is_verified: true }).eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadUsers();
+}
+async function rejectUser(id, name){
+  const reason = prompt(`Reject "${name}"?\n\nReason (optional):`);
+  if(reason === null) return;
+  const { error } = await sb.from('profiles').update({ verification_status: 'rejected', is_verified: false, verification_note: reason || null }).eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadUsers();
+}
+async function suspendUser(id, name){
+  const reason = prompt(`Suspend "${name}"?\n\nThis prevents them from using the platform.\nReason (optional):`);
+  if(reason === null) return;
+  const { error } = await sb.from('profiles').update({ suspended: true, suspended_reason: reason || null }).eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadUsers();
+}
+async function unsuspendUser(id, name){
+  if(!confirm(`Unsuspend "${name}"?`)) return;
+  const { error } = await sb.from('profiles').update({ suspended: false, suspended_reason: null }).eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadUsers();
+}
+async function makeAdmin(id, name){
+  if(!confirm(`Make "${name}" an admin? They will have FULL platform access.`)) return;
+  const { error } = await sb.from('profiles').update({ is_admin: true }).eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadUsers();
+}
+async function removeAdmin(id, name){
+  if(!confirm(`Remove admin from "${name}"?`)) return;
+  const { error } = await sb.from('profiles').update({ is_admin: false }).eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadUsers();
+}
+async function deleteUser(id, name){
+  if(!confirm(`Permanently delete "${name}" and ALL their data?\n\nThis cannot be undone.`)) return;
+  const { error } = await sb.from('profiles').delete().eq('id', id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadUsers();
+}
+
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
+  const menu = document.getElementById('user-menu');
+  if(menu) menu.style.display = 'none';
+});
+
+init();
+</script>
+</body>
+</html>
