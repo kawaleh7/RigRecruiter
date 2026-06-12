@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RigPass — Talent Pool</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#1e3a8a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -225,7 +229,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
 @media(max-width:768px){
   .sidebar{display:none}
   .main{margin-left:0}
-  .filter-col{display:none}
+  .filter-col{position:fixed;left:0;top:0;bottom:0;z-index:400;width:270px;transform:translateX(-100%);transition:transform .25s;box-shadow:8px 0 30px rgba(15,23,42,.18)}
+  .filter-col.open{transform:translateX(0)}
+  .filter-toggle{display:inline-flex !important}
   .search-bar{display:none}
   .drawer{width:100%}
 }
@@ -278,7 +284,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <div class="topbar-right">
       <div class="search-bar">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Search by name, trade, certification...">
+        <input type="text" placeholder="Search by name, trade, certification..." oninput="talentSearch=this.value.toLowerCase();renderWorkers()">
       </div>
       <div class="icon-btn">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -297,51 +303,36 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <aside class="filter-col">
       <div class="fp-head">
         Filters
-        <button class="fp-clear">Clear all</button>
+        <button class="fp-clear" onclick="clearFilters()">Clear all</button>
       </div>
 
       <div class="fp-section">
         <div class="fp-label">Trade</div>
-        <label class="fp-check"><input type="checkbox" checked><span>Pipefitter</span><span class="fp-count">342</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Welder</span><span class="fp-count">298</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Electrician</span><span class="fp-count">186</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Instrumentation</span><span class="fp-count">122</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Heavy Equipment</span><span class="fp-count">98</span></label>
+        <div id="filt-trade"></div>
       </div>
       <div class="fp-divider"></div>
 
       <div class="fp-section">
         <div class="fp-label">Province</div>
-        <label class="fp-check"><input type="checkbox" checked><span>Alberta</span><span class="fp-count">9,840</span></label>
-        <label class="fp-check"><input type="checkbox"><span>British Columbia</span><span class="fp-count">1,260</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Saskatchewan</span><span class="fp-count">980</span></label>
-        <label class="fp-check"><input type="checkbox"><span>NWT</span><span class="fp-count">220</span></label>
+        <div id="filt-province"></div>
       </div>
       <div class="fp-divider"></div>
 
       <div class="fp-section">
-        <div class="fp-label">Required Certs</div>
-        <label class="fp-check"><input type="checkbox" checked><span>H2S Alive</span></label>
-        <label class="fp-check"><input type="checkbox" checked><span>WHMIS 2018</span></label>
-        <label class="fp-check"><input type="checkbox"><span>First Aid L3</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Confined Space</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Ground Disturbance II</span></label>
+        <div class="fp-label">Has Certification</div>
+        <div id="filt-certs"></div>
       </div>
       <div class="fp-divider"></div>
 
       <div class="fp-section">
         <div class="fp-label">Availability</div>
-        <label class="fp-check"><input type="checkbox" checked><span>Available now</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Within 2 weeks</span></label>
-        <label class="fp-check"><input type="checkbox"><span>Within 30 days</span></label>
+        <div id="filt-avail"></div>
       </div>
       <div class="fp-divider"></div>
 
       <div class="fp-section">
         <div class="fp-label">Experience</div>
-        <label class="fp-check"><input type="checkbox"><span>0–3 years</span></label>
-        <label class="fp-check"><input type="checkbox" checked><span>4–7 years</span></label>
-        <label class="fp-check"><input type="checkbox" checked><span>8+ years</span></label>
+        <div id="filt-exp"></div>
       </div>
     </aside>
 
@@ -349,15 +340,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     <div class="workers-col">
       <div class="results-head">
         <div>
-          <h1>342 Pipefitters in Alberta</h1>
-          <p>218 fully qualified · 124 missing 1 cert · Sorted by best match</p>
+          <h1 id="results-title">Loading workers…</h1>
+          <p id="results-sub"></p>
         </div>
         <div class="results-sort">
-          <select class="sort-select">
-            <option>Best Match</option>
-            <option>Most Experience</option>
-            <option>Recently Active</option>
-            <option>Nearest Location</option>
+          <button class="filter-toggle" onclick="document.querySelector('.filter-col').classList.toggle('open')" style="display:none;align-items:center;gap:6px;padding:8px 13px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:700;color:var(--text);cursor:pointer;margin-right:8px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Filters
+          </button>
+          <select class="sort-select" id="sort-select" onchange="renderWorkers()">
+            <option value="newest">Newest First</option>
+            <option value="experience">Most Experience</option>
+            <option value="name">Name A–Z</option>
           </select>
         </div>
       </div>
@@ -467,6 +461,17 @@ async function init(){
   currentUser = session.user;
 
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+
+  if(profile && profile.suspended && !profile.is_admin){
+    alert('Your RigPass account has been suspended.' + (profile.suspended_reason ? '
+
+Reason: ' + profile.suspended_reason : '') + '
+
+Contact support if you believe this is a mistake.');
+    await sb.auth.signOut();
+    window.location.href = 'login.html';
+    return;
+  }
   if(!profile){ alert('Profile not found.'); window.location.href = 'login.html'; return; }
   currentProfile = profile;
 
@@ -516,6 +521,7 @@ async function loadWorkers(){
     });
   }
 
+  buildFilters();
   renderWorkers();
 }
 
@@ -545,8 +551,137 @@ function certStatus(c){
   return 'valid';
 }
 
+// ════════════════════════════════════════════════════════════════════
+// FILTERS — built from real worker data, real counts
+// ════════════════════════════════════════════════════════════════════
+let talentSearch = '';
+let filters = { trade: new Set(), province: new Set(), cert: new Set(), avail: new Set(), exp: new Set() };
+
+const AVAIL_LABELS = {
+  available_now: 'Available now',
+  within_2_weeks: 'Within 2 weeks',
+  within_30_days: 'Within 30 days',
+  not_available: 'Not available'
+};
+const EXP_BUCKETS = [
+  { key: '0-3', label: '0–3 years', test: y => (y || 0) <= 3 },
+  { key: '4-7', label: '4–7 years', test: y => y >= 4 && y <= 7 },
+  { key: '8+',  label: '8+ years',  test: y => y >= 8 }
+];
+
+function validCertNames(workerId){
+  return (workerCerts[workerId] || [])
+    .filter(c => !c.expiry_date || new Date(c.expiry_date) > new Date())
+    .map(c => c.name);
+}
+
+function buildFilters(){
+  const countBy = (getter) => {
+    const m = {};
+    workers.forEach(w => {
+      const vals = getter(w);
+      (Array.isArray(vals) ? vals : [vals]).forEach(v => {
+        if(!v) return;
+        m[v] = (m[v] || 0) + 1;
+      });
+    });
+    return m;
+  };
+
+  const renderGroup = (containerId, counts, group, labelMap) => {
+    const el = document.getElementById(containerId);
+    const keys = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
+    if(keys.length === 0){ el.innerHTML = '<div style="font-size:.76rem;color:var(--light)">No data yet</div>'; return; }
+    el.innerHTML = keys.map(k => `
+      <label class="fp-check">
+        <input type="checkbox" ${filters[group].has(k) ? 'checked' : ''} onchange="toggleFilter('${group}', '${k.replace(/'/g,"\\'")}', this.checked)">
+        <span>${(labelMap && labelMap[k]) || k}</span>
+        <span class="fp-count">${counts[k]}</span>
+      </label>`).join('');
+  };
+
+  renderGroup('filt-trade', countBy(w => w.trade), 'trade');
+  renderGroup('filt-province', countBy(w => w.province), 'province');
+  renderGroup('filt-certs', countBy(w => validCertNames(w.id)), 'cert');
+  renderGroup('filt-avail', countBy(w => w.availability), 'avail', AVAIL_LABELS);
+
+  // Experience buckets
+  const expCounts = {};
+  EXP_BUCKETS.forEach(b => { expCounts[b.key] = workers.filter(w => b.test(w.experience_years)).length; });
+  document.getElementById('filt-exp').innerHTML = EXP_BUCKETS.map(b => `
+    <label class="fp-check">
+      <input type="checkbox" ${filters.exp.has(b.key) ? 'checked' : ''} onchange="toggleFilter('exp', '${b.key}', this.checked)">
+      <span>${b.label}</span>
+      <span class="fp-count">${expCounts[b.key]}</span>
+    </label>`).join('');
+}
+
+function toggleFilter(group, value, on){
+  if(on) filters[group].add(value); else filters[group].delete(value);
+  renderWorkers();
+}
+
+function clearFilters(){
+  filters = { trade: new Set(), province: new Set(), cert: new Set(), avail: new Set(), exp: new Set() };
+  talentSearch = '';
+  const sb_input = document.querySelector('.search-bar input');
+  if(sb_input) sb_input.value = '';
+  buildFilters();
+  renderWorkers();
+}
+
+function applyFilters(list){
+  return list.filter(w => {
+    if(filters.trade.size && !filters.trade.has(w.trade)) return false;
+    if(filters.province.size && !filters.province.has(w.province)) return false;
+    if(filters.avail.size && !filters.avail.has(w.availability)) return false;
+    if(filters.exp.size){
+      const hit = [...filters.exp].some(k => EXP_BUCKETS.find(b => b.key === k).test(w.experience_years));
+      if(!hit) return false;
+    }
+    if(filters.cert.size){
+      const certNames = validCertNames(w.id);
+      const hasAll = [...filters.cert].every(c => certNames.includes(c));
+      if(!hasAll) return false;
+    }
+    if(talentSearch){
+      const hay = [w.first_name, w.last_name, w.trade, w.trade_level, w.city, w.province, ...validCertNames(w.id)]
+        .filter(Boolean).join(' ').toLowerCase();
+      if(!hay.includes(talentSearch)) return false;
+    }
+    return true;
+  });
+}
+
 function renderWorkers(){
   const grid = document.getElementById('workers-grid');
+
+  // Apply filters + search + sort
+  let shown = applyFilters(workers);
+  const sortBy = (document.getElementById('sort-select') || {}).value || 'newest';
+  if(sortBy === 'experience') shown = [...shown].sort((a,b) => (b.experience_years||0) - (a.experience_years||0));
+  else if(sortBy === 'name') shown = [...shown].sort((a,b) => ((a.first_name||'')+(a.last_name||'')).localeCompare((b.first_name||'')+(b.last_name||'')));
+
+  // Real headline
+  const title = document.getElementById('results-title');
+  const sub = document.getElementById('results-sub');
+  if(title){
+    const tradeBits = [...filters.trade];
+    const provBits = [...filters.province];
+    const what = tradeBits.length === 1 ? tradeBits[0] + 's' : 'Workers';
+    const where = provBits.length === 1 ? ' in ' + provBits[0] : '';
+    title.textContent = shown.length + ' ' + what + where;
+    const availNow = shown.filter(w => w.availability === 'available_now').length;
+    sub.textContent = (workers.length !== shown.length ? 'Filtered from ' + workers.length + ' total · ' : '') + availNow + ' available now';
+  }
+
+  if(shown.length === 0 && workers.length > 0){
+    grid.innerHTML = `<div style="grid-column:1/-1;background:#fff;border:1.5px dashed var(--border);border-radius:14px;padding:50px 24px;text-align:center">
+      <p style="font-size:1rem;font-weight:800;color:var(--text);margin-bottom:6px">No workers match these filters</p>
+      <p style="font-size:.85rem;color:var(--muted)">Try removing a filter or two.</p>
+    </div>`;
+    return;
+  }
 
   if(workers.length === 0){
     grid.innerHTML = `<div style="grid-column:1/-1;background:#fff;border:1.5px dashed var(--border);border-radius:14px;padding:60px 24px;text-align:center">
@@ -557,7 +692,7 @@ function renderWorkers(){
     return;
   }
 
-  grid.innerHTML = workers.map((w, idx) => {
+  grid.innerHTML = shown.map((w, idx) => {
     const first = w.first_name || '';
     const last = w.last_name || '';
     const name = (first + ' ' + last).trim() || 'Worker';

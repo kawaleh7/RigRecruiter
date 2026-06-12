@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RigPass — Dashboard</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#1e3a8a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -422,6 +426,19 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
         </div>
       </div>
 
+      <label class="ob-label">Are you legally entitled to work in Canada?</label>
+      <select class="ob-input" id="ob-eligibility" onchange="document.getElementById('ob-permit-wrap').style.display = this.value === 'work_permit' ? 'block' : 'none'">
+        <option value="">Select…</option>
+        <option value="citizen">Yes — Canadian Citizen</option>
+        <option value="permanent_resident">Yes — Permanent Resident</option>
+        <option value="work_permit">Yes — Work Permit</option>
+      </select>
+
+      <div id="ob-permit-wrap" style="display:none">
+        <label class="ob-label">Work Permit Expiry Date</label>
+        <input class="ob-input" id="ob-permit-expiry" type="date">
+      </div>
+
       <label class="ob-label">Availability</label>
       <select class="ob-input" id="ob-avail">
         <option value="">Select…</option>
@@ -434,7 +451,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
       <button class="ob-back" onclick="obShow(2)">← Back</button>
     </div>
 
-    <button onclick="obSkip()" style="display:block;margin:14px auto 0;background:none;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:600;color:#94a3b8;cursor:pointer">Skip for now</button>
   </div>
 </div>
 
@@ -466,6 +482,17 @@ async function init(){
   currentUser = session.user;
 
   const { data: profile, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+
+  if(profile && profile.suspended && !profile.is_admin){
+    alert('Your RigPass account has been suspended.' + (profile.suspended_reason ? '
+
+Reason: ' + profile.suspended_reason : '') + '
+
+Contact support if you believe this is a mistake.');
+    await sb.auth.signOut();
+    window.location.href = 'login.html';
+    return;
+  }
 
   if(profile && profile.role === 'employer'){ window.location.href = 'employer-dashboard.html'; return; }
 
@@ -500,7 +527,7 @@ async function init(){
   updateGreetingMsg();
 
   // ── ONBOARDING: new worker with missing basics gets the setup wizard
-  if(profile.role === 'worker' && (!profile.first_name || !profile.trade) && !localStorage.getItem('rp_onboard_skip')){
+  if(profile.role === 'worker' && (!profile.first_name || !profile.trade)){
     document.getElementById('ob-first').value = profile.first_name || '';
     document.getElementById('ob-last').value = profile.last_name || '';
     if(profile.trade) document.getElementById('ob-trade').value = profile.trade;
@@ -531,6 +558,22 @@ function obNext(n){
 }
 
 async function obFinish(){
+  if(!document.getElementById('ob-province').value){
+    document.getElementById('ob-province').style.borderColor = '#b91c1c';
+    return;
+  }
+  if(!document.getElementById('ob-eligibility').value){
+    document.getElementById('ob-eligibility').style.borderColor = '#b91c1c';
+    return;
+  }
+  if(document.getElementById('ob-eligibility').value === 'work_permit' && !document.getElementById('ob-permit-expiry').value){
+    document.getElementById('ob-permit-expiry').style.borderColor = '#b91c1c';
+    return;
+  }
+  if(!document.getElementById('ob-avail').value){
+    document.getElementById('ob-avail').style.borderColor = '#b91c1c';
+    return;
+  }
   const btn = document.getElementById('ob-finish-btn');
   btn.disabled = true;
   btn.textContent = 'Saving…';
@@ -543,7 +586,11 @@ async function obFinish(){
     trade_level: document.getElementById('ob-level').value || null,
     city: document.getElementById('ob-city').value.trim() || null,
     province: document.getElementById('ob-province').value || null,
-    availability: document.getElementById('ob-avail').value || null
+    availability: document.getElementById('ob-avail').value || null,
+    work_eligibility: document.getElementById('ob-eligibility').value || null,
+    work_permit_expiry: document.getElementById('ob-eligibility').value === 'work_permit'
+      ? (document.getElementById('ob-permit-expiry').value || null)
+      : null
   };
   if(exp !== '') updates.experience_years = parseInt(exp);
 
@@ -556,10 +603,6 @@ async function obFinish(){
   window.location.reload();
 }
 
-function obSkip(){
-  localStorage.setItem('rp_onboard_skip', '1');
-  document.getElementById('onboard').style.display = 'none';
-}
 
 function setDate(){
   const d = new Date();

@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RigPass — Job Board</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#1e3a8a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -350,11 +354,21 @@ async function init(){
   currentUser = session.user;
 
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+
+  if(profile && profile.suspended && !profile.is_admin){
+    alert('Your RigPass account has been suspended.' + (profile.suspended_reason ? '
+
+Reason: ' + profile.suspended_reason : '') + '
+
+Contact support if you believe this is a mistake.');
+    await sb.auth.signOut();
+    window.location.href = 'login.html';
+    return;
+  }
   if(!profile){ alert('Profile not found.'); window.location.href = 'login.html'; return; }
   currentProfile = profile;
 
   // Send non-workers elsewhere
-  if(profile.is_admin){ window.location.href = 'admin.html'; return; }
   if(profile.role === 'employer'){ window.location.href = 'employer-dashboard.html'; return; }
 
   // Sidebar
@@ -603,9 +617,8 @@ async function applyToJob(jobId, btn){
       const ans = confirm(`Screening question from the employer:\n\n"${sq.q}"\n\nPress OK for YES, Cancel for NO.`);
       screeningAnswers.push({ q: sq.q, answer: ans ? 'yes' : 'no', dealbreaker: !!sq.dealbreaker });
       if(sq.dealbreaker && !ans){
-        if(!confirm(`Heads up: the employer marked that question as a requirement, and you answered No.\n\nYou can still apply, but your application will be flagged as not meeting it.\n\nApply anyway?`)){
-          return;
-        }
+        alert(`Unfortunately this job requires a YES to:\n\n"${sq.q}"\n\nYour application wasn't submitted — the employer set this as a hard requirement. If your situation changes, you can apply then.`);
+        return;
       }
     }
   }

@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RigPass — Worker Profile</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#1e3a8a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -194,6 +198,24 @@ function renderProfile(worker, certs, history, canSeeContact){
   };
   const avail = availMap[worker.availability] || '—';
 
+  // Work eligibility badge
+  let eligBadge = '';
+  if(worker.work_eligibility === 'citizen' || worker.work_eligibility === 'permanent_resident'){
+    const label = worker.work_eligibility === 'citizen' ? 'Canadian Citizen' : 'Permanent Resident';
+    eligBadge = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;background:rgba(34,197,94,.16);color:#4ade80;padding:3px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px">✓ ${label} — Eligible to Work</span>`;
+  } else if(worker.work_eligibility === 'work_permit'){
+    const exp = worker.work_permit_expiry ? new Date(worker.work_permit_expiry) : null;
+    const days = exp ? Math.ceil((exp - new Date()) / (1000*60*60*24)) : null;
+    const expStr = exp ? exp.toLocaleDateString('en-CA', {month:'short', day:'numeric', year:'numeric'}) : 'expiry unknown';
+    if(days !== null && days < 0){
+      eligBadge = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;background:rgba(239,68,68,.18);color:#f87171;padding:3px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px">⚠ Work Permit EXPIRED ${expStr}</span>`;
+    } else if(days !== null && days <= 90){
+      eligBadge = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;background:rgba(234,179,8,.18);color:#fbbf24;padding:3px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px">Work Permit — expires ${expStr} (${days}d)</span>`;
+    } else {
+      eligBadge = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;background:rgba(34,197,94,.16);color:#4ade80;padding:3px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px">✓ Work Permit — valid until ${expStr}</span>`;
+    }
+  }
+
   // Cert status counts
   const validCerts = certs.filter(c => !c.expiry_date || new Date(c.expiry_date) > new Date()).length;
 
@@ -211,6 +233,7 @@ function renderProfile(worker, certs, history, canSeeContact){
             <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${avail}</span>
             ${worker.expected_pay_min ? `<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>$${worker.expected_pay_min}${worker.expected_pay_max ? '–$' + worker.expected_pay_max : '+'}/hr expected</span>` : ''}
           </div>
+          ${eligBadge ? `<div style="margin-top:10px">${eligBadge}</div>` : ''}
         </div>
       </div>
     </div>

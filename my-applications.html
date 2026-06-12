@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RigPass — My Applications</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#1e3a8a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -277,8 +281,18 @@ async function init(){
   currentUser = session.user;
 
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-  if(profile?.is_admin){ window.location.href = 'admin.html'; return; }
-  if(profile?.role === 'employer'){ window.location.href = 'employer-dashboard.html'; return; }
+
+  if(profile && profile.suspended && !profile.is_admin){
+    alert('Your RigPass account has been suspended.' + (profile.suspended_reason ? '
+
+Reason: ' + profile.suspended_reason : '') + '
+
+Contact support if you believe this is a mistake.');
+    await sb.auth.signOut();
+    window.location.href = 'login.html';
+    return;
+  }
+  if(profile?.role === 'employer' && !profile?.is_admin){ window.location.href = 'employer-dashboard.html'; return; }
 
   // Sidebar identity
   const first = profile?.first_name || '';
@@ -387,14 +401,22 @@ function render(){
       </div>
 
       <div class="ac-foot">
-        <div class="ac-applied">Applied ${timeAgo(app.applied_at)}</div>
+        <div class="ac-applied">Applied ${timeAgo(app.applied_at)}${job.status && job.status !== 'active' ? ' · <span style="color:var(--danger);font-weight:700">Posting closed</span>' : ''}</div>
         <div class="ac-actions">
           ${job.status === 'active' ? `<a href="jobs.html" class="btn-sm">View Job</a>` : ''}
           ${employer.id ? `<a href="employer-profile.html?id=${employer.id}" class="btn-sm">View Employer</a>` : ''}
+          ${(app.status === 'pending' || app.status === 'reviewed') && job.status === 'active' ? `<button class="btn-sm" style="color:var(--danger);border-color:#fda4af" onclick="withdrawApp('${app.id}', '${(job.title || '').replace(/'/g,"\\'")}')">Withdraw</button>` : ''}
         </div>
       </div>
     </div>`;
   }).join('');
+}
+
+async function withdrawApp(appId, jobTitle){
+  if(!confirm(`Withdraw your application to "${jobTitle}"?\n\nThe employer will no longer see it. You can apply again later if the job is still open.`)) return;
+  const { error } = await sb.from('applications').delete().eq('id', appId).eq('worker_id', currentUser.id);
+  if(error){ alert('Error: ' + error.message); return; }
+  await loadApplications();
 }
 
 function timeAgo(dateStr){

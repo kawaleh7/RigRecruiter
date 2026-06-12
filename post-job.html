@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RigPass — Post a Job</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#1e3a8a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -283,6 +287,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
         <h2>Job Basics</h2>
         <p class="desc">Start with what the role is and who you're hiring.</p>
 
+        <!-- UPLOAD EXISTING POSTING (entry option) -->
+        <div id="drop-zone-1"
+          ondragover="event.preventDefault();this.style.borderColor='var(--blue)';this.style.background='var(--blue-soft)'"
+          ondragleave="this.style.borderColor='var(--line)';this.style.background='#fff'"
+          ondrop="handleFileDrop(event, 'drop-zone-1', 'drop-status-1')"
+          onclick="document.getElementById('posting-file-1').click()"
+          style="display:flex;align-items:center;gap:12px;border:2px dashed var(--line);border-radius:10px;padding:13px 16px;cursor:pointer;margin-bottom:20px;background:#fff;transition:all .15s">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" style="flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div style="text-align:left">
+            <div style="font-size:.83rem;font-weight:700;color:var(--text)">Reposting an old job? Drop the file here <span style="font-weight:500;color:var(--muted)">(Word, PDF, or txt)</span></div>
+            <div id="drop-status-1" style="font-size:.74rem;font-weight:700;margin-top:2px;color:var(--muted)">We'll pull the text into your description — you just fill in the quick details.</div>
+          </div>
+          <input type="file" id="posting-file-1" accept=".pdf,.docx,.doc,.txt" style="display:none" onchange="handleFilePick(this, 'drop-status-1')">
+        </div>
+
         <div class="field">
           <label>Job Title <span class="req">*</span></label>
           <input type="text" id="f-title" placeholder="e.g. Journeyman Pipefitter — Fort Hills Turnaround" maxlength="100">
@@ -447,12 +466,38 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
         <div class="cert-grid" id="cert-grid">
           <!-- populated by JS -->
         </div>
+
+        <!-- SCREENING QUESTIONS -->
+        <div style="margin-top:26px;padding-top:22px;border-top:1px solid var(--line)">
+          <h2 style="font-size:1rem">Screening Questions <span style="font-weight:500;color:var(--muted);font-size:.78rem">(optional, up to 3)</span></h2>
+          <p class="desc" style="margin-bottom:14px">Yes/No questions workers answer when applying. Mark one as a <strong>deal-breaker</strong> and you'll instantly see who fails it.</p>
+          <div id="sq-list"></div>
+          <button type="button" class="btn btn-ghost" id="sq-add" onclick="addScreeningQ()" style="margin-top:4px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Question
+          </button>
+          <div class="field-help" style="margin-top:10px">Examples: "Do you have your own rig truck?" · "Can you pass a pre-access drug & alcohol test?" · "Are you legally entitled to work in Canada?"</div>
+        </div>
       </div>
 
       <!-- STEP 5: DESCRIPTION & REVIEW -->
       <div class="panel-card" id="panel-5" style="display:none">
         <h2>Description & Review</h2>
         <p class="desc">Write the description, then review and post.</p>
+
+        <!-- UPLOAD EXISTING POSTING -->
+        <div id="drop-zone"
+          ondragover="event.preventDefault();this.style.borderColor='var(--blue)';this.style.background='var(--blue-soft)'"
+          ondragleave="this.style.borderColor='var(--line)';this.style.background='#fff'"
+          ondrop="handleFileDrop(event, 'drop-zone', 'drop-status')"
+          onclick="document.getElementById('posting-file').click()"
+          style="border:2px dashed var(--line);border-radius:10px;padding:18px 20px;text-align:center;cursor:pointer;margin-bottom:16px;background:#fff;transition:all .15s">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" style="margin-bottom:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div style="font-size:.86rem;font-weight:700;color:var(--text)">Already have this posting written?</div>
+          <div style="font-size:.76rem;color:var(--muted);margin-top:2px">Drop your Word doc, PDF, or text file here — we'll pull the text in for you.</div>
+          <div id="drop-status" style="font-size:.76rem;font-weight:700;margin-top:6px"></div>
+          <input type="file" id="posting-file" accept=".pdf,.docx,.doc,.txt" style="display:none" onchange="handleFilePick(this, 'drop-status')">
+        </div>
 
         <div class="templates">
           <button type="button" class="tmpl" onclick="useTemplate('pipefitter')">Pipefitter template</button>
@@ -631,7 +676,7 @@ let formData = {
   title:'',trade:'',experience:'',employmentType:'',
   city:'',province:'',startDate:'',duration:'',schedule:'',
   payType:'hourly',payMin:'',payMax:'',
-  requiredCerts:[],description:''
+  requiredCerts:[],description:'',screeningQuestions:[]
 };
 let draftId = null;
 let saveTimer = null;
@@ -645,6 +690,17 @@ async function init(){
   currentUser = session.user;
 
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+
+  if(profile && profile.suspended && !profile.is_admin){
+    alert('Your RigPass account has been suspended.' + (profile.suspended_reason ? '
+
+Reason: ' + profile.suspended_reason : '') + '
+
+Contact support if you believe this is a mistake.');
+    await sb.auth.signOut();
+    window.location.href = 'login.html';
+    return;
+  }
   if(!profile){ alert('Profile not found.'); window.location.href = 'login.html'; return; }
   currentProfile = profile;
 
@@ -679,6 +735,7 @@ async function init(){
   }
 
   renderCertGrid();
+  renderScreeningQs();
   bindChoices();
   bindFormInputs();
   updatePreview();
@@ -707,6 +764,7 @@ async function loadDraft(id){
   formData.payMin = data.pay_min || '';
   formData.payMax = data.pay_max || '';
   formData.requiredCerts = data.required_certs || [];
+  formData.screeningQuestions = data.screening_questions || [];
   formData.description = data.description || '';
 
   // Populate form fields
@@ -817,6 +875,51 @@ function toggleCert(name){
 function updateCertCounter(){
   const n = formData.requiredCerts.length;
   document.getElementById('cert-counter').textContent = `${n} certification${n === 1 ? '' : 's'} selected`;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SCREENING QUESTIONS (up to 3 yes/no, optional deal-breaker)
+// ════════════════════════════════════════════════════════════════════
+function addScreeningQ(){
+  if(formData.screeningQuestions.length >= 3) return;
+  formData.screeningQuestions.push({ q: '', dealbreaker: false });
+  renderScreeningQs();
+}
+
+function removeScreeningQ(i){
+  formData.screeningQuestions.splice(i, 1);
+  renderScreeningQs();
+  autoSave();
+}
+
+function updateScreeningQ(i, val){
+  formData.screeningQuestions[i].q = val;
+  autoSave();
+}
+
+function toggleDealbreaker(i, el){
+  formData.screeningQuestions[i].dealbreaker = el.checked;
+  autoSave();
+}
+
+function renderScreeningQs(){
+  const list = document.getElementById('sq-list');
+  list.innerHTML = formData.screeningQuestions.map((sq, i) => `
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap">
+      <input type="text" value="${(sq.q || '').replace(/"/g,'&quot;')}" placeholder="e.g. Do you have your own rig truck?" maxlength="140"
+        oninput="updateScreeningQ(${i}, this.value)"
+        style="flex:1;min-width:220px;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;outline:none">
+      <label style="display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:700;color:var(--danger);cursor:pointer;padding:10px 0;white-space:nowrap">
+        <input type="checkbox" ${sq.dealbreaker ? 'checked' : ''} onchange="toggleDealbreaker(${i}, this)" style="width:15px;height:15px;accent-color:var(--danger)">
+        Deal-breaker
+      </label>
+      <button type="button" onclick="removeScreeningQ(${i})" title="Remove"
+        style="background:transparent;border:none;cursor:pointer;color:var(--light);padding:10px 6px;border-radius:6px" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--light)'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  `).join('');
+  document.getElementById('sq-add').style.display = formData.screeningQuestions.length >= 3 ? 'none' : 'inline-flex';
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -983,6 +1086,100 @@ async function saveDraft(silent = false){
   setTimeout(() => ind.classList.remove('show'), 2500);
 }
 
+// ════════════════════════════════════════════════════════════════════
+// UPLOAD EXISTING POSTING — extract text from PDF / Word / TXT
+// ════════════════════════════════════════════════════════════════════
+function handleFileDrop(e, zoneId, statusId){
+  e.preventDefault();
+  const zone = document.getElementById(zoneId || 'drop-zone');
+  zone.style.borderColor = 'var(--line)';
+  zone.style.background = '#fff';
+  const file = e.dataTransfer.files[0];
+  if(file) extractPostingFile(file, statusId || 'drop-status');
+}
+
+function handleFilePick(input, statusId){
+  if(input.files[0]) extractPostingFile(input.files[0], statusId || 'drop-status');
+  input.value = '';
+}
+
+function loadScript(src){
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+async function extractPostingFile(file, statusId){
+  const status = document.getElementById(statusId || 'drop-status');
+  const name = file.name.toLowerCase();
+  status.style.color = 'var(--muted)';
+  status.textContent = 'Reading ' + file.name + '…';
+
+  try {
+    let text = '';
+
+    if(name.endsWith('.txt')){
+      text = await file.text();
+
+    } else if(name.endsWith('.docx')){
+      if(!window.mammoth) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+      const buf = await file.arrayBuffer();
+      const result = await window.mammoth.extractRawText({ arrayBuffer: buf });
+      text = result.value;
+
+    } else if(name.endsWith('.pdf')){
+      if(!window.pdfjsLib) {
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+      const buf = await file.arrayBuffer();
+      const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+      const parts = [];
+      for(let p = 1; p <= pdf.numPages; p++){
+        const page = await pdf.getPage(p);
+        const content = await page.getTextContent();
+        parts.push(content.items.map(i => i.str).join(' '));
+      }
+      text = parts.join('\n\n');
+
+    } else if(name.endsWith('.doc')){
+      status.style.color = 'var(--danger)';
+      status.textContent = 'Old .doc format isn\'t supported — save it as .docx in Word and try again.';
+      return;
+
+    } else {
+      status.style.color = 'var(--danger)';
+      status.textContent = 'Unsupported file type — use PDF, Word (.docx), or .txt.';
+      return;
+    }
+
+    // Clean up: collapse extra whitespace, trim
+    text = text.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+
+    if(!text || text.length < 30){
+      status.style.color = 'var(--danger)';
+      status.textContent = 'Couldn\'t find readable text in that file (scanned PDFs of images won\'t work).';
+      return;
+    }
+
+    const ta = document.getElementById('f-description');
+    if(ta.value.trim() && !confirm('Replace the current description with the text from ' + file.name + '?')){
+      return;
+    }
+    ta.value = text;
+    formData.description = text;
+    autoSave();
+    status.style.color = 'var(--ok)';
+    status.textContent = '✓ Pulled in ' + text.split(/\s+/).length + ' words from ' + file.name + ' — give it a quick read below.';
+  } catch(err){
+    console.error(err);
+    status.style.color = 'var(--danger)';
+    status.textContent = 'Couldn\'t read that file: ' + (err.message || 'unknown error');
+  }
+}
+
 async function publishJob(){
   // VERIFICATION ENFORCEMENT: only approved employers can publish
   if(currentProfile.verification_status !== 'approved' && !currentProfile.is_admin){
@@ -1029,6 +1226,7 @@ function buildJobData(status){
     pay_min: formData.payMin ? parseFloat(formData.payMin) : null,
     pay_max: formData.payMax ? parseFloat(formData.payMax) : null,
     required_certs: formData.requiredCerts,
+    screening_questions: formData.screeningQuestions.filter(s => s.q && s.q.trim()),
     description: formData.description || null,
     status
   };
