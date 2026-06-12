@@ -209,6 +209,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
         Profile Visibility
       </button>
+      <button class="tab-btn" data-tab="billing" id="tab-billing" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Billing
+      </button>
       <button class="tab-btn" data-tab="notifications">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         Notifications
@@ -380,6 +384,46 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
         </div>
       </div>
 
+      <!-- BILLING TAB (employer only) -->
+      <div class="tab-panel" id="panel-billing">
+        <div class="card">
+          <div class="card-title">Current Plan</div>
+          <div class="card-sub">Your subscription and what's included.</div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;background:var(--blue-soft);border:1px solid #c7d2fe;border-radius:10px;flex-wrap:wrap">
+            <div>
+              <div style="font-size:1.05rem;font-weight:800;color:var(--blue);letter-spacing:-.2px" id="billing-plan-name">Free Plan</div>
+              <div style="font-size:.8rem;color:var(--text-2);margin-top:3px" id="billing-plan-desc">Post jobs and browse talent at no cost during our launch period.</div>
+            </div>
+            <div style="font-size:1.3rem;font-weight:800;color:var(--text);letter-spacing:-.4px" id="billing-plan-price">$0<span style="font-size:.78rem;color:var(--muted);font-weight:600">/mo</span></div>
+          </div>
+
+          <div style="margin-top:16px;font-size:.84rem;color:var(--text-2);line-height:1.6">
+            Included in your plan:
+          </div>
+          <ul style="font-size:.84rem;color:var(--text-2);line-height:1.8;padding-left:22px;margin-top:6px">
+            <li>Unlimited job postings</li>
+            <li>Browse and shortlist certified workers</li>
+            <li>Cert-based applicant matching</li>
+            <li>Training requests to workers</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Payment Method</div>
+          <div class="card-sub">No payment method needed on the free plan. When paid plans launch, you'll add a card here.</div>
+          <button class="btn btn-ghost" disabled style="opacity:.55;cursor:not-allowed">Add Payment Method — Coming Soon</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Billing History</div>
+          <div class="card-sub">Invoices and receipts will appear here.</div>
+          <div style="padding:26px 0;text-align:center;color:var(--muted);font-size:.84rem">
+            No invoices yet — you're on the free plan.
+          </div>
+        </div>
+      </div>
+
       <!-- NOTIFICATIONS TAB -->
       <div class="tab-panel" id="panel-notifications">
         <div class="card">
@@ -540,6 +584,7 @@ async function init(){
   // Show/hide tabs by role
   if(isEmployer){
     document.getElementById('tab-company').style.display = 'flex';
+    document.getElementById('tab-billing').style.display = 'flex';
     document.getElementById('notif-employer').style.display = 'block';
     document.getElementById('del-bullet-postings').style.display = 'list-item';
     document.getElementById('del-bullet-certs').style.display = 'none';
@@ -613,6 +658,7 @@ function buildSidebar(isEmployer, isAdmin){
         <a class="sb-link" href="employer-dashboard.html">${ico('grid')}<span>Dashboard</span></a>
         <a class="sb-link" href="postings.html">${ico('briefcase')}<span>Job Postings</span></a>
         <a class="sb-link" href="talent.html">${ico('search')}<span>Browse Talent</span></a>
+        <a class="sb-link" href="shortlists.html">${ico('users')}<span>My Roster</span></a>
         <a class="sb-link" href="analytics.html">${ico('chart')}<span>Analytics</span></a>
       </div>
       <div class="sb-section">

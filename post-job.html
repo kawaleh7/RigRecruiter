@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — Post a Job</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+:root{
+  --navy:#0a1228;
+  --blue:#1e3a8a;
+  --blue-mid:#1e40af;
+  --blue-soft:#eef2ff;
+  --text:#0f172a;
+  --text-2:#475569;
+  --muted:#64748b;
+  --light:#94a3b8;
+  --line:#e2e8f0;
+  --line-soft:#f1f5f9;
+  --ok:#15803d;
+  --ok-soft:#f0fdf4;
+  --warn:#a16207;
+  --warn-soft:#fefce8;
+  --danger:#b91c1c;
+  --danger-soft:#fef2f2;
+}
+
+/* TOP BAR */
+.topbar{
+  background:#fff;border-bottom:1px solid var(--line);padding:14px 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:50;
+}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand-logo{width:32px;height:32px;background:var(--blue);border-radius:8px;display:grid;place-items:center}
+.brand-logo svg{width:15px;height:15px;fill:#fff}
+.brand-text{font-size:1rem;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.brand-text span{color:var(--blue)}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:7px}
+.back-link:hover{background:var(--line-soft);color:var(--text)}
+
+/* PAGE HEAD */
+.page-head{
+  background:#fff;border-bottom:1px solid var(--line);
+  padding:28px 40px 24px;
+}
+.page-head h1{font-size:1.55rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:5px}
+.page-head p{font-size:.92rem;color:var(--text-2);line-height:1.5}
+
+/* STEP PROGRESS */
+.steps{
+  display:flex;gap:0;padding:18px 40px 0;
+  background:#fff;border-bottom:1px solid var(--line);
+  overflow-x:auto;
+}
+.step{
+  flex:1;min-width:140px;padding:14px 8px;
+  text-align:center;cursor:pointer;
+  position:relative;border-bottom:3px solid var(--line);
+  transition:all .15s;
+}
+.step:hover{background:var(--line-soft)}
+.step.on{border-bottom-color:var(--blue);background:var(--blue-soft)}
+.step.done{border-bottom-color:var(--ok)}
+.step-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:50%;font-size:.74rem;font-weight:800;
+  background:var(--line-soft);color:var(--muted);margin-bottom:6px;
+}
+.step.on .step-num{background:var(--blue);color:#fff}
+.step.done .step-num{background:var(--ok);color:#fff}
+.step-label{font-size:.78rem;font-weight:700;color:var(--muted)}
+.step.on .step-label{color:var(--blue)}
+.step.done .step-label{color:var(--ok)}
+
+/* MAIN */
+.main{padding:28px 40px 40px;max-width:1100px;margin:0 auto}
+
+/* WIZARD LAYOUT — form on left, preview on right */
+.wizard{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:flex-start}
+
+.panel-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:28px 30px}
+.panel-card h2{font-size:1.1rem;font-weight:800;color:var(--text);letter-spacing:-.3px;margin-bottom:4px}
+.panel-card .desc{font-size:.86rem;color:var(--muted);margin-bottom:22px;line-height:1.5}
+
+.field{margin-bottom:18px}
+.field label{display:block;font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.field label .req{color:var(--danger)}
+.field label .hint{font-weight:500;color:var(--muted);font-size:.74rem;margin-left:4px}
+.field input,.field select,.field textarea{
+  width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:9px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;color:var(--text);
+  outline:none;transition:border-color .15s,box-shadow .15s;background:#fff;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,58,138,.1)}
+.field textarea{resize:vertical;min-height:120px;line-height:1.55}
+.field-help{font-size:.76rem;color:var(--muted);margin-top:5px;line-height:1.4}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* CHOICE TILES (radio cards) */
+.choice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.choice{
+  border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;
+  cursor:pointer;transition:all .15s;background:#fff;
+  display:flex;align-items:center;gap:10px;
+}
+.choice:hover{border-color:var(--light)}
+.choice.selected{border-color:var(--blue);background:var(--blue-soft)}
+.choice-radio{
+  width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;
+  position:relative;transition:all .15s;
+}
+.choice.selected .choice-radio{border-color:var(--blue)}
+.choice.selected .choice-radio::after{
+  content:'';position:absolute;inset:3px;border-radius:50%;background:var(--blue);
+}
+.choice-text{font-size:.86rem;font-weight:700;color:var(--text);letter-spacing:-.1px}
+
+/* CERT SELECTOR */
+.cert-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:8px}
+.cert-chip{
+  display:flex;align-items:center;gap:9px;padding:10px 12px;
+  border:1.5px solid var(--line);border-radius:8px;cursor:pointer;
+  transition:all .15s;background:#fff;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.82rem;font-weight:600;color:var(--text);text-align:left;
+}
+.cert-chip:hover{border-color:var(--light);background:var(--line-soft)}
+.cert-chip.selected{background:var(--blue-soft);border-color:var(--blue);color:var(--blue);font-weight:700}
+.cert-chip-check{
+  width:16px;height:16px;border-radius:4px;border:1.5px solid var(--line);flex-shrink:0;
+  display:grid;place-items:center;transition:all .15s;
+}
+.cert-chip.selected .cert-chip-check{background:var(--blue);border-color:var(--blue);color:#fff}
+.cert-chip.selected .cert-chip-check svg{display:block}
+.cert-chip:not(.selected) .cert-chip-check svg{display:none}
+
+.cert-search{margin-bottom:10px;position:relative}
+.cert-search input{width:100%;padding:10px 12px 10px 36px;border:1.5px solid var(--line);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;outline:none}
+.cert-search input:focus{border-color:var(--blue)}
+.cert-search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted)}
+
+.selected-count{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--blue-soft);color:var(--blue);
+  padding:5px 11px;border-radius:6px;font-size:.78rem;font-weight:800;
+  border:1px solid #c7d2fe;margin-bottom:14px;
+}
+
+/* TEMPLATE BUTTONS */
+.templates{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.tmpl{
+  padding:7px 12px;border:1.5px solid var(--line);border-radius:7px;
+  background:#fff;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.78rem;font-weight:700;color:var(--text-2);cursor:pointer;
+  transition:all .15s;
+}
+.tmpl:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 22px;border-radius:10px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;font-weight:700;
+  cursor:pointer;border:1.5px solid transparent;text-decoration:none;transition:all .15s;
+}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:var(--blue-mid)}
+.btn-ghost{background:#fff;color:var(--text-2);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--light);color:var(--text);background:var(--line-soft)}
+.btn-gold{background:#fcd34d;color:var(--navy);border-color:#fcd34d}
+.btn-gold:hover{background:#fbbf24}
+
+/* FOOTER NAV */
+.wizard-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:24px;padding-top:20px;border-top:1px solid var(--line);
+  flex-wrap:wrap;gap:12px;
+}
+.wizard-foot-left{display:flex;gap:10px;align-items:center}
+.wizard-foot-right{display:flex;gap:10px;align-items:center}
+
+.save-indicator{
+  display:none;align-items:center;gap:5px;
+  font-size:.76rem;color:var(--ok);font-weight:600;
+}
+.save-indicator.show{display:inline-flex}
+
+/* PREVIEW (right column) */
+.preview{
+  background:#fff;border:1px solid var(--line);border-radius:12px;
+  position:sticky;top:90px;overflow:hidden;
+}
+.preview-head{padding:14px 18px;background:var(--line-soft);border-bottom:1px solid var(--line)}
+.preview-label{font-size:.66rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.preview-body{padding:22px}
+.preview-title{font-size:1.1rem;font-weight:800;color:var(--text);letter-spacing:-.3px;margin-bottom:5px;line-height:1.3}
+.preview-title.empty{color:var(--light);font-style:italic;font-weight:500}
+.preview-co{font-size:.84rem;color:var(--muted);font-weight:600;margin-bottom:14px}
+.preview-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.preview-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.72rem;font-weight:700;padding:4px 9px;border-radius:5px;
+  background:var(--line-soft);color:var(--text-2);
+}
+.preview-pay{
+  font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.2px;
+  margin:14px 0;padding:10px 12px;background:var(--ok-soft);border:1px solid #bbf7d0;
+  border-radius:8px;color:var(--ok);
+}
+.preview-section{margin-top:14px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.preview-section-title{font-size:.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.preview-desc{font-size:.84rem;color:var(--text-2);line-height:1.55;white-space:pre-wrap}
+.preview-certs{display:flex;flex-wrap:wrap;gap:5px}
+.preview-cert{font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:5px;background:var(--blue-soft);color:var(--blue);border:1px solid #c7d2fe}
+
+/* REVIEW (final step) */
+.review-section{padding:18px 0;border-top:1px solid var(--line-soft)}
+.review-section:first-of-type{border-top:none;padding-top:0}
+.review-row{display:flex;justify-content:space-between;gap:14px;padding:7px 0;font-size:.86rem}
+.review-label{color:var(--muted);font-weight:600}
+.review-value{color:var(--text);font-weight:700;text-align:right;flex:1}
+.review-empty{color:var(--light);font-style:italic;font-weight:500}
+.review-title{font-size:.82rem;font-weight:800;color:var(--text);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.review-edit{font-size:.74rem;font-weight:700;color:var(--blue);background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+.review-edit:hover{text-decoration:underline}
+
+@media(max-width:980px){
+  .wizard{grid-template-columns:1fr}
+  .preview{position:relative;top:0}
+  .three-col{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  .page-head{padding:20px 22px 18px}
+  .steps{padding:14px 22px 0}
+  .main{padding:20px 22px}
+  .panel-card{padding:20px 22px}
+  .two-col,.three-col{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="employer-dashboard.html" class="brand">
+    <div class="brand-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <span class="brand-text">Rig<span>Pass</span></span>
+  </a>
+  <a href="postings.html" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Postings
+  </a>
+</div>
+
+<div class="page-head">
+  <h1>Post a New Job</h1>
+  <p>Reach qualified, certified oil & gas workers in Western Canada. Most postings get applicants within 24 hours.</p>
+</div>
+
+<div class="steps" id="steps">
+  <div class="step on" data-step="1"><div class="step-num">1</div><div class="step-label">Basics</div></div>
+  <div class="step" data-step="2"><div class="step-num">2</div><div class="step-label">Where & When</div></div>
+  <div class="step" data-step="3"><div class="step-num">3</div><div class="step-label">Pay</div></div>
+  <div class="step" data-step="4"><div class="step-num">4</div><div class="step-label">Certifications</div></div>
+  <div class="step" data-step="5"><div class="step-num">5</div><div class="step-label">Review & Post</div></div>
+</div>
+
+<main class="main">
+
+  <div class="wizard">
+
+    <!-- LEFT — FORM PANELS -->
+    <div>
+
+      <!-- STEP 1: BASICS -->
+      <div class="panel-card" id="panel-1">
+        <h2>Job Basics</h2>
+        <p class="desc">Start with what the role is and who you're hiring.</p>
+
+        <div class="field">
+          <label>Job Title <span class="req">*</span></label>
+          <input type="text" id="f-title" placeholder="e.g. Journeyman Pipefitter — Fort Hills Turnaround" maxlength="100">
+          <div class="field-help">A clear title gets 3× more qualified applicants. Include trade + location.</div>
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label>Trade <span class="req">*</span></label>
+            <select id="f-trade">
+              <option value="">Select trade…</option>
+              <option>Pipefitter</option>
+              <option>Welder</option>
+              <option>Electrician</option>
+              <option>Instrumentation Tech</option>
+              <option>Heavy Equipment Operator</option>
+              <option>Millwright</option>
+              <option>Boilermaker</option>
+              <option>Ironworker</option>
+              <option>Insulator</option>
+              <option>Scaffolder</option>
+              <option>Crane Operator</option>
+              <option>Labourer</option>
+              <option>General Foreman</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Experience Level</label>
+            <select id="f-experience">
+              <option value="">Any</option>
+              <option>Apprentice (0–2 yrs)</option>
+              <option>Journeyman (2–5 yrs)</option>
+              <option>Experienced (5–10 yrs)</option>
+              <option>Senior / Lead (10+ yrs)</option>
+              <option>Red Seal Certified</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Employment Type <span class="req">*</span></label>
+          <div class="choice-grid" id="employment-types">
+            <div class="choice" data-value="Full-time"><div class="choice-radio"></div><div class="choice-text">Full-time</div></div>
+            <div class="choice" data-value="Contract"><div class="choice-radio"></div><div class="choice-text">Contract</div></div>
+            <div class="choice" data-value="Part-time"><div class="choice-radio"></div><div class="choice-text">Part-time</div></div>
+            <div class="choice" data-value="Casual"><div class="choice-radio"></div><div class="choice-text">Casual / On-Call</div></div>
+            <div class="choice" data-value="Turnaround"><div class="choice-radio"></div><div class="choice-text">Turnaround / Shutdown</div></div>
+            <div class="choice" data-value="Apprenticeship"><div class="choice-radio"></div><div class="choice-text">Apprenticeship</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: WHERE & WHEN -->
+      <div class="panel-card" id="panel-2" style="display:none">
+        <h2>Where & When</h2>
+        <p class="desc">Where the work happens and when you need workers on site.</p>
+
+        <div class="two-col">
+          <div class="field">
+            <label>City / Town <span class="req">*</span></label>
+            <input type="text" id="f-city" placeholder="e.g. Fort McMurray">
+          </div>
+          <div class="field">
+            <label>Province <span class="req">*</span></label>
+            <select id="f-province">
+              <option value="">Select…</option>
+              <option>Alberta</option>
+              <option>British Columbia</option>
+              <option>Saskatchewan</option>
+              <option>Manitoba</option>
+              <option>Ontario</option>
+              <option>Quebec</option>
+              <option>Northwest Territories</option>
+              <option>Yukon</option>
+              <option>Nunavut</option>
+              <option>New Brunswick</option>
+              <option>Nova Scotia</option>
+              <option>Prince Edward Island</option>
+              <option>Newfoundland and Labrador</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label>Start Date</label>
+            <input type="date" id="f-start-date">
+            <div class="field-help">Approximate is fine.</div>
+          </div>
+          <div class="field">
+            <label>Duration</label>
+            <select id="f-duration">
+              <option value="">Select…</option>
+              <option>Single day</option>
+              <option>Less than 1 week</option>
+              <option>1–2 weeks</option>
+              <option>2–4 weeks</option>
+              <option>1–3 months</option>
+              <option>3–6 months</option>
+              <option>6+ months</option>
+              <option>Permanent</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Schedule</label>
+          <div class="choice-grid" id="schedule-types">
+            <div class="choice" data-value="Day shift (5×8)"><div class="choice-radio"></div><div class="choice-text">Day shift (5×8)</div></div>
+            <div class="choice" data-value="Night shift"><div class="choice-radio"></div><div class="choice-text">Night shift</div></div>
+            <div class="choice" data-value="Rotational 14×7"><div class="choice-radio"></div><div class="choice-text">Rotational 14×7</div></div>
+            <div class="choice" data-value="Rotational 21×7"><div class="choice-radio"></div><div class="choice-text">Rotational 21×7</div></div>
+            <div class="choice" data-value="FIFO"><div class="choice-radio"></div><div class="choice-text">FIFO (Fly-in)</div></div>
+            <div class="choice" data-value="DIDO"><div class="choice-radio"></div><div class="choice-text">DIDO (Drive-in)</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: PAY -->
+      <div class="panel-card" id="panel-3" style="display:none">
+        <h2>Compensation</h2>
+        <p class="desc">Listings with pay get <strong>2× more applicants</strong>. Workers filter by pay range.</p>
+
+        <div class="field">
+          <label>Pay Type</label>
+          <div class="choice-grid" id="pay-types">
+            <div class="choice selected" data-value="hourly"><div class="choice-radio"></div><div class="choice-text">Hourly ($/hr)</div></div>
+            <div class="choice" data-value="daily"><div class="choice-radio"></div><div class="choice-text">Daily ($/day)</div></div>
+            <div class="choice" data-value="salary"><div class="choice-radio"></div><div class="choice-text">Annual Salary</div></div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="field">
+            <label>Minimum Pay <span class="req">*</span></label>
+            <input type="number" id="f-pay-min" min="0" placeholder="e.g. 45">
+          </div>
+          <div class="field">
+            <label>Maximum Pay <span class="req">*</span></label>
+            <input type="number" id="f-pay-max" min="0" placeholder="e.g. 65">
+          </div>
+        </div>
+
+        <div class="field-help" style="background:var(--blue-soft);border:1px solid #c7d2fe;border-radius:8px;padding:11px 13px;color:var(--text-2);font-size:.82rem;line-height:1.5;margin-top:6px">
+          <strong style="color:var(--blue)">Industry tip:</strong> Showing a range (e.g. $45–65/hr) builds trust. Workers expect honest pay info — vague listings get skipped.
+        </div>
+      </div>
+
+      <!-- STEP 4: CERTIFICATIONS -->
+      <div class="panel-card" id="panel-4" style="display:none">
+        <h2>Required Certifications</h2>
+        <p class="desc">Workers are auto-matched based on their valid safety tickets. Required certs filter out unqualified applicants.</p>
+
+        <span class="selected-count" id="cert-counter">0 certifications selected</span>
+
+        <div class="cert-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="cert-filter" placeholder="Search certifications…" oninput="filterCerts(this.value)">
+        </div>
+
+        <div class="cert-grid" id="cert-grid">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- STEP 5: DESCRIPTION & REVIEW -->
+      <div class="panel-card" id="panel-5" style="display:none">
+        <h2>Description & Review</h2>
+        <p class="desc">Write the description, then review and post.</p>
+
+        <div class="templates">
+          <button type="button" class="tmpl" onclick="useTemplate('pipefitter')">Pipefitter template</button>
+          <button type="button" class="tmpl" onclick="useTemplate('welder')">Welder template</button>
+          <button type="button" class="tmpl" onclick="useTemplate('turnaround')">Turnaround template</button>
+          <button type="button" class="tmpl" onclick="useTemplate('clear')">Clear</button>
+        </div>
+
+        <div class="field">
+          <label>Job Description <span class="req">*</span></label>
+          <textarea id="f-description" rows="8" placeholder="Describe the role: scope of work, day-to-day responsibilities, who you're hiring, safety expectations, camp/lodging, transportation, anything that helps workers self-qualify."></textarea>
+          <div class="field-help">Aim for 100+ words. Be specific about location, equipment, and team size.</div>
+        </div>
+
+        <!-- REVIEW SUMMARY -->
+        <div style="background:var(--line-soft);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-top:18px">
+          <div style="font-size:.82rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px">Summary</div>
+
+          <div class="review-section">
+            <div class="review-title">Basics <button class="review-edit" onclick="goToStep(1)">Edit</button></div>
+            <div class="review-row"><span class="review-label">Title</span><span class="review-value" id="rv-title">—</span></div>
+            <div class="review-row"><span class="review-label">Trade</span><span class="review-value" id="rv-trade">—</span></div>
+            <div class="review-row"><span class="review-label">Type</span><span class="review-value" id="rv-type">—</span></div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-title">Where & When <button class="review-edit" onclick="goToStep(2)">Edit</button></div>
+            <div class="review-row"><span class="review-label">Location</span><span class="review-value" id="rv-loc">—</span></div>
+            <div class="review-row"><span class="review-label">Starts</span><span class="review-value" id="rv-start">—</span></div>
+            <div class="review-row"><span class="review-label">Schedule</span><span class="review-value" id="rv-schedule">—</span></div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-title">Pay <button class="review-edit" onclick="goToStep(3)">Edit</button></div>
+            <div class="review-row"><span class="review-label">Range</span><span class="review-value" id="rv-pay">—</span></div>
+          </div>
+
+          <div class="review-section">
+            <div class="review-title">Required Certs <button class="review-edit" onclick="goToStep(4)">Edit</button></div>
+            <div class="review-row"><span class="review-label">Count</span><span class="review-value" id="rv-certs">0 certifications</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER NAV -->
+      <div class="wizard-foot">
+        <div class="wizard-foot-left">
+          <button class="btn btn-ghost" id="btn-back" onclick="prevStep()" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Back
+          </button>
+          <span class="save-indicator" id="save-indicator">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Draft saved
+          </span>
+        </div>
+        <div class="wizard-foot-right">
+          <button class="btn btn-ghost" onclick="saveDraft()">Save Draft</button>
+          <button class="btn btn-blue" id="btn-next" onclick="nextStep()">
+            Next
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="btn btn-blue" id="btn-publish" onclick="publishJob()" style="display:none">
+            Publish Job
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT — LIVE PREVIEW -->
+    <div class="preview">
+      <div class="preview-head">
+        <div class="preview-label">Live Preview · How workers will see it</div>
+      </div>
+      <div class="preview-body">
+        <div class="preview-title empty" id="p-title">Your job title will appear here</div>
+        <div class="preview-co" id="p-co">Your company</div>
+
+        <div class="preview-meta" id="p-meta-tags">
+          <span class="preview-tag" id="p-location" style="display:none"></span>
+          <span class="preview-tag" id="p-type" style="display:none"></span>
+          <span class="preview-tag" id="p-schedule" style="display:none"></span>
+          <span class="preview-tag" id="p-duration" style="display:none"></span>
+        </div>
+
+        <div class="preview-pay" id="p-pay" style="display:none"></div>
+
+        <div class="preview-section" id="p-certs-section" style="display:none">
+          <div class="preview-section-title">Required Certifications</div>
+          <div class="preview-certs" id="p-certs"></div>
+        </div>
+
+        <div class="preview-section" id="p-desc-section" style="display:none">
+          <div class="preview-section-title">Description</div>
+          <div class="preview-desc" id="p-desc"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const ALL_CERTS = [
+  'H2S Alive','WHMIS 2018','Standard First Aid + CPR','First Aid Level 1','First Aid Level 2','First Aid Level 3',
+  'TDG (Transportation of Dangerous Goods)','Ground Disturbance Level I','Ground Disturbance Level II',
+  'Confined Space Entry','Confined Space Watch','Fall Protection','Rigging & Hoisting Level 1','Rigging & Hoisting Level 2',
+  'Scaffold Builder','Scaffold Erector','Aerial Work Platform (AWP)','Forklift Operator','Skid Steer Operator',
+  'Energy Isolation / LOTO','Electrical Safety','Atmospheric Testing / Gas Testing','Fire Watch','Hot Work Permit',
+  'Bear Safety','Working Alone','Emergency Response','Leadership for Safety Excellence (LSE)',
+  'BOSIET (Offshore)','HUET (Helicopter Underwater Escape)','OGUK Medical','Man Basket','PPE Awareness'
+];
+
+const TEMPLATES = {
+  pipefitter: `We are hiring an experienced pipefitter to support our operations in Western Canada. Scope of work includes installation, fabrication, and maintenance of high-pressure process piping.
+
+Day-to-day:
+• Layout, fit, and install piping per ISO drawings
+• Pneumatic and hydrostatic testing
+• Tie-in work during scheduled turnarounds
+• Collaborate with welders, instrumentation, and safety teams
+
+What we offer:
+• Camp accommodation and meals provided
+• FIFO from Edmonton/Calgary
+• Per diems and travel allowance
+• Safety-first culture, zero-incident track record
+
+We are looking for journeyman or Red Seal pipefitters with experience in oil sands or petrochemical operations.`,
+
+  welder: `Hiring qualified welders for upcoming oilfield projects in Alberta. Looking for hands who can pass CWB or ASME pressure tests on day one.
+
+Scope:
+• SMAW, GTAW, and FCAW on carbon steel, stainless, and alloys
+• Pressure piping (B31.1, B31.3) and structural welding
+• Tie-ins during turnaround season
+• Quality-first — every weld is X-rayed
+
+Requirements:
+• CWB ticket or ASME pressure ticket (current)
+• Minimum 3 years field welding experience
+• Own rig truck preferred (mileage reimbursed)
+• ISN-Ready safety tickets
+
+Camp, travel, and competitive day rate. Long-term contract for the right person.`,
+
+  turnaround: `Major turnaround project — we need experienced trades hands for a [X-week] shutdown at a Western Canadian operator.
+
+What to expect:
+• 21×7 rotation, 12-hour shifts (day or night)
+• Camp accommodation provided
+• Travel and per diems covered
+• Strict safety expectations — pre-job tailgates, JSAs, daily inspections
+
+You should bring:
+• Active safety tickets (H2S, WHMIS, First Aid, Confined Space, Fall Protection)
+• Previous turnaround experience
+• A team-first attitude
+• Own PPE in working condition
+
+We pay top of market for skilled hands who finish what they start.`,
+  clear: ''
+};
+
+let currentUser = null;
+let currentProfile = null;
+let currentStep = 1;
+let formData = {
+  title:'',trade:'',experience:'',employmentType:'',
+  city:'',province:'',startDate:'',duration:'',schedule:'',
+  payType:'hourly',payMin:'',payMax:'',
+  requiredCerts:[],description:''
+};
+let draftId = null;
+let saveTimer = null;
+
+// ════════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════════
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(!profile){ alert('Profile not found.'); window.location.href = 'login.html'; return; }
+  currentProfile = profile;
+
+  if(profile.role !== 'employer' && !profile.is_admin){
+    alert('Only verified employers can post jobs.');
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  if(profile.verification_status === 'pending' && !profile.is_admin){
+    if(!confirm('Your employer account is still pending verification. You can save a draft, but workers won\'t see your posting until you\'re approved.\n\nContinue anyway?')){
+      window.location.href = 'employer-dashboard.html';
+      return;
+    }
+  }
+
+  // Pre-fill company defaults
+  if(profile.city){ formData.city = profile.city; document.getElementById('f-city').value = profile.city; }
+  if(profile.province){ formData.province = profile.province; document.getElementById('f-province').value = profile.province; }
+
+  // Check for existing draft via URL ?draft=<id>
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('draft')){
+    await loadDraft(params.get('draft'));
+  } else {
+    // Auto-load most recent draft if any
+    const { data: drafts } = await sb.from('jobs')
+      .select('*').eq('employer_id', currentUser.id).eq('status', 'draft')
+      .order('created_at', { ascending: false }).limit(1);
+    if(drafts && drafts.length > 0){
+      if(confirm('You have a saved draft. Continue editing it?')){
+        await loadDraft(drafts[0].id);
+      }
+    }
+  }
+
+  renderCertGrid();
+  bindChoices();
+  bindFormInputs();
+  updatePreview();
+  updateNav();
+
+  // Step click handler
+  document.querySelectorAll('.step').forEach(s => {
+    s.addEventListener('click', () => goToStep(parseInt(s.dataset.step)));
+  });
+}
+
+async function loadDraft(id){
+  const { data, error } = await sb.from('jobs').select('*').eq('id', id).single();
+  if(error || !data){ return; }
+  draftId = id;
+  formData.title = data.title || '';
+  formData.trade = data.trade || '';
+  formData.experience = data.experience_level || '';
+  formData.employmentType = data.employment_type || '';
+  formData.city = data.city || '';
+  formData.province = data.province || '';
+  formData.startDate = data.start_date || '';
+  formData.duration = data.duration || '';
+  formData.schedule = data.schedule || '';
+  formData.payType = data.pay_type || 'hourly';
+  formData.payMin = data.pay_min || '';
+  formData.payMax = data.pay_max || '';
+  formData.requiredCerts = data.required_certs || [];
+  formData.description = data.description || '';
+
+  // Populate form fields
+  document.getElementById('f-title').value = formData.title;
+  document.getElementById('f-trade').value = formData.trade;
+  document.getElementById('f-experience').value = formData.experience;
+  document.getElementById('f-city').value = formData.city;
+  document.getElementById('f-province').value = formData.province;
+  document.getElementById('f-start-date').value = formData.startDate;
+  document.getElementById('f-duration').value = formData.duration;
+  document.getElementById('f-pay-min').value = formData.payMin;
+  document.getElementById('f-pay-max').value = formData.payMax;
+  document.getElementById('f-description').value = formData.description;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CHOICE TILES + FORM BINDINGS
+// ════════════════════════════════════════════════════════════════════
+function bindChoices(){
+  // Employment type
+  document.querySelectorAll('#employment-types .choice').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('#employment-types .choice').forEach(x => x.classList.remove('selected'));
+      c.classList.add('selected');
+      formData.employmentType = c.dataset.value;
+      updatePreview();
+      autoSave();
+    });
+    if(c.dataset.value === formData.employmentType) c.classList.add('selected');
+  });
+
+  // Schedule
+  document.querySelectorAll('#schedule-types .choice').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('#schedule-types .choice').forEach(x => x.classList.remove('selected'));
+      c.classList.add('selected');
+      formData.schedule = c.dataset.value;
+      updatePreview();
+      autoSave();
+    });
+    if(c.dataset.value === formData.schedule) c.classList.add('selected');
+  });
+
+  // Pay type
+  document.querySelectorAll('#pay-types .choice').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('#pay-types .choice').forEach(x => x.classList.remove('selected'));
+      c.classList.add('selected');
+      formData.payType = c.dataset.value;
+      updatePreview();
+      autoSave();
+    });
+    if(c.dataset.value === formData.payType) c.classList.add('selected');
+  });
+}
+
+function bindFormInputs(){
+  const fields = [
+    ['f-title','title'],['f-trade','trade'],['f-experience','experience'],
+    ['f-city','city'],['f-province','province'],['f-start-date','startDate'],
+    ['f-duration','duration'],['f-pay-min','payMin'],['f-pay-max','payMax'],
+    ['f-description','description']
+  ];
+  fields.forEach(([id,key]) => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      formData[key] = el.value;
+      updatePreview();
+      autoSave();
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CERT GRID
+// ════════════════════════════════════════════════════════════════════
+function renderCertGrid(filter = ''){
+  const grid = document.getElementById('cert-grid');
+  const lower = filter.toLowerCase();
+  const filtered = ALL_CERTS.filter(c => c.toLowerCase().includes(lower));
+  grid.innerHTML = filtered.map(c => {
+    const selected = formData.requiredCerts.includes(c);
+    const safe = c.replace(/'/g,"\\'");
+    return `<button type="button" class="cert-chip ${selected ? 'selected' : ''}" onclick="toggleCert('${safe}')">
+      <div class="cert-chip-check">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      ${c}
+    </button>`;
+  }).join('');
+  updateCertCounter();
+}
+
+function filterCerts(val){ renderCertGrid(val); }
+
+function toggleCert(name){
+  const idx = formData.requiredCerts.indexOf(name);
+  if(idx >= 0){
+    formData.requiredCerts.splice(idx, 1);
+  } else {
+    formData.requiredCerts.push(name);
+  }
+  renderCertGrid(document.getElementById('cert-filter').value);
+  updatePreview();
+  autoSave();
+}
+
+function updateCertCounter(){
+  const n = formData.requiredCerts.length;
+  document.getElementById('cert-counter').textContent = `${n} certification${n === 1 ? '' : 's'} selected`;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// PREVIEW
+// ════════════════════════════════════════════════════════════════════
+function updatePreview(){
+  const title = document.getElementById('p-title');
+  if(formData.title){
+    title.textContent = formData.title;
+    title.classList.remove('empty');
+  } else {
+    title.textContent = 'Your job title will appear here';
+    title.classList.add('empty');
+  }
+
+  const co = currentProfile?.company_name || (((currentProfile?.first_name || '') + ' ' + (currentProfile?.last_name || '')).trim()) || 'Your company';
+  document.getElementById('p-co').textContent = co;
+
+  // Meta tags
+  const loc = [formData.city, formData.province].filter(Boolean).join(', ');
+  const setTag = (id, val, icon) => {
+    const el = document.getElementById(id);
+    if(val){
+      el.innerHTML = (icon || '') + val;
+      el.style.display = 'inline-flex';
+    } else {
+      el.style.display = 'none';
+    }
+  };
+  setTag('p-location', loc, '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>');
+  setTag('p-type', formData.employmentType, '');
+  setTag('p-schedule', formData.schedule, '');
+  setTag('p-duration', formData.duration, '');
+
+  // Pay
+  const payEl = document.getElementById('p-pay');
+  if(formData.payMin && formData.payMax){
+    const unit = formData.payType === 'hourly' ? '/hr' : formData.payType === 'daily' ? '/day' : '/yr';
+    payEl.textContent = `$${formData.payMin} – $${formData.payMax}${unit}`;
+    payEl.style.display = 'block';
+  } else if(formData.payMin){
+    const unit = formData.payType === 'hourly' ? '/hr' : formData.payType === 'daily' ? '/day' : '/yr';
+    payEl.textContent = `From $${formData.payMin}${unit}`;
+    payEl.style.display = 'block';
+  } else {
+    payEl.style.display = 'none';
+  }
+
+  // Certs
+  if(formData.requiredCerts.length > 0){
+    document.getElementById('p-certs-section').style.display = 'block';
+    document.getElementById('p-certs').innerHTML = formData.requiredCerts.map(c => `<span class="preview-cert">${c}</span>`).join('');
+  } else {
+    document.getElementById('p-certs-section').style.display = 'none';
+  }
+
+  // Description
+  if(formData.description.trim()){
+    document.getElementById('p-desc-section').style.display = 'block';
+    document.getElementById('p-desc').textContent = formData.description;
+  } else {
+    document.getElementById('p-desc-section').style.display = 'none';
+  }
+
+  // Review summary
+  document.getElementById('rv-title').textContent = formData.title || '—';
+  document.getElementById('rv-trade').textContent = formData.trade || '—';
+  document.getElementById('rv-type').textContent = formData.employmentType || '—';
+  document.getElementById('rv-loc').textContent = loc || '—';
+  document.getElementById('rv-start').textContent = formData.startDate ? new Date(formData.startDate).toLocaleDateString('en-CA',{month:'long',day:'numeric',year:'numeric'}) : '—';
+  document.getElementById('rv-schedule').textContent = [formData.schedule, formData.duration].filter(Boolean).join(' · ') || '—';
+  const payUnit = formData.payType === 'hourly' ? '/hr' : formData.payType === 'daily' ? '/day' : '/yr';
+  document.getElementById('rv-pay').textContent = formData.payMin && formData.payMax ? `$${formData.payMin}–$${formData.payMax}${payUnit}` : '—';
+  document.getElementById('rv-certs').textContent = `${formData.requiredCerts.length} certification${formData.requiredCerts.length === 1 ? '' : 's'}`;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// STEP NAVIGATION
+// ════════════════════════════════════════════════════════════════════
+function goToStep(n){
+  if(n < 1 || n > 5) return;
+  if(n > currentStep && !validateStep(currentStep)) return;
+  currentStep = n;
+  document.querySelectorAll('.panel-card').forEach((p, i) => {
+    p.style.display = (i + 1 === n) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.step').forEach((s, i) => {
+    s.classList.toggle('on', i + 1 === n);
+    s.classList.toggle('done', i + 1 < n);
+  });
+  updateNav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextStep(){ goToStep(currentStep + 1); }
+function prevStep(){ goToStep(currentStep - 1); }
+
+function updateNav(){
+  document.getElementById('btn-back').style.display = currentStep > 1 ? 'inline-flex' : 'none';
+  document.getElementById('btn-next').style.display = currentStep < 5 ? 'inline-flex' : 'none';
+  document.getElementById('btn-publish').style.display = currentStep === 5 ? 'inline-flex' : 'none';
+}
+
+function validateStep(step){
+  if(step === 1){
+    if(!formData.title){ alert('Job title is required.'); return false; }
+    if(!formData.trade){ alert('Please select a trade.'); return false; }
+    if(!formData.employmentType){ alert('Please pick an employment type.'); return false; }
+  }
+  if(step === 2){
+    if(!formData.city){ alert('Please enter a city.'); return false; }
+    if(!formData.province){ alert('Please select a province.'); return false; }
+  }
+  if(step === 3){
+    if(!formData.payMin || !formData.payMax){ alert('Please enter a pay range.'); return false; }
+    if(parseFloat(formData.payMax) < parseFloat(formData.payMin)){ alert('Maximum pay must be greater than minimum.'); return false; }
+  }
+  return true;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// TEMPLATES
+// ════════════════════════════════════════════════════════════════════
+function useTemplate(key){
+  if(key === 'clear'){
+    formData.description = '';
+    document.getElementById('f-description').value = '';
+  } else {
+    formData.description = TEMPLATES[key];
+    document.getElementById('f-description').value = TEMPLATES[key];
+  }
+  updatePreview();
+  autoSave();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SAVE / PUBLISH
+// ════════════════════════════════════════════════════════════════════
+function autoSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => saveDraft(true), 2000);
+}
+
+async function saveDraft(silent = false){
+  if(!formData.title && !formData.description){ return; }
+
+  const data = buildJobData('draft');
+  let result;
+  if(draftId){
+    result = await sb.from('jobs').update(data).eq('id', draftId).select().single();
+  } else {
+    result = await sb.from('jobs').insert(data).select().single();
+    if(result.data) draftId = result.data.id;
+  }
+
+  if(result.error){
+    if(!silent) alert('Error saving draft: ' + result.error.message);
+    return;
+  }
+
+  // Show "Draft saved" indicator
+  const ind = document.getElementById('save-indicator');
+  ind.classList.add('show');
+  setTimeout(() => ind.classList.remove('show'), 2500);
+}
+
+async function publishJob(){
+  if(!validateStep(1) || !validateStep(2) || !validateStep(3)) return;
+  if(!formData.description || formData.description.length < 50){
+    if(!confirm('Your description is short. Postings with detailed descriptions get 3× more qualified applicants. Publish anyway?')) return;
+  }
+
+  const data = buildJobData('active');
+  data.published_at = new Date().toISOString();
+
+  let result;
+  if(draftId){
+    result = await sb.from('jobs').update(data).eq('id', draftId).select().single();
+  } else {
+    result = await sb.from('jobs').insert(data).select().single();
+  }
+
+  if(result.error){ alert('Error publishing: ' + result.error.message); return; }
+
+  alert('🎉 Your job is live! Workers will start seeing it immediately.');
+  window.location.href = 'postings.html';
+}
+
+function buildJobData(status){
+  return {
+    employer_id: currentUser.id,
+    title: formData.title || null,
+    trade: formData.trade || null,
+    experience_level: formData.experience || null,
+    employment_type: formData.employmentType || null,
+    city: formData.city || null,
+    province: formData.province || null,
+    start_date: formData.startDate || null,
+    duration: formData.duration || null,
+    schedule: formData.schedule || null,
+    pay_type: formData.payType || 'hourly',
+    pay_min: formData.payMin ? parseFloat(formData.payMin) : null,
+    pay_max: formData.payMax ? parseFloat(formData.payMax) : null,
+    required_certs: formData.requiredCerts,
+    description: formData.description || null,
+    status
+  };
+}
+
+init();
+</script>
+</body>
+</html>
