@@ -9,357 +9,259 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;display:flex;min-height:100vh}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a;display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+
 :root{
-  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;
-  --navy:#0a1228;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#94a3b8;
-  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--red-bg:#fef2f2;
-  --amber:#92400e;--amber-bg:#fefce8;--gold:#b8923a;--gold-border:#c9963a;
-  --off:#f8fafc;
-  --shadow-sm:0 1px 3px rgba(15,23,42,.06);
-  --shadow:0 4px 14px rgba(15,23,42,.08);
-  --shadow-lg:0 16px 40px rgba(15,23,42,.12);
+  --navy:#0a1228;
+  --blue:#1e3a8a;
+  --blue-mid:#1e40af;
+  --blue-soft:#eef2ff;
+  --text:#0f172a;
+  --text-2:#475569;
+  --muted:#64748b;
+  --light:#94a3b8;
+  --line:#e2e8f0;
+  --line-soft:#f1f5f9;
+  --ok:#15803d;
+  --ok-soft:#f0fdf4;
+  --warn:#a16207;
+  --warn-soft:#fefce8;
+  --danger:#b91c1c;
+  --danger-soft:#fef2f2;
 }
 
-/* ── SIDEBAR ── */
-.sidebar{
-  width:248px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);
-  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;
-}
-.sb-logo{padding:22px 22px 0;display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:32px}
-.logo-mark{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 10px rgba(30,58,138,.25)}
-.logo-mark svg{width:16px;height:16px;fill:#fff}
-.logo-name{font-size:1.12rem;font-weight:800;color:var(--text)}
-.logo-name span{color:var(--blue-mid)}
+/* SIDEBAR */
+.sidebar{width:240px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sb-top{padding:22px 22px 18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line-soft)}
+.sb-logo{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+.sb-logo svg{width:16px;height:16px;fill:#fff}
+.sb-brand{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.sb-brand span{color:var(--blue)}
 
-.sb-section{padding:0 12px;margin-bottom:6px}
-.sb-label{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--light);padding:0 12px;margin-bottom:8px}
-.sb-link{
-  display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;
-  font-size:.88rem;font-weight:500;color:var(--muted);text-decoration:none;
-  transition:all .15s;margin-bottom:2px;position:relative;
-}
-.sb-link:hover{background:#f1f5f9;color:var(--text)}
-.sb-link.active{background:var(--blue-lt);color:var(--blue);font-weight:700}
-.sb-link.active::before{content:'';position:absolute;left:-12px;top:8px;bottom:8px;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
-.sb-link svg{width:17px;height:17px;flex-shrink:0}
-.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:100px}
+.sb-nav{flex:1;padding:18px 12px;overflow-y:auto}
+.sb-section + .sb-section{margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.sb-label{font-size:.66rem;font-weight:800;color:var(--light);text-transform:uppercase;letter-spacing:1.2px;padding:0 10px 6px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;font-size:.86rem;font-weight:600;color:var(--text-2);text-decoration:none;margin-bottom:2px;transition:all .15s}
+.sb-link:hover{background:var(--line-soft);color:var(--text)}
+.sb-link.active{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.sb-link svg{width:17px;height:17px;flex-shrink:0;stroke-width:2}
 
-.sb-divider{height:1px;background:var(--border);margin:14px 22px}
-
-.pro-card{
-  margin:0 16px 12px;padding:16px;
-  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
-  border-radius:11px;color:#fff;position:relative;overflow:hidden;
-}
-.pro-card::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(147,197,253,.15)}
-.pro-card-title{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#93c5fd;margin-bottom:6px;position:relative}
-.pro-card p{font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.5;margin-bottom:12px;position:relative}
-.pro-card button{width:100%;padding:8px;background:#fff;color:var(--blue);border:none;border-radius:7px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .15s;position:relative}
-.pro-card button:hover{background:#f1f5f9}
-
-.sb-bottom{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
-.sb-user{display:flex;align-items:center;gap:11px;padding:10px;border-radius:9px;cursor:pointer;transition:background .15s}
-.sb-user:hover{background:#f1f5f9}
-.sb-avatar{width:36px;height:36px;border-radius:9px;background:var(--blue);display:grid;place-items:center;font-weight:800;font-size:.78rem;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(30,58,138,.25)}
-.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2}
-.sb-urole{font-size:.7rem;color:var(--muted);margin-top:2px}
+.sb-bottom{padding:14px;border-top:1px solid var(--line-soft)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;cursor:pointer;transition:background .15s;position:relative}
+.sb-user:hover{background:var(--line-soft)}
+.sb-avatar{width:34px;height:34px;border-radius:9px;background:var(--blue);display:grid;place-items:center;color:#fff;font-size:.74rem;font-weight:800;flex-shrink:0}
+.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.sb-urole{font-size:.72rem;color:var(--muted);margin-top:2px}
 .sb-arrow{margin-left:auto;color:var(--light)}
 
-/* ── MAIN ── */
-.main{margin-left:248px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+/* MAIN */
+.main{flex:1;padding:32px 40px 60px;min-width:0;max-width:1280px}
+.page-head{margin-bottom:24px}
+.page-head h1{font-size:1.65rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:6px}
+.page-head p{font-size:.92rem;color:var(--text-2);line-height:1.5}
 
-.topbar{
-  background:#fff;border-bottom:1px solid var(--border);
-  padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:50;
-}
-.topbar-title{font-size:1.02rem;font-weight:800;color:var(--text)}
-.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-actions{display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap}
 
-.search-bar{position:relative;width:280px}
-.search-bar input{
-  width:100%;padding:8px 12px 8px 36px;border-radius:9px;
-  border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:.85rem;color:var(--text);outline:none;background:var(--off);transition:all .15s;
-}
-.search-bar input:focus{background:#fff;border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,58,138,.08)}
-.search-bar svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--light)}
+/* STATS STRIP — uniform with dashboards */
+.stats-strip{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 4px;margin-bottom:24px}
+.stat-item{flex:1;padding:0 24px;text-align:left;border-right:1px solid var(--line-soft);min-width:0}
+.stat-item:last-child{border-right:none}
+.stat-num{font-size:1.7rem;font-weight:800;color:var(--text);letter-spacing:-.6px;line-height:1}
+.stat-num.ok{color:var(--ok)}
+.stat-num.warn{color:var(--warn)}
+.stat-num.danger{color:var(--danger)}
+.stat-label{font-size:.78rem;color:var(--muted);margin-top:6px;font-weight:600}
 
-.icon-btn{
-  width:38px;height:38px;border-radius:9px;border:1.5px solid var(--border);
-  background:#fff;display:grid;place-items:center;cursor:pointer;position:relative;transition:all .15s;
-}
-.icon-btn:hover{border-color:var(--light);background:var(--off)}
-.notif-dot{position:absolute;top:7px;right:7px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid #fff}
+/* LAYOUT — left list, right add form */
+.layout{display:grid;grid-template-columns:1fr 380px;gap:22px}
 
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:7px;
-  padding:9px 18px;border-radius:9px;
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:700;
-  cursor:pointer;border:none;text-decoration:none;transition:all .15s;white-space:nowrap;
-}
-.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 10px rgba(30,58,138,.2)}
-.btn-blue:hover{background:var(--blue-mid);transform:translateY(-1px);box-shadow:0 8px 16px rgba(30,58,138,.25)}
-.btn-ghost{background:#fff;color:var(--muted);border:1.5px solid var(--border)}
-.btn-ghost:hover{color:var(--text);border-color:var(--light)}
-.btn-sm{padding:7px 14px;font-size:.78rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+.card-head{padding:18px 22px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.card-title{font-size:.95rem;font-weight:800;color:var(--text);letter-spacing:-.2px}
+.card-sub{font-size:.76rem;color:var(--muted);margin-top:2px}
 
-.content{padding:28px 32px;flex:1}
-
-/* ── PAGE HEAD ── */
-.page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px}
-.page-head h1{font-size:1.6rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:4px}
-.page-head .subtitle{font-size:.88rem;color:var(--muted)}
-
-/* ── ISN-READY BADGE ── */
-.isn-banner{
-  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
-  border-radius:14px;padding:22px 26px;color:#fff;
-  margin-bottom:24px;position:relative;overflow:hidden;
-  display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;
-}
-.isn-banner::before{content:'';position:absolute;inset:0;opacity:.05;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:36px 36px}
-.isn-icon{
-  width:52px;height:52px;border-radius:12px;
-  background:rgba(147,197,253,.15);border:1px solid rgba(147,197,253,.3);
-  display:grid;place-items:center;flex-shrink:0;position:relative;z-index:2;
-}
-.isn-content{position:relative;z-index:2}
-.isn-title{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-.isn-title h3{font-size:1rem;font-weight:800;color:#fff;letter-spacing:-.2px}
-.isn-ready-tag{
-  background:#22c55e;color:#fff;
-  font-size:.65rem;font-weight:800;padding:3px 9px;border-radius:5px;
-  text-transform:uppercase;letter-spacing:.5px;
-}
-.isn-banner p{font-size:.83rem;color:rgba(255,255,255,.65);line-height:1.55;max-width:520px}
-.isn-cta{position:relative;z-index:2}
-
-/* ── STAT STRIP ── */
-.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-.stat-card{
-  background:#fff;border-radius:12px;border:1.5px solid var(--gold-border);
-  padding:18px 20px;display:flex;align-items:center;gap:14px;
-  transition:all .2s;position:relative;overflow:hidden;isolation:isolate;
-}
-.stat-card::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.5) 50%,transparent 60%);
-  transform:translateX(-100%);transition:transform .55s ease;
-  border-radius:inherit;pointer-events:none;z-index:1;
-}
-.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--gold)}
-.stat-card:hover::after{transform:translateX(100%)}
-.sc-ico{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
-.sc-info{flex:1}
-.sc-num{font-size:1.55rem;font-weight:800;color:var(--text);line-height:1;letter-spacing:-.7px}
-.sc-label{font-size:.74rem;color:var(--muted);margin-top:4px;font-weight:600}
-
-/* ── LAYOUT ── */
-.layout{display:grid;grid-template-columns:1fr 340px;gap:22px;align-items:start}
-
-/* ── TICKETS CARD ── */
-.card{background:#fff;border-radius:14px;border:1.5px solid var(--gold-border);overflow:hidden;margin-bottom:18px}
-.card-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.card-title{font-size:.95rem;font-weight:800;color:var(--text);letter-spacing:-.1px}
-.card-sub{font-size:.75rem;color:var(--muted);margin-top:2px}
-
-/* FILTER TABS */
-.tabs{display:flex;gap:6px}
+/* TABS — minimal */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);padding:0 22px}
 .tab{
-  padding:6px 14px;border-radius:100px;border:1.5px solid var(--border);background:#fff;
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;color:var(--muted);
-  cursor:pointer;transition:all .15s;
+  padding:11px 14px;border:none;background:transparent;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;font-weight:700;color:var(--muted);
+  cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;
+  display:flex;align-items:center;gap:6px;white-space:nowrap;transition:color .15s;
 }
-.tab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
-.tab .count{margin-left:5px;opacity:.7;font-size:.72rem}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--blue);border-color:var(--blue)}
+.tab .count{
+  background:var(--line-soft);color:var(--muted);font-size:.68rem;
+  padding:1px 7px;border-radius:5px;font-weight:800;min-width:18px;text-align:center;
+}
+.tab.on .count{background:var(--blue-soft);color:var(--blue)}
 
-/* TICKET ROWS */
-.tickets-list{padding:8px 0}
+/* TICKET ROWS — minimal, dot indicator */
 .ticket-row{
-  display:grid;grid-template-columns:48px 1fr auto auto;gap:14px;align-items:center;
-  padding:14px 22px;border-bottom:1px solid #f1f5f9;
-  transition:background .15s;cursor:pointer;position:relative;
+  display:flex;align-items:center;gap:14px;padding:14px 22px;
+  border-top:1px solid var(--line-soft);
 }
-.ticket-row:hover{background:var(--off)}
-.ticket-row:last-child{border-bottom:none}
-.ticket-ico{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
-.ticket-info{min-width:0}
-.ticket-name{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:3px;letter-spacing:-.1px}
-.ticket-meta{display:flex;align-items:center;gap:14px;font-size:.74rem;color:var(--muted)}
-.ticket-meta span{display:flex;align-items:center;gap:4px}
-.ticket-meta svg{opacity:.6}
-.days-left{font-size:.75rem;font-weight:700;padding:4px 10px;border-radius:6px;text-align:center;min-width:74px}
-.days-ok{background:var(--green-bg);color:var(--green)}
-.days-warn{background:var(--amber-bg);color:var(--amber)}
-.days-exp{background:var(--red-bg);color:var(--red)}
-.tag{
-  display:inline-flex;align-items:center;gap:5px;
-  border-radius:100px;padding:4px 11px;
-  font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px;
-  flex-shrink:0;
-}
-.tag::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
-.tg{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
-.tr-tag{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
-.ty{background:var(--amber-bg);color:var(--amber);border:1px solid #fcd34d}
-.row-action{
-  width:30px;height:30px;border-radius:7px;border:1.5px solid var(--border);
-  background:#fff;display:grid;place-items:center;cursor:pointer;
-  transition:all .15s;
-}
-.row-action:hover{border-color:var(--light);background:var(--off)}
-.row-action.del:hover{border-color:#fda4af;background:var(--red-bg);color:var(--red)}
+.ticket-row:first-of-type{border-top:none}
+.ticket-row:hover{background:var(--line-soft)}
 
-/* ── ADD TICKET FORM ── */
-.add-form{padding:22px}
+.t-dot{
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
+}
+.t-dot.ok{background:var(--ok)}
+.t-dot.warn{background:var(--warn)}
+.t-dot.danger{background:var(--danger)}
+
+.t-info{flex:1;min-width:0}
+.t-name{font-size:.92rem;font-weight:700;color:var(--text);letter-spacing:-.1px;line-height:1.3;margin-bottom:3px}
+.t-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:.72rem;color:var(--muted);font-weight:500}
+.t-meta span{display:inline-flex;align-items:center;gap:5px}
+.t-meta svg{opacity:.6}
+
+.t-days{
+  font-size:.74rem;font-weight:700;padding:4px 9px;border-radius:5px;flex-shrink:0;
+}
+.t-days.ok{color:var(--text-2);background:var(--line-soft)}
+.t-days.warn{color:var(--warn);background:var(--warn-soft)}
+.t-days.danger{color:var(--danger);background:var(--danger-soft)}
+
+.t-status{
+  font-size:.66rem;font-weight:800;padding:3px 8px;border-radius:5px;
+  text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;
+}
+.t-status.ok{background:var(--ok-soft);color:var(--ok)}
+.t-status.warn{background:var(--warn-soft);color:var(--warn)}
+.t-status.danger{background:var(--danger-soft);color:var(--danger)}
+
+.t-del{
+  background:transparent;border:none;cursor:pointer;color:var(--light);
+  padding:6px;border-radius:6px;transition:all .15s;flex-shrink:0;
+}
+.t-del:hover{color:var(--danger);background:var(--danger-soft)}
+
+/* ADD FORM */
+.add-card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;position:sticky;top:24px}
+.add-body{padding:18px 22px}
 .field{margin-bottom:14px}
-.field label{display:block;font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.field label{display:block;font-size:.76rem;font-weight:700;color:var(--text);margin-bottom:6px}
 .field input,.field select{
-  width:100%;padding:10px 13px;border-radius:9px;
-  border:1.5px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:.85rem;color:var(--text);outline:none;transition:all .15s;background:#fff;
+  width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;color:var(--text);
+  outline:none;transition:border-color .15s,box-shadow .15s;background:#fff;
 }
-.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,58,138,.08)}
-.field-hint{font-size:.72rem;color:var(--muted);margin-top:4px}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,58,138,.1)}
 
-/* SEARCH DROPDOWN */
 .search-wrap{position:relative}
 .ticket-dd{
-  position:absolute;top:100%;left:0;right:0;
-  background:#fff;border:1.5px solid var(--blue-border);border-radius:9px;
-  box-shadow:var(--shadow-lg);z-index:50;max-height:240px;overflow-y:auto;
-  margin-top:4px;display:none;
+  position:absolute;top:100%;left:0;right:0;background:#fff;
+  border:1px solid var(--line);border-radius:8px;
+  box-shadow:0 12px 28px rgba(15,23,42,.12);
+  max-height:280px;overflow-y:auto;display:none;z-index:50;margin-top:4px;
 }
 .ticket-dd.open{display:block}
-.dd-item{padding:10px 14px;cursor:pointer;transition:background .1s;border-bottom:1px solid #f1f5f9}
+.dd-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--line-soft);transition:background .12s}
 .dd-item:last-child{border-bottom:none}
-.dd-item:hover{background:var(--blue-lt)}
+.dd-item:hover{background:var(--blue-soft)}
 .dd-name{font-size:.85rem;font-weight:700;color:var(--text)}
 .dd-cat{font-size:.72rem;color:var(--muted);margin-top:1px}
 
-/* UPLOAD ZONE */
-.upload-zone{
-  border:2px dashed var(--gold-border);border-radius:10px;
-  padding:24px;text-align:center;cursor:pointer;
-  background:#fffdf8;transition:all .2s;
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.help{
+  background:var(--blue-soft);border:1px solid #c7d2fe;border-radius:8px;
+  padding:11px 13px;font-size:.78rem;color:var(--text-2);line-height:1.5;margin-bottom:14px;
 }
-.upload-zone:hover{border-color:var(--gold);background:#fdf8ee}
-.upload-zone p{font-size:.8rem;color:var(--muted);margin-top:8px;line-height:1.5}
-.upload-zone strong{color:var(--blue)}
-.uploaded-file{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--off);border-radius:9px;border:1px solid var(--border);margin-top:8px}
-.uf-name{font-size:.82rem;font-weight:600;color:var(--text);flex:1}
-.uf-remove{background:none;border:none;cursor:pointer;color:var(--light);transition:color .15s;padding:2px}
-.uf-remove:hover{color:var(--red)}
+.help strong{color:var(--blue)}
 
-/* ── TRAINING REQUIREMENTS ── */
-.req-card{background:#fff;border-radius:14px;border:1.5px solid var(--gold-border);overflow:hidden}
-.req-empty{text-align:center;padding:32px 20px;color:var(--light);font-size:.83rem}
-
-.req-item{
-  padding:16px 18px;border-bottom:1px solid #f1f5f9;
-  transition:background .15s;
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:10px 16px;border-radius:9px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;font-weight:700;
+  cursor:pointer;border:1.5px solid transparent;text-decoration:none;transition:all .15s;
 }
-.req-item:last-child{border-bottom:none}
-.req-item:hover{background:var(--off)}
-.req-from{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.req-from-ico{width:24px;height:24px;border-radius:6px;background:var(--blue);display:grid;place-items:center;font-weight:800;font-size:.6rem;color:#fff;flex-shrink:0}
-.req-co{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--blue)}
-.req-job{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:8px;line-height:1.3}
-.req-certs{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
-.req-cert{background:#fff;border:1.5px solid var(--border);border-radius:100px;padding:3px 10px;font-size:.7rem;font-weight:700;color:var(--text);display:inline-flex;align-items:center;gap:4px}
-.req-cert.done{background:var(--green-bg);border-color:#86efac;color:var(--green)}
-.req-cert.missing{background:var(--red-bg);border-color:#fda4af;color:var(--red)}
-.req-deadline{font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:6px}
-.req-note{font-size:.78rem;color:var(--muted);line-height:1.55;margin-top:8px;font-style:italic;padding:8px 10px;background:var(--off);border-radius:7px;border-left:3px solid var(--blue-border)}
-.req-actions{display:flex;gap:6px;margin-top:10px}
+.btn-blue{background:var(--blue);color:#fff;width:100%}
+.btn-blue:hover{background:var(--blue-mid)}
+.btn-ghost{background:#fff;color:var(--text-2);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--light);color:var(--text);background:var(--line-soft)}
 
-/* RESPONSIVE */
+.empty{padding:50px 22px;text-align:center;color:var(--muted)}
+.empty svg{opacity:.4;margin:0 auto 12px}
+.empty p{font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:4px}
+.empty span{font-size:.82rem}
+
 @media(max-width:1100px){
-  .stat-strip{grid-template-columns:1fr 1fr}
   .layout{grid-template-columns:1fr}
-  .isn-banner{grid-template-columns:auto 1fr}
-  .isn-cta{grid-column:1/-1;justify-self:start}
+  .add-card{position:relative;top:0}
 }
-@media(max-width:768px){
-  .sidebar{display:none}
-  .main{margin-left:0}
-  .search-bar{display:none}
-  .stat-strip{grid-template-columns:1fr 1fr}
-  .ticket-row{grid-template-columns:42px 1fr}
-  .ticket-row .days-left,.ticket-row .tag{grid-column:2;justify-self:start}
+@media(max-width:980px){
+  .stats-strip{flex-wrap:wrap}
+  .stat-item{flex:0 0 50%;padding:14px 18px;border-right:none;border-bottom:1px solid var(--line-soft)}
+  .stat-item:nth-last-child(-n+2){border-bottom:none}
+}
+@media(max-width:700px){
+  .sidebar{width:64px}
+  .sb-brand,.sb-link span,.sb-uname,.sb-urole,.sb-arrow,.sb-label{display:none}
+  .sb-link{justify-content:center;padding:9px 0}
+  .sb-user{justify-content:center;padding:0}
+  .main{padding:20px}
+  .stat-item{flex:0 0 100%}
+  .ticket-row{flex-wrap:wrap}
+  .t-status,.t-days{font-size:.65rem}
 }
 </style>
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
 <aside class="sidebar">
-  <a class="sb-logo" href="index.html">
-    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
-    <span class="logo-name">Rig<span>Pass</span></span>
-  </a>
-  <div class="sb-section">
-    <div class="sb-label">Main</div>
-    <a class="sb-link" href="dashboard.html">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Dashboard
-    </a>
-    <a class="sb-link" href="profile.html">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      My Profile
-    </a>
-    <a class="sb-link active" href="certifications.html">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Safety Tickets
-    </a>
-    <a class="sb-link" href="jobs.html">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-      Job Board
-      <span class="sb-badge">9</span>
-    </a>
+  <div class="sb-top">
+    <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <div class="sb-brand">Rig<span>Pass</span></div>
   </div>
-  <div class="sb-divider"></div>
-  <div class="sb-section">
-    <div class="sb-label">Account</div>
-    <a class="sb-link" href="#">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      Messages
-      <span class="sb-badge">2</span>
-    </a>
-    <a class="sb-link" href="#">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      Alerts
-    </a>
-    <a class="sb-link" href="#">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Settings
-    </a>
-  </div>
-  <div class="pro-card" style="margin-top:auto">
-    <div class="pro-card-title">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      Upgrade to Pro
+
+  <nav class="sb-nav">
+    <div class="sb-section">
+      <div class="sb-label">Main</div>
+      <a class="sb-link" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="sb-link" href="jobs.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Browse Jobs</span>
+      </a>
+      <a class="sb-link" href="my-applications.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>My Applications</span>
+      </a>
+      <a class="sb-link active" href="certifications.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Safety Tickets</span>
+      </a>
+      <a class="sb-link" href="profile.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>My Profile</span>
+      </a>
     </div>
-    <p>Unlimited tickets, SMS alerts, priority visibility.</p>
-    <button>Upgrade — $7.99/mo</button>
-  </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Account</div>
+      <a class="sb-link" href="settings.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/></svg>
+        <span>Settings</span>
+      </a>
+    </div>
+  </nav>
+
   <div class="sb-bottom">
-    <div class="sb-user" onclick="toggleUserMenu(event)" style="position:relative">
+    <div class="sb-user" onclick="toggleUserMenu(event)">
       <div class="sb-avatar" id="sb-avatar">--</div>
       <div style="min-width:0">
         <div class="sb-uname" id="sb-uname">Loading...</div>
         <div class="sb-urole" id="sb-urole">—</div>
       </div>
       <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.18);overflow:hidden;z-index:200">
-        <a href="profile.html" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--text);text-decoration:none;font-weight:600" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          My Profile
-        </a>
-        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--red);background:#fff;border:none;border-top:1px solid #f1f5f9;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.12);overflow:hidden;z-index:200">
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--danger);background:#fff;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Sign Out
         </button>
@@ -368,211 +270,108 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
   </div>
 </aside>
 
-<!-- ── MAIN ── -->
-<div class="main">
-  <div class="topbar">
-    <div class="topbar-title">Safety Tickets</div>
-    <div class="topbar-right">
-      <div class="search-bar">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Search certifications..." oninput="filterTickets(this.value)">
-      </div>
-      <div class="icon-btn">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <div class="notif-dot"></div>
-      </div>
-      <button class="btn btn-blue" onclick="document.getElementById('ticket-name-input').focus();document.getElementById('add-panel').scrollIntoView({behavior:'smooth',block:'center'})">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Ticket
-      </button>
+<main class="main">
+
+  <div class="page-head">
+    <h1>Safety Tickets</h1>
+    <p>Track every certification with automatic expiry alerts. Employers see your active tickets when matching you with jobs.</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-strip">
+    <div class="stat-item">
+      <div class="stat-num ok" id="s-valid">0</div>
+      <div class="stat-label">Valid Tickets</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num warn" id="s-expiring">0</div>
+      <div class="stat-label">Expiring Soon</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num danger" id="s-expired">0</div>
+      <div class="stat-label">Expired</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="s-total">0</div>
+      <div class="stat-label">Total</div>
     </div>
   </div>
 
-  <div class="content">
+  <!-- LAYOUT -->
+  <div class="layout">
 
-    <!-- PAGE HEAD -->
-    <div class="page-head">
-      <div>
-        <h1>Your Safety Tickets</h1>
-        <p class="subtitle">Track every certification with automatic expiry alerts.</p>
-      </div>
-    </div>
-
-    <!-- ISN-READY BANNER -->
-    <div class="isn-banner">
-      <div class="isn-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-      </div>
-      <div class="isn-content">
-        <div class="isn-title">
-          <h3>You're ISN-Ready</h3>
-          <span class="isn-ready-tag">✓ Compliant</span>
-        </div>
-        <p>Your current certifications meet the standard requirements used by Suncor, Cenovus, Imperial Oil, and TC Energy on ISNetworld. Employers can hire you with confidence.</p>
-      </div>
-      <div class="isn-cta">
-        <a href="#" class="btn" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.25)">
-          Share Profile
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-        </a>
-      </div>
-    </div>
-
-    <!-- STAT STRIP -->
-    <div class="stat-strip">
-      <div class="stat-card">
-        <div class="sc-ico" style="background:var(--green-bg)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></div>
-        <div class="sc-info"><div class="sc-num" style="color:var(--green)">7</div><div class="sc-label">Valid Certifications</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-ico" style="background:var(--amber-bg)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-        <div class="sc-info"><div class="sc-num" style="color:var(--amber)">2</div><div class="sc-label">Expiring Soon</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-ico" style="background:var(--red-bg)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
-        <div class="sc-info"><div class="sc-num" style="color:var(--red)">1</div><div class="sc-label">Expired</div></div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-ico" style="background:var(--blue-lt)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div class="sc-info"><div class="sc-num">10</div><div class="sc-label">Total Tickets</div></div>
-      </div>
-    </div>
-
-    <!-- LAYOUT -->
-    <div class="layout">
-      <!-- LEFT: Tickets List + Add Form -->
-      <div>
-        <!-- TICKETS LIST -->
-        <div class="card">
-          <div class="card-head">
-            <div>
-              <div class="card-title">My Certifications</div>
-              <div class="card-sub">10 tickets · Last updated today</div>
-            </div>
-            <div class="tabs">
-              <button class="tab on" onclick="setTab(this,'all')">All <span class="count">10</span></button>
-              <button class="tab" onclick="setTab(this,'valid')">Valid <span class="count">7</span></button>
-              <button class="tab" onclick="setTab(this,'expiring')">Expiring <span class="count">2</span></button>
-              <button class="tab" onclick="setTab(this,'expired')">Expired <span class="count">1</span></button>
-            </div>
+    <!-- LEFT: TICKETS -->
+    <div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Your Certifications</div>
+            <div class="card-sub" id="list-sub">0 tickets</div>
           </div>
-          <div class="tickets-list" id="tickets-list"></div>
+          <input id="search-input" type="search" placeholder="Search tickets..." oninput="filterTickets(this.value)" style="padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:.82rem;font-family:'Plus Jakarta Sans',sans-serif;outline:none;width:200px">
         </div>
 
-        <!-- ADD TICKET FORM -->
-        <div class="card" id="add-panel">
-          <div class="card-head">
-            <div>
-              <div class="card-title">Add a Safety Ticket</div>
-              <div class="card-sub">Search from 30+ common oilfield certifications</div>
+        <div class="tabs">
+          <button class="tab on" onclick="setTab(this,'all')">All <span class="count" id="ct-all">0</span></button>
+          <button class="tab" onclick="setTab(this,'valid')">Valid <span class="count" id="ct-valid">0</span></button>
+          <button class="tab" onclick="setTab(this,'expiring')">Expiring <span class="count" id="ct-expiring">0</span></button>
+          <button class="tab" onclick="setTab(this,'expired')">Expired <span class="count" id="ct-expired">0</span></button>
+        </div>
+
+        <div id="tickets-list">
+          <div class="empty"><span>Loading…</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: ADD FORM -->
+    <div>
+      <div class="add-card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Add a Ticket</div>
+            <div class="card-sub">Search from 30+ common certifications</div>
+          </div>
+        </div>
+        <div class="add-body">
+
+          <div class="help">
+            <strong>Tip:</strong> Adding more tickets improves your match rate. Employers filter workers by required safety tickets.
+          </div>
+
+          <div class="field">
+            <label>Certification Name</label>
+            <div class="search-wrap">
+              <input id="ticket-name-input" type="text" placeholder="e.g. H2S Alive" autocomplete="off" oninput="searchPreset(this.value)" onfocus="searchPreset(this.value)">
+              <div class="ticket-dd" id="ticket-dd"></div>
             </div>
           </div>
-          <div class="add-form">
+
+          <div class="two-col">
             <div class="field">
-              <label>Certification Name</label>
-              <div class="search-wrap">
-                <input id="ticket-name-input" type="text" placeholder="Search e.g. H2S, First Aid, WHMIS..." autocomplete="off" oninput="searchPreset(this.value)" onfocus="searchPreset(this.value)">
-                <div class="ticket-dd" id="ticket-dd"></div>
-              </div>
-              <div class="field-hint">Can't find it? Type a custom name.</div>
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label>Date Issued</label>
-                <input type="date" id="date-issued">
-              </div>
-              <div class="field">
-                <label>Expiry Date</label>
-                <input type="date" id="date-expiry">
-              </div>
+              <label>Date Issued</label>
+              <input id="date-issued" type="date">
             </div>
             <div class="field">
-              <label>Upload Certificate (optional)</label>
-              <div class="upload-zone" onclick="document.getElementById('file-upload').click()" id="upload-zone">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" style="margin:0 auto"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <p><strong>Click to upload</strong> PDF, JPG, or PNG · Max 10 MB</p>
-              </div>
-              <input type="file" id="file-upload" style="display:none" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile(this)">
-              <div id="file-preview" style="display:none" class="uploaded-file">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
-                <span class="uf-name" id="file-name"></span>
-                <button class="uf-remove" onclick="removeFile()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px">
-              <button class="btn btn-blue" style="flex:1" onclick="addTicket()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                Save Ticket
-              </button>
-              <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+              <label>Expires On *</label>
+              <input id="date-expiry" type="date">
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- RIGHT: Training Requirements -->
-      <div>
-        <div class="req-card">
-          <div class="card-head">
-            <div>
-              <div class="card-title">Training Requirements</div>
-              <div class="card-sub">Sent by employers — action needed</div>
-            </div>
-          </div>
-          <div id="req-body">
-            <div class="req-item">
-              <div class="req-from">
-                <div class="req-from-ico">SE</div>
-                <span class="req-co">Suncor Energy</span>
-              </div>
-              <div class="req-job">Fort Hills Turnaround — May 2025</div>
-              <div class="req-certs">
-                <span class="req-cert done"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>H2S Alive</span>
-                <span class="req-cert missing"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>First Aid L3</span>
-                <span class="req-cert missing"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>WHMIS 2018</span>
-                <span class="req-cert done"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Confined Space</span>
-              </div>
-              <div class="req-note">"All workers must have valid First Aid Level 3 and updated WHMIS before site start."</div>
-              <div class="req-deadline">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                Deadline: May 1, 2025
-              </div>
-              <div class="req-actions">
-                <button class="btn btn-blue btn-sm" style="flex:1">Acknowledge</button>
-                <button class="btn btn-ghost btn-sm">Message</button>
-              </div>
-            </div>
+          <button class="btn btn-blue" onclick="addTicket()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Ticket
+          </button>
 
-            <div class="req-item">
-              <div class="req-from">
-                <div class="req-from-ico" style="background:#334155">TC</div>
-                <span class="req-co">TC Energy</span>
-              </div>
-              <div class="req-job">Compressor Station Maintenance</div>
-              <div class="req-certs">
-                <span class="req-cert done"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>H2S Alive</span>
-                <span class="req-cert missing"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>TDG</span>
-                <span class="req-cert done"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>WHMIS 2018</span>
-              </div>
-              <div class="req-note">"TDG required for all on-site personnel handling hazmat."</div>
-              <div class="req-deadline">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                Deadline: Jun 15, 2025
-              </div>
-              <div class="req-actions">
-                <button class="btn btn-blue btn-sm" style="flex:1">Acknowledge</button>
-                <button class="btn btn-ghost btn-sm">Message</button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
+
   </div>
-</div>
+
+</main>
 
 <script>
-// ── PRESET TICKETS ──
 const presetTickets = [
   {name:'H2S Alive',cat:'Gas Safety'},
   {name:'WHMIS 2018',cat:'Workplace Safety'},
@@ -609,9 +408,6 @@ const presetTickets = [
   {name:'PPE Awareness',cat:'Safety Management'},
 ];
 
-// ════════════════════════════════════════════════════════════════════
-// SUPABASE
-// ════════════════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -621,16 +417,15 @@ let myTickets = [];
 let currentTab = 'all';
 let currentFilter = '';
 
-// ════════════════════════════════════════════════════════════════════
-// AUTH GUARD + LOAD PROFILE INTO SIDEBAR
-// ════════════════════════════════════════════════════════════════════
 async function init(){
   const { data: { session } } = await sb.auth.getSession();
   if(!session){ window.location.href = 'login.html'; return; }
   currentUser = session.user;
 
-  // Load profile for sidebar
   const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(profile?.is_admin){ window.location.href = 'admin.html'; return; }
+  if(profile?.role === 'employer'){ window.location.href = 'employer-dashboard.html'; return; }
+
   if(profile){
     const first = profile.first_name || '';
     const last = profile.last_name || '';
@@ -638,247 +433,175 @@ async function init(){
     const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
     document.getElementById('sb-avatar').textContent = initials;
     document.getElementById('sb-uname').textContent = fullName;
-    const roleLabel = profile.role === 'employer' ? 'Employer' : (profile.trade || 'Worker');
-    const planLabel = profile.plan === 'pro' ? 'Pro Plan' : (profile.plan === 'employer_pro' ? 'Employer Pro' : 'Free Plan');
-    document.getElementById('sb-urole').textContent = roleLabel + ' · ' + planLabel;
+    document.getElementById('sb-urole').textContent = (profile.trade || 'Worker') + ' · ' + (profile.plan === 'pro' ? 'Pro' : 'Free');
   } else {
     document.getElementById('sb-uname').textContent = currentUser.email.split('@')[0];
-    document.getElementById('sb-urole').textContent = 'Free Plan';
     document.getElementById('sb-avatar').textContent = currentUser.email.substring(0,2).toUpperCase();
+    document.getElementById('sb-urole').textContent = 'Free';
   }
 
   await loadTickets();
 }
 
-// ════════════════════════════════════════════════════════════════════
-// LOAD CERTS FROM SUPABASE
-// ════════════════════════════════════════════════════════════════════
 async function loadTickets(){
-  const { data, error } = await sb
-    .from('certifications')
-    .select('*')
-    .eq('worker_id', currentUser.id)
-    .order('expiry_date', { ascending: true });
-
+  const { data, error } = await sb.from('certifications').select('*').eq('worker_id', currentUser.id).order('expiry_date', { ascending: true });
   if(error){ console.error(error); return; }
   myTickets = (data || []).map(c => ({
-    id: c.id,
-    name: c.name,
-    cat: c.category || 'Other',
-    issued: c.issued_date,
-    expiry: c.expiry_date
+    id: c.id, name: c.name, cat: c.category || 'Other',
+    issued: c.issued_date, expiry: c.expiry_date
   }));
   updateStats();
   updateTabCounts();
   render();
 }
 
-// ════════════════════════════════════════════════════════════════════
-// UPDATE STATS CARDS
-// ════════════════════════════════════════════════════════════════════
 function updateStats(){
   let valid = 0, expiring = 0, expired = 0;
   myTickets.forEach(t => {
     const s = statusOf(daysUntil(t.expiry));
-    if(s === 'valid') valid++;
-    else if(s === 'expiring') expiring++;
+    if(s === 'ok') valid++;
+    else if(s === 'warn') expiring++;
     else expired++;
   });
-  const cards = document.querySelectorAll('.sc-num');
-  if(cards.length >= 4){
-    cards[0].textContent = valid;
-    cards[1].textContent = expiring;
-    cards[2].textContent = expired;
-    cards[3].textContent = myTickets.length;
-  }
-  // Update card-sub
-  const sub = document.querySelector('.card-head .card-sub');
-  if(sub) sub.textContent = myTickets.length + ' tickets · Last updated today';
+  document.getElementById('s-valid').textContent = valid;
+  document.getElementById('s-expiring').textContent = expiring;
+  document.getElementById('s-expired').textContent = expired;
+  document.getElementById('s-total').textContent = myTickets.length;
+  document.getElementById('list-sub').textContent = `${myTickets.length} ticket${myTickets.length === 1 ? '' : 's'}`;
 }
 
 function updateTabCounts(){
   let valid=0, expiring=0, expired=0;
-  myTickets.forEach(t=>{
+  myTickets.forEach(t => {
     const s = statusOf(daysUntil(t.expiry));
-    if(s==='valid') valid++;
-    else if(s==='expiring') expiring++;
+    if(s==='ok') valid++;
+    else if(s==='warn') expiring++;
     else expired++;
   });
-  const counts = document.querySelectorAll('.tab .count');
-  if(counts.length >= 4){
-    counts[0].textContent = myTickets.length;
-    counts[1].textContent = valid;
-    counts[2].textContent = expiring;
-    counts[3].textContent = expired;
-  }
+  document.getElementById('ct-all').textContent = myTickets.length;
+  document.getElementById('ct-valid').textContent = valid;
+  document.getElementById('ct-expiring').textContent = expiring;
+  document.getElementById('ct-expired').textContent = expired;
 }
 
-// ════════════════════════════════════════════════════════════════════
-// HELPERS
-// ════════════════════════════════════════════════════════════════════
-function daysUntil(d){return Math.ceil((new Date(d)-new Date())/(1000*60*60*24))}
-function statusOf(days){return days<0?'expired':days<=60?'expiring':'valid'}
-function iconFor(status){
-  if(status==='valid') return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`;
-  if(status==='expiring') return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
-  return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
-}
-function bgFor(status){return status==='valid'?'var(--green-bg)':status==='expiring'?'var(--amber-bg)':'var(--red-bg)'}
-function fmtDate(s){return s ? new Date(s).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}) : 'N/A'}
+function daysUntil(d){ return Math.ceil((new Date(d) - new Date()) / (1000*60*60*24)); }
+function statusOf(days){ return days < 0 ? 'danger' : days <= 60 ? 'warn' : 'ok'; }
+function fmtDate(s){ return s ? new Date(s).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}) : 'N/A'; }
 
-// ════════════════════════════════════════════════════════════════════
-// RENDER
-// ════════════════════════════════════════════════════════════════════
 function render(){
   const list = document.getElementById('tickets-list');
-  let arr = myTickets.filter(t=>{
-    if(currentTab==='valid')return statusOf(daysUntil(t.expiry))==='valid';
-    if(currentTab==='expiring')return statusOf(daysUntil(t.expiry))==='expiring';
-    if(currentTab==='expired')return statusOf(daysUntil(t.expiry))==='expired';
+  let arr = myTickets.filter(t => {
+    const status = statusOf(daysUntil(t.expiry));
+    if(currentTab === 'valid') return status === 'ok';
+    if(currentTab === 'expiring') return status === 'warn';
+    if(currentTab === 'expired') return status === 'danger';
     return true;
   });
   if(currentFilter){
-    arr = arr.filter(t=>t.name.toLowerCase().includes(currentFilter.toLowerCase())||(t.cat||'').toLowerCase().includes(currentFilter.toLowerCase()));
+    arr = arr.filter(t => t.name.toLowerCase().includes(currentFilter.toLowerCase()) || (t.cat||'').toLowerCase().includes(currentFilter.toLowerCase()));
   }
+
   if(!arr.length){
     if(myTickets.length === 0){
-      list.innerHTML = `<div style="padding:50px 22px;text-align:center;color:var(--muted)">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;opacity:.3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <p style="font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:4px">No safety tickets yet</p>
-        <p style="font-size:.82rem">Add your first certification below to get started.</p>
+      list.innerHTML = `<div class="empty">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <p>No safety tickets yet</p>
+        <span>Add your first certification using the form on the right.</span>
       </div>`;
     } else {
-      list.innerHTML = `<div style="padding:40px 22px;text-align:center;color:var(--light);font-size:.85rem">No certifications match your filter.</div>`;
+      list.innerHTML = `<div class="empty"><span>No certifications match this filter.</span></div>`;
     }
     return;
   }
-  list.innerHTML = arr.map(t=>{
+
+  list.innerHTML = arr.map(t => {
     const days = daysUntil(t.expiry);
     const status = statusOf(days);
-    const tagCls = status==='valid'?'tg':status==='expiring'?'ty':'tr-tag';
-    const tagLabel = status==='valid'?'Valid':status==='expiring'?'Expiring':'Expired';
-    const daysCls = status==='valid'?'days-ok':status==='expiring'?'days-warn':'days-exp';
-    const daysLabel = days<0?`${Math.abs(days)}d ago`:days===0?'Today':`${days} days`;
-    const safeName = String(t.name).replace(/"/g,'&quot;');
+    const statusLabel = status === 'ok' ? 'Valid' : status === 'warn' ? 'Expiring' : 'Expired';
+    const daysLabel = days < 0 ? `Expired ${Math.abs(days)}d ago` : days === 0 ? 'Today' : `${days}d left`;
+    const safeName = String(t.name).replace(/"/g,'&quot;').replace(/'/g,"\\'");
     return `<div class="ticket-row">
-      <div class="ticket-ico" style="background:${bgFor(status)}">${iconFor(status)}</div>
-      <div class="ticket-info">
-        <div class="ticket-name">${t.name}</div>
-        <div class="ticket-meta">
+      <div class="t-dot ${status}"></div>
+      <div class="t-info">
+        <div class="t-name">${t.name}</div>
+        <div class="t-meta">
           <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg>Issued ${fmtDate(t.issued)}</span>
           <span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Expires ${fmtDate(t.expiry)}</span>
           <span>${t.cat}</span>
         </div>
       </div>
-      <span class="days-left ${daysCls}">${daysLabel}</span>
-      <span class="tag ${tagCls}">${tagLabel}</span>
-      <button onclick="deleteTicket('${t.id}','${safeName}')" title="Delete" style="background:transparent;border:none;cursor:pointer;color:var(--light);padding:6px;border-radius:6px;transition:all .15s" onmouseover="this.style.color='var(--red)';this.style.background='var(--red-bg)'" onmouseout="this.style.color='var(--light)';this.style.background='transparent'">
+      <span class="t-days ${status}">${daysLabel}</span>
+      <span class="t-status ${status}">${statusLabel}</span>
+      <button class="t-del" onclick="deleteTicket('${t.id}','${safeName}')" title="Delete">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
       </button>
     </div>`;
   }).join('');
 }
 
-function setTab(btn,tab){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+function setTab(btn, tab){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
   btn.classList.add('on');
   currentTab = tab;
   render();
 }
-function filterTickets(val){currentFilter = val; render();}
 
-// ════════════════════════════════════════════════════════════════════
-// SEARCH DROPDOWN
-// ════════════════════════════════════════════════════════════════════
+function filterTickets(val){ currentFilter = val; render(); }
+
 function searchPreset(val){
   const dd = document.getElementById('ticket-dd');
-  if(!val.trim()){dd.classList.remove('open');return}
-  const matches = presetTickets.filter(t=>t.name.toLowerCase().includes(val.toLowerCase())||t.cat.toLowerCase().includes(val.toLowerCase()));
-  if(!matches.length){dd.classList.remove('open');return}
-  dd.innerHTML = matches.slice(0,8).map(t=>`
+  if(!val.trim()){ dd.classList.remove('open'); return; }
+  const matches = presetTickets.filter(t => t.name.toLowerCase().includes(val.toLowerCase()) || t.cat.toLowerCase().includes(val.toLowerCase()));
+  if(!matches.length){ dd.classList.remove('open'); return; }
+  dd.innerHTML = matches.slice(0,8).map(t => `
     <div class="dd-item" onclick="selectPreset('${t.name.replace(/'/g,"\\'")}','${t.cat}')">
       <div class="dd-name">${t.name}</div>
       <div class="dd-cat">${t.cat}</div>
     </div>`).join('');
   dd.classList.add('open');
 }
+
 function selectPreset(name){
   document.getElementById('ticket-name-input').value = name;
   document.getElementById('ticket-dd').classList.remove('open');
 }
-document.addEventListener('click',e=>{
-  if(!e.target.closest('.search-wrap')) {
-    const dd = document.getElementById('ticket-dd');
-    if(dd) dd.classList.remove('open');
-  }
-  const menu = document.getElementById('user-menu');
-  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
-});
 
-// ════════════════════════════════════════════════════════════════════
-// FILE UPLOAD (currently just visual — storage wiring later)
-// ════════════════════════════════════════════════════════════════════
-function handleFile(input){
-  const file = input.files[0];
-  if(!file) return;
-  document.getElementById('file-preview').style.display='flex';
-  document.getElementById('file-name').textContent=file.name;
-  document.getElementById('upload-zone').style.display='none';
-}
-function removeFile(){
-  document.getElementById('file-upload').value='';
-  document.getElementById('file-preview').style.display='none';
-  document.getElementById('upload-zone').style.display='block';
-}
-
-// ════════════════════════════════════════════════════════════════════
-// ADD TICKET — saves to Supabase
-// ════════════════════════════════════════════════════════════════════
 async function addTicket(){
   const name = document.getElementById('ticket-name-input').value.trim();
   const issued = document.getElementById('date-issued').value;
   const expiry = document.getElementById('date-expiry').value;
-  if(!name){alert('Please enter a certification name.');return}
-  if(!expiry){alert('Please enter an expiry date.');return}
+  if(!name){ alert('Please enter a certification name.'); return; }
+  if(!expiry){ alert('Please enter an expiry date.'); return; }
   if(issued && new Date(expiry) < new Date(issued)){
     alert('Expiry date must be after issue date.'); return;
   }
-  const preset = presetTickets.find(t=>t.name===name);
+  const preset = presetTickets.find(t => t.name === name);
   const cat = preset ? preset.cat : 'Other';
 
-  const btn = document.querySelector('.btn.btn-blue[onclick="addTicket()"]');
-  if(btn){ btn.disabled = true; btn.style.opacity = '.6'; }
+  const btn = document.querySelector('.btn.btn-blue');
+  if(btn){ btn.disabled = true; btn.style.opacity = '.6'; btn.textContent = 'Adding…'; }
 
-  const { data, error } = await sb.from('certifications').insert({
+  const { error } = await sb.from('certifications').insert({
     worker_id: currentUser.id,
-    name,
-    category: cat,
+    name, category: cat,
     issued_date: issued || null,
     expiry_date: expiry
-  }).select().single();
+  });
 
-  if(btn){ btn.disabled = false; btn.style.opacity = '1'; }
-
-  if(error){
-    alert('Error saving ticket: ' + error.message);
-    return;
+  if(btn){
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Ticket';
   }
 
-  clearForm();
+  if(error){ alert('Error saving ticket: ' + error.message); return; }
+
+  document.getElementById('ticket-name-input').value = '';
+  document.getElementById('date-issued').value = '';
+  document.getElementById('date-expiry').value = '';
   await loadTickets();
-  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function clearForm(){
-  document.getElementById('ticket-name-input').value='';
-  document.getElementById('date-issued').value='';
-  document.getElementById('date-expiry').value='';
-  removeFile();
-}
-
-// ════════════════════════════════════════════════════════════════════
-// DELETE TICKET
-// ════════════════════════════════════════════════════════════════════
 async function deleteTicket(id, name){
   if(!confirm(`Delete "${name}"?`)) return;
   const { error } = await sb.from('certifications').delete().eq('id', id);
@@ -886,9 +609,6 @@ async function deleteTicket(id, name){
   await loadTickets();
 }
 
-// ════════════════════════════════════════════════════════════════════
-// USER MENU + SIGN OUT
-// ════════════════════════════════════════════════════════════════════
 function toggleUserMenu(e){
   e.stopPropagation();
   const menu = document.getElementById('user-menu');
@@ -898,6 +618,15 @@ async function signOut(){
   await sb.auth.signOut();
   window.location.href = 'login.html';
 }
+
+document.addEventListener('click', e => {
+  if(!e.target.closest('.search-wrap')){
+    const dd = document.getElementById('ticket-dd');
+    if(dd) dd.classList.remove('open');
+  }
+  const menu = document.getElementById('user-menu');
+  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
+});
 
 init();
 </script>
