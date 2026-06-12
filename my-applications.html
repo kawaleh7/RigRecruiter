@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — My Applications</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a;display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+:root{
+  --navy:#0a1228;
+  --blue:#1e3a8a;
+  --blue-mid:#1e40af;
+  --blue-soft:#eef2ff;
+  --text:#0f172a;
+  --text-2:#475569;
+  --muted:#64748b;
+  --light:#94a3b8;
+  --line:#e2e8f0;
+  --line-soft:#f1f5f9;
+  --ok:#15803d;
+  --ok-soft:#f0fdf4;
+  --warn:#a16207;
+  --warn-soft:#fefce8;
+  --danger:#b91c1c;
+  --danger-soft:#fef2f2;
+  --purple:#6b21a8;
+  --purple-soft:#faf5ff;
+}
+
+/* SIDEBAR */
+.sidebar{width:240px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sb-top{padding:22px 22px 18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line-soft)}
+.sb-logo{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+.sb-logo svg{width:16px;height:16px;fill:#fff}
+.sb-brand{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.sb-brand span{color:var(--blue)}
+
+.sb-nav{flex:1;padding:18px 12px;overflow-y:auto}
+.sb-section + .sb-section{margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.sb-label{font-size:.66rem;font-weight:800;color:var(--light);text-transform:uppercase;letter-spacing:1.2px;padding:0 10px 6px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;font-size:.86rem;font-weight:600;color:var(--text-2);text-decoration:none;margin-bottom:2px;transition:all .15s}
+.sb-link:hover{background:var(--line-soft);color:var(--text)}
+.sb-link.active{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.sb-link svg{width:17px;height:17px;flex-shrink:0;stroke-width:2}
+
+.sb-bottom{padding:14px;border-top:1px solid var(--line-soft)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;cursor:pointer;transition:background .15s;position:relative}
+.sb-user:hover{background:var(--line-soft)}
+.sb-avatar{width:34px;height:34px;border-radius:9px;background:var(--blue);display:grid;place-items:center;color:#fff;font-size:.74rem;font-weight:800;flex-shrink:0}
+.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.sb-urole{font-size:.72rem;color:var(--muted);margin-top:2px}
+.sb-arrow{margin-left:auto;color:var(--light)}
+
+/* MAIN */
+.main{flex:1;padding:32px 40px 60px;min-width:0;max-width:1100px}
+.page-head{margin-bottom:24px}
+.page-head h1{font-size:1.65rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:6px}
+.page-head p{font-size:.92rem;color:var(--text-2);line-height:1.5}
+
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1.5px solid var(--line);overflow-x:auto}
+.tab{padding:11px 16px;border:none;background:transparent;font-family:'Plus Jakarta Sans',sans-serif;font-size:.84rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;display:flex;align-items:center;gap:7px;white-space:nowrap;transition:color .15s}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--blue);border-color:var(--blue)}
+.tab .count{background:var(--line-soft);color:var(--muted);font-size:.68rem;padding:1px 7px;border-radius:5px;font-weight:800;min-width:18px;text-align:center}
+.tab.on .count{background:var(--blue-soft);color:var(--blue)}
+
+/* APPLICATION CARDS — quieter */
+.app-card{
+  background:#fff;border:1px solid var(--line);border-radius:12px;
+  padding:18px 22px;margin-bottom:12px;transition:border-color .15s;
+}
+.app-card:hover{border-color:var(--light)}
+.ac-row{display:flex;align-items:flex-start;gap:14px}
+.ac-avatar{
+  width:42px;height:42px;border-radius:9px;background:var(--line-soft);
+  color:var(--text);display:grid;place-items:center;font-size:.74rem;font-weight:800;
+  flex-shrink:0;border:1px solid var(--line);
+}
+.ac-info{flex:1;min-width:0}
+.ac-title{font-size:1.02rem;font-weight:800;color:var(--text);letter-spacing:-.2px;line-height:1.3;margin-bottom:3px}
+.ac-co{font-size:.82rem;color:var(--muted);font-weight:600}
+.ac-status{flex-shrink:0}
+
+.ac-divider{height:1px;background:var(--line-soft);margin:14px 0}
+
+.ac-meta{display:flex;flex-wrap:wrap;gap:18px;font-size:.78rem;color:var(--muted);font-weight:500}
+.ac-meta span{display:inline-flex;align-items:center;gap:6px}
+.ac-meta svg{opacity:.6}
+.ac-meta strong{color:var(--text);font-weight:700}
+
+.ac-foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.ac-applied{font-size:.74rem;color:var(--light);font-weight:600}
+.ac-actions{display:flex;gap:8px}
+
+/* STATUS PILLS — small, quiet, semantic */
+.status-pill{
+  display:inline-flex;align-items:center;gap:5px;padding:5px 10px;
+  border-radius:6px;font-size:.7rem;font-weight:800;
+  text-transform:uppercase;letter-spacing:.3px;
+}
+.status-pill::before{
+  content:'';width:6px;height:6px;border-radius:50%;background:currentColor;
+}
+.status-pending{background:var(--warn-soft);color:var(--warn)}
+.status-reviewed{background:var(--blue-soft);color:var(--blue)}
+.status-shortlisted{background:#fef3c7;color:#854d0e}
+.status-interviewed{background:var(--purple-soft);color:var(--purple)}
+.status-hired{background:var(--ok-soft);color:var(--ok)}
+.status-rejected{background:var(--danger-soft);color:var(--danger)}
+
+.match-text{font-size:.76rem;color:var(--muted);font-weight:600}
+.match-text strong{color:var(--text);font-weight:800}
+
+/* BUTTONS */
+.btn-sm{padding:7px 12px;font-size:.76rem;font-weight:700;border-radius:7px;border:1.5px solid var(--line);background:#fff;color:var(--text);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.btn-sm:hover{border-color:var(--light);background:var(--line-soft)}
+.btn-blue{background:var(--blue);color:#fff;border:1.5px solid var(--blue);padding:10px 18px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:7px;transition:all .15s}
+.btn-blue:hover{background:var(--blue-mid)}
+
+/* EMPTY STATE */
+.empty{
+  padding:60px 22px;text-align:center;
+  background:#fff;border:1px dashed var(--line);border-radius:14px;
+}
+.empty svg{margin:0 auto 14px;opacity:.4}
+.empty p{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:6px}
+.empty span{font-size:.85rem;color:var(--muted);display:block;margin-bottom:14px}
+
+/* SUMMARY STRIP — like the dashboards */
+.summary{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 4px;margin-bottom:22px}
+.summary-item{flex:1;padding:0 22px;border-right:1px solid var(--line-soft);min-width:0}
+.summary-item:last-child{border-right:none}
+.summary-num{font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-.5px;line-height:1}
+.summary-num.ok{color:var(--ok)}
+.summary-num.warn{color:var(--warn)}
+.summary-label{font-size:.74rem;color:var(--muted);margin-top:6px;font-weight:600}
+
+@media(max-width:980px){
+  .summary{flex-wrap:wrap}
+  .summary-item{flex:0 0 50%;padding:14px 18px;border-right:none;border-bottom:1px solid var(--line-soft)}
+  .summary-item:nth-last-child(-n+2){border-bottom:none}
+}
+@media(max-width:700px){
+  .sidebar{width:64px}
+  .sb-brand,.sb-link span,.sb-uname,.sb-urole,.sb-arrow,.sb-label{display:none}
+  .sb-link{justify-content:center;padding:9px 0}
+  .sb-user{justify-content:center;padding:0}
+  .main{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <div class="sb-brand">Rig<span>Pass</span></div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section">
+      <div class="sb-label">Main</div>
+      <a class="sb-link" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="sb-link" href="jobs.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Browse Jobs</span>
+      </a>
+      <a class="sb-link active" href="my-applications.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>My Applications</span>
+      </a>
+      <a class="sb-link" href="certifications.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Safety Tickets</span>
+      </a>
+      <a class="sb-link" href="training.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.65 3.36 3 6 3s6-1.35 6-3v-5"/></svg>
+        <span>Training</span>
+      </a>
+      <a class="sb-link" href="profile.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>My Profile</span>
+      </a>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Account</div>
+      <a class="sb-link" href="settings.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/></svg>
+        <span>Settings</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="sb-bottom">
+    <div class="sb-user" onclick="toggleUserMenu(event)">
+      <div class="sb-avatar" id="sb-avatar">--</div>
+      <div style="min-width:0">
+        <div class="sb-uname" id="sb-uname">Loading...</div>
+        <div class="sb-urole" id="sb-urole">—</div>
+      </div>
+      <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.12);overflow:hidden;z-index:200">
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--danger);background:#fff;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+  <div class="page-head">
+    <h1>My Applications</h1>
+    <p>Track every job you've applied to and where you stand with each employer.</p>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary">
+    <div class="summary-item">
+      <div class="summary-num" id="sum-total">0</div>
+      <div class="summary-label">Total Applications</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-num warn" id="sum-active">0</div>
+      <div class="summary-label">Awaiting Response</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-num ok" id="sum-active-progress">0</div>
+      <div class="summary-label">In Active Review</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-num ok" id="sum-hired">0</div>
+      <div class="summary-label">Hired</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab on" onclick="setTab(this,'all')">All <span class="count" id="ct-all">0</span></button>
+    <button class="tab" onclick="setTab(this,'pending')">Pending <span class="count" id="ct-pending">0</span></button>
+    <button class="tab" onclick="setTab(this,'reviewed')">Reviewed <span class="count" id="ct-reviewed">0</span></button>
+    <button class="tab" onclick="setTab(this,'shortlisted')">Shortlisted <span class="count" id="ct-shortlisted">0</span></button>
+    <button class="tab" onclick="setTab(this,'interviewed')">Interviewed <span class="count" id="ct-interviewed">0</span></button>
+    <button class="tab" onclick="setTab(this,'hired')">Hired <span class="count" id="ct-hired">0</span></button>
+    <button class="tab" onclick="setTab(this,'rejected')">Closed <span class="count" id="ct-rejected">0</span></button>
+  </div>
+
+  <div id="apps-list">
+    <div style="padding:40px;text-align:center;color:var(--light)">Loading...</div>
+  </div>
+</main>
+
+<script>
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allApps = [];
+let currentTab = 'all';
+let currentUser = null;
+
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(profile?.is_admin){ window.location.href = 'admin.html'; return; }
+  if(profile?.role === 'employer'){ window.location.href = 'employer-dashboard.html'; return; }
+
+  // Sidebar identity
+  const first = profile?.first_name || '';
+  const last = profile?.last_name || '';
+  const fullName = (first + ' ' + last).trim() || currentUser.email.split('@')[0];
+  const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
+  document.getElementById('sb-avatar').textContent = initials;
+  document.getElementById('sb-uname').textContent = fullName;
+  document.getElementById('sb-urole').textContent = (profile?.trade || 'Worker') + ' · ' + (profile?.plan === 'pro' ? 'Pro' : 'Free');
+
+  await loadApplications();
+}
+
+async function loadApplications(){
+  const { data, error } = await sb
+    .from('applications')
+    .select('*, job:jobs!applications_job_id_fkey(*, employer:profiles!jobs_employer_id_fkey(*))')
+    .eq('worker_id', currentUser.id)
+    .order('applied_at', { ascending: false });
+
+  if(error){ console.error(error); return; }
+  allApps = data || [];
+
+  // Counts per status
+  const statuses = ['pending','reviewed','shortlisted','interviewed','hired','rejected'];
+  document.getElementById('ct-all').textContent = allApps.length;
+  statuses.forEach(s => {
+    document.getElementById('ct-' + s).textContent = allApps.filter(a => a.status === s).length;
+  });
+
+  // Summary calculations
+  const total = allApps.length;
+  const awaiting = allApps.filter(a => a.status === 'pending').length;
+  const inReview = allApps.filter(a => ['reviewed','shortlisted','interviewed'].includes(a.status)).length;
+  const hired = allApps.filter(a => a.status === 'hired').length;
+  document.getElementById('sum-total').textContent = total;
+  document.getElementById('sum-active').textContent = awaiting;
+  document.getElementById('sum-active-progress').textContent = inReview;
+  document.getElementById('sum-hired').textContent = hired;
+
+  render();
+}
+
+function setTab(btn, tab){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+  currentTab = tab;
+  render();
+}
+
+function render(){
+  const list = document.getElementById('apps-list');
+  const filtered = currentTab === 'all' ? allApps : allApps.filter(a => a.status === currentTab);
+
+  if(filtered.length === 0){
+    list.innerHTML = `<div class="empty">
+      <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--light)" stroke-width="1.4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+      <p>${allApps.length === 0 ? 'No applications yet' : 'Nothing here'}</p>
+      <span>${allApps.length === 0 ? "When you apply to jobs, they'll show up here." : 'Try a different tab.'}</span>
+      ${allApps.length === 0 ? '<a href="jobs.html" class="btn-blue">Browse Jobs</a>' : ''}
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(app => {
+    const job = app.job || {};
+    const employer = job.employer || {};
+    const company = employer.company_name || ((employer.first_name || '') + ' ' + (employer.last_name || '')).trim() || 'Employer';
+    const initials = company.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const loc = [job.city, job.province].filter(Boolean).join(', ') || 'Location TBD';
+    const pay = job.pay_min && job.pay_max ? `$${job.pay_min}–$${job.pay_max}${job.pay_type==='hourly'?'/hr':''}` : 'Pay TBD';
+
+    const labels = {
+      pending: 'Pending',
+      reviewed: 'Reviewed',
+      shortlisted: 'Shortlisted',
+      interviewed: 'Interviewed',
+      hired: 'Hired',
+      rejected: 'Closed'
+    };
+
+    return `<div class="app-card">
+      <div class="ac-row">
+        <div class="ac-avatar">${initials}</div>
+        <div class="ac-info">
+          <div class="ac-title">${job.title || 'Job no longer available'}</div>
+          <div class="ac-co">${company}</div>
+        </div>
+        <div class="ac-status">
+          <span class="status-pill status-${app.status}">${labels[app.status] || app.status}</span>
+        </div>
+      </div>
+
+      <div class="ac-divider"></div>
+
+      <div class="ac-meta">
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/></svg>
+          ${loc}
+        </span>
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+          ${pay}
+        </span>
+        ${app.match_score !== null && app.match_score !== undefined ? `<span class="match-text">Match: <strong>${app.match_score}%</strong></span>` : ''}
+      </div>
+
+      <div class="ac-foot">
+        <div class="ac-applied">Applied ${timeAgo(app.applied_at)}</div>
+        <div class="ac-actions">
+          ${job.status === 'active' ? `<a href="jobs.html" class="btn-sm">View Job</a>` : ''}
+          ${employer.id ? `<a href="employer-profile.html?id=${employer.id}" class="btn-sm">View Employer</a>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function timeAgo(dateStr){
+  if(!dateStr) return 'recently';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if(mins < 1) return 'just now';
+  if(mins < 60) return mins + ' min ago';
+  const hrs = Math.floor(mins / 60);
+  if(hrs < 24) return hrs + ' hr ago';
+  const days = Math.floor(hrs / 24);
+  if(days < 30) return days + ' day' + (days === 1 ? '' : 's') + ' ago';
+  return new Date(dateStr).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('user-menu');
+  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
+});
+
+init();
+</script>
+</body>
+</html>

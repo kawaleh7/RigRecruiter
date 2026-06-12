@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a;display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+:root{
+  --navy:#0a1228;
+  --blue:#1e3a8a;
+  --blue-mid:#1e40af;
+  --blue-soft:#eef2ff;
+  --text:#0f172a;
+  --text-2:#475569;
+  --muted:#64748b;
+  --light:#94a3b8;
+  --line:#e2e8f0;
+  --line-soft:#f1f5f9;
+  --ok:#15803d;
+  --ok-soft:#f0fdf4;
+  --warn:#a16207;
+  --warn-soft:#fefce8;
+  --danger:#b91c1c;
+  --danger-soft:#fef2f2;
+}
+
+/* SIDEBAR (same pattern across all pages) */
+.sidebar{width:240px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sb-top{padding:22px 22px 18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--line-soft)}
+.sb-logo{width:34px;height:34px;background:var(--blue);border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+.sb-logo svg{width:16px;height:16px;fill:#fff}
+.sb-brand{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.sb-brand span{color:var(--blue)}
+
+.sb-nav{flex:1;padding:18px 12px;overflow-y:auto}
+.sb-section + .sb-section{margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.sb-label{font-size:.66rem;font-weight:800;color:var(--light);text-transform:uppercase;letter-spacing:1.2px;padding:0 10px 6px}
+.sb-link{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;font-size:.86rem;font-weight:600;color:var(--text-2);text-decoration:none;margin-bottom:2px;transition:all .15s}
+.sb-link:hover{background:var(--line-soft);color:var(--text)}
+.sb-link.active{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.sb-link svg{width:17px;height:17px;flex-shrink:0;stroke-width:2}
+.sb-badge{margin-left:auto;background:var(--blue);color:#fff;font-size:.62rem;font-weight:800;padding:1px 7px;border-radius:100px;min-width:18px;text-align:center}
+
+.sb-bottom{padding:14px;border-top:1px solid var(--line-soft)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;cursor:pointer;transition:background .15s;position:relative}
+.sb-user:hover{background:var(--line-soft)}
+.sb-avatar{width:34px;height:34px;border-radius:9px;background:var(--blue);display:grid;place-items:center;color:#fff;font-size:.74rem;font-weight:800;flex-shrink:0}
+.sb-uname{font-size:.86rem;font-weight:700;color:var(--text);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.sb-urole{font-size:.72rem;color:var(--muted);margin-top:2px}
+.sb-arrow{margin-left:auto;color:var(--light)}
+
+/* MAIN */
+.main{flex:1;padding:32px 40px 60px;min-width:0;max-width:1280px}
+.page-head{margin-bottom:24px}
+.page-head h1{font-size:1.65rem;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:6px}
+.page-head p{font-size:.92rem;color:var(--text-2);line-height:1.5;max-width:640px}
+
+/* ISN COMPLIANCE — main hero card */
+.isn-card{
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;margin-bottom:24px;
+}
+.isn-head{
+  padding:24px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line-soft);
+}
+.isn-ring{
+  width:88px;height:88px;border-radius:50%;flex-shrink:0;
+  display:grid;place-items:center;position:relative;
+  background:conic-gradient(var(--blue) var(--pct), var(--line-soft) 0);
+}
+.isn-ring::before{
+  content:'';position:absolute;inset:8px;background:#fff;border-radius:50%;
+}
+.isn-ring-num{
+  position:relative;z-index:1;font-size:1.4rem;font-weight:800;color:var(--text);letter-spacing:-.5px;
+}
+.isn-head-info{flex:1;min-width:220px}
+.isn-tag{display:inline-block;font-size:.62rem;font-weight:800;color:var(--blue);background:var(--blue-soft);padding:3px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.isn-title{font-size:1.2rem;font-weight:800;color:var(--text);letter-spacing:-.3px;margin-bottom:4px}
+.isn-sub{font-size:.86rem;color:var(--text-2);line-height:1.5;max-width:520px}
+.isn-status{
+  padding:9px 14px;border-radius:8px;font-size:.78rem;font-weight:800;
+  letter-spacing:.2px;flex-shrink:0;
+}
+.isn-status.ok{background:var(--ok-soft);color:var(--ok)}
+.isn-status.warn{background:var(--warn-soft);color:var(--warn)}
+.isn-status.danger{background:var(--danger-soft);color:var(--danger)}
+
+.isn-grid{
+  padding:20px 28px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;
+}
+.isn-item{
+  display:flex;align-items:center;gap:11px;padding:11px 14px;
+  border:1px solid var(--line);border-radius:9px;
+  background:var(--line-soft);
+}
+.isn-item.has{background:var(--ok-soft);border-color:#bbf7d0}
+.isn-item-ico{
+  width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;
+  background:var(--line);color:var(--muted);
+}
+.isn-item.has .isn-item-ico{background:var(--ok);color:#fff}
+.isn-item-text{font-size:.83rem;font-weight:700;color:var(--text);line-height:1.3}
+.isn-item.has .isn-item-text{color:var(--ok)}
+
+.isn-cta{
+  padding:16px 28px 20px;border-top:1px solid var(--line-soft);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.isn-cta-text{font-size:.84rem;color:var(--text-2);font-weight:600}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:18px;overflow:hidden}
+.card-head{padding:18px 22px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.card-title{font-size:.95rem;font-weight:800;color:var(--text);letter-spacing:-.2px}
+.card-sub{font-size:.76rem;color:var(--muted);margin-top:2px}
+
+/* TRAINING REQUEST ROWS */
+.req-row{
+  padding:16px 22px;border-top:1px solid var(--line-soft);
+}
+.req-row:first-of-type{border-top:none}
+.req-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.req-from{font-size:.92rem;font-weight:800;color:var(--text);letter-spacing:-.1px}
+.req-from-sub{font-size:.76rem;color:var(--muted);margin-top:3px;font-weight:500}
+.req-status{
+  font-size:.68rem;font-weight:800;padding:4px 9px;border-radius:5px;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0;
+}
+.req-status.sent{background:var(--warn-soft);color:var(--warn)}
+.req-status.completed{background:var(--ok-soft);color:var(--ok)}
+
+.req-certs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.req-cert{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.74rem;font-weight:700;padding:5px 10px;border-radius:6px;
+  background:var(--line-soft);color:var(--text-2);border:1px solid var(--line);
+}
+.req-cert.have{background:var(--ok-soft);color:var(--ok);border-color:#bbf7d0}
+.req-cert.have::before{content:'✓';font-weight:800}
+.req-cert.missing::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--warn);display:inline-block}
+
+/* PROVIDER ROWS */
+.provider-row{
+  display:flex;align-items:center;gap:14px;padding:16px 22px;
+  border-top:1px solid var(--line-soft);transition:background .15s;
+}
+.provider-row:first-of-type{border-top:none}
+.provider-row:hover{background:var(--line-soft)}
+.prov-ico{
+  width:42px;height:42px;border-radius:9px;background:var(--blue-soft);color:var(--blue);
+  display:grid;place-items:center;flex-shrink:0;border:1px solid #c7d2fe;
+}
+.prov-ico svg{width:20px;height:20px}
+.prov-info{flex:1;min-width:0}
+.prov-name{font-size:.92rem;font-weight:800;color:var(--text);letter-spacing:-.1px;line-height:1.3;margin-bottom:3px}
+.prov-desc{font-size:.78rem;color:var(--text-2);line-height:1.45;margin-bottom:6px}
+.prov-tags{display:flex;flex-wrap:wrap;gap:5px}
+.prov-tag{font-size:.66rem;font-weight:700;color:var(--muted);background:var(--line-soft);padding:2px 7px;border-radius:4px;letter-spacing:.2px}
+.prov-link{
+  font-size:.78rem;font-weight:700;color:var(--blue);text-decoration:none;
+  padding:7px 12px;border:1.5px solid var(--line);border-radius:7px;
+  display:inline-flex;align-items:center;gap:5px;transition:all .15s;flex-shrink:0;
+}
+.prov-link:hover{border-color:var(--blue);background:var(--blue-soft)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;border:1.5px solid transparent;text-decoration:none;transition:all .15s}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:var(--blue-mid)}
+.btn-ghost{background:#fff;color:var(--text-2);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--light);color:var(--text);background:var(--line-soft)}
+
+.empty{padding:40px 22px;text-align:center;color:var(--muted)}
+.empty p{font-size:.92rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.empty span{font-size:.82rem}
+
+@media(max-width:700px){
+  .sidebar{width:64px}
+  .sb-brand,.sb-link span:not(.sb-badge),.sb-uname,.sb-urole,.sb-arrow,.sb-label{display:none}
+  .sb-link{justify-content:center;padding:9px 0}
+  .sb-user{justify-content:center;padding:0}
+  .main{padding:20px}
+  .isn-head{padding:20px}
+  .isn-ring{width:72px;height:72px}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <div class="sb-brand">Rig<span>Pass</span></div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section">
+      <div class="sb-label">Main</div>
+      <a class="sb-link" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="sb-link" href="jobs.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>Browse Jobs</span>
+      </a>
+      <a class="sb-link" href="my-applications.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>My Applications</span>
+      </a>
+      <a class="sb-link" href="certifications.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Safety Tickets</span>
+      </a>
+      <a class="sb-link active" href="training.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.65 3.36 3 6 3s6-1.35 6-3v-5"/></svg>
+        <span>Training</span>
+        <span class="sb-badge" id="nav-req-count" style="display:none">0</span>
+      </a>
+      <a class="sb-link" href="profile.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>My Profile</span>
+      </a>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">Account</div>
+      <a class="sb-link" href="settings.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/></svg>
+        <span>Settings</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="sb-bottom">
+    <div class="sb-user" onclick="toggleUserMenu(event)">
+      <div class="sb-avatar" id="sb-avatar">--</div>
+      <div style="min-width:0">
+        <div class="sb-uname" id="sb-uname">Loading...</div>
+        <div class="sb-urole" id="sb-urole">—</div>
+      </div>
+      <svg class="sb-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <div id="user-menu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.12);overflow:hidden;z-index:200">
+        <button onclick="signOut()" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:.85rem;color:var(--danger);background:#fff;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+  <div class="page-head">
+    <h1>Training & ISN-Readiness</h1>
+    <p>Get your safety credentials in order. ISN-compliant workers are hired faster by Suncor, Cenovus, Imperial Oil, and other major operators.</p>
+  </div>
+
+  <!-- ISN COMPLIANCE -->
+  <div class="isn-card">
+    <div class="isn-head">
+      <div class="isn-ring" id="isn-ring" style="--pct:0%">
+        <div class="isn-ring-num" id="isn-pct">0%</div>
+      </div>
+      <div class="isn-head-info">
+        <span class="isn-tag">ISN-Readiness</span>
+        <div class="isn-title" id="isn-title">Loading…</div>
+        <div class="isn-sub" id="isn-sub">Checking your safety tickets against industry-standard requirements…</div>
+      </div>
+      <span class="isn-status" id="isn-status">—</span>
+    </div>
+    <div class="isn-grid" id="isn-grid">
+      <!-- core certs render here -->
+    </div>
+    <div class="isn-cta" id="isn-cta" style="display:none">
+      <div class="isn-cta-text" id="isn-cta-text"></div>
+      <a href="#training-providers" class="btn btn-blue">
+        Find Training
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- EMPLOYER TRAINING REQUESTS -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Training Requested by Employers</div>
+        <div class="card-sub">Specific certifications employers want you to have before a placement</div>
+      </div>
+    </div>
+    <div id="requests-list">
+      <div class="empty"><span>Loading requests…</span></div>
+    </div>
+  </div>
+
+  <!-- TRAINING PROVIDERS -->
+  <div class="card" id="training-providers">
+    <div class="card-head">
+      <div>
+        <div class="card-title">Where to Get Training</div>
+        <div class="card-sub">Verified training providers in Western Canada</div>
+      </div>
+    </div>
+    <div id="providers-list">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+</main>
+
+<script>
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ════════════════════════════════════════════════════════════════════
+// CORE ISN-READY CERTIFICATIONS
+// These are the safety tickets most operators require to hire on site.
+// Source: common ISNetworld + Energy Safety Canada baseline.
+// ════════════════════════════════════════════════════════════════════
+const CORE_CERTS = [
+  { name: 'H2S Alive', aliases: ['h2s alive','h2s','hydrogen sulfide'] },
+  { name: 'WHMIS 2018', aliases: ['whmis','whmis 2018'] },
+  { name: 'Standard First Aid + CPR', aliases: ['first aid','standard first aid','cpr','first aid level 1','first aid level 2','first aid level 3','standard first aid + cpr'] },
+  { name: 'TDG (Transportation of Dangerous Goods)', aliases: ['tdg','transportation of dangerous goods'] },
+  { name: 'Ground Disturbance Level II', aliases: ['ground disturbance','ground disturbance level i','ground disturbance level ii'] },
+  { name: 'Fall Protection', aliases: ['fall protection','working at heights'] },
+  { name: 'Confined Space Entry', aliases: ['confined space','confined space entry'] },
+  { name: 'Energy Isolation / LOTO', aliases: ['energy isolation','loto','lockout tagout','lockout/tagout'] }
+];
+
+// ════════════════════════════════════════════════════════════════════
+// TRAINING PROVIDERS — Western Canada
+// ════════════════════════════════════════════════════════════════════
+const PROVIDERS = [
+  {
+    name: 'Energy Safety Canada',
+    desc: 'Industry-owned organization. Standard-setter for H2S Alive, Ground Disturbance, and Common Safety Orientation (CSO) across Canada.',
+    tags: ['H2S Alive','Ground Disturbance','CSO'],
+    url: 'https://www.energysafetycanada.com'
+  },
+  {
+    name: 'BIS Safety Software',
+    desc: 'Online courses (WHMIS, TDG, Fall Protection, Confined Space) plus in-person H2S Alive in Edmonton, Calgary, Red Deer.',
+    tags: ['WHMIS','TDG','Fall Protection','Online'],
+    url: 'https://www.bissafety.com'
+  },
+  {
+    name: 'SAIT Continuing Education',
+    desc: 'Calgary-based. Recognized provider for First Aid, Confined Space Entry, and trade-specific safety training.',
+    tags: ['First Aid','Confined Space','Trade-Specific'],
+    url: 'https://www.sait.ca'
+  },
+  {
+    name: 'NAIT Corporate & International Training',
+    desc: 'Edmonton-based. Strong programs for Ground Disturbance II, Fall Protection, and energy-isolation/LOTO.',
+    tags: ['Ground Disturbance','Fall Protection','LOTO'],
+    url: 'https://www.nait.ca'
+  },
+  {
+    name: 'St. John Ambulance',
+    desc: 'Standard First Aid + CPR Level C across all major Alberta and BC centres. Required by most oilfield employers.',
+    tags: ['First Aid','CPR','In-Person'],
+    url: 'https://www.sja.ca'
+  },
+  {
+    name: 'Red Cross Training',
+    desc: 'Alternative to St. John for First Aid + CPR. Equally recognized by ISNetworld and operators.',
+    tags: ['First Aid','CPR'],
+    url: 'https://www.redcross.ca'
+  },
+  {
+    name: 'Pure Safety',
+    desc: 'Fort McMurray and Edmonton. H2S Alive, Confined Space Entry, Fall Protection, Common Safety Orientation.',
+    tags: ['H2S Alive','Confined Space','Fort McMurray'],
+    url: 'https://www.puresafety.ca'
+  },
+  {
+    name: 'Metro Safety Training',
+    desc: 'BC-focused (Vancouver, Surrey). Online and classroom for WHMIS, TDG, and Fall Protection.',
+    tags: ['WHMIS','TDG','BC','Online'],
+    url: 'https://www.metrosafety.ca'
+  }
+];
+
+let currentUser = null;
+let myCerts = [];
+
+async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+  currentUser = session.user;
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if(profile?.is_admin){ window.location.href = 'admin.html'; return; }
+  if(profile?.role === 'employer'){ window.location.href = 'employer-dashboard.html'; return; }
+
+  // Sidebar
+  if(profile){
+    const first = profile.first_name || '';
+    const last = profile.last_name || '';
+    const fullName = (first + ' ' + last).trim() || currentUser.email.split('@')[0];
+    const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || currentUser.email.substring(0,2).toUpperCase();
+    document.getElementById('sb-avatar').textContent = initials;
+    document.getElementById('sb-uname').textContent = fullName;
+    document.getElementById('sb-urole').textContent = (profile.trade || 'Worker') + ' · ' + (profile.plan === 'pro' ? 'Pro' : 'Free');
+  }
+
+  await Promise.all([loadCerts(), loadRequests()]);
+  renderISN();
+  renderProviders();
+}
+
+async function loadCerts(){
+  const { data } = await sb.from('certifications').select('*').eq('worker_id', currentUser.id);
+  myCerts = (data || []).filter(c => !c.expiry_date || new Date(c.expiry_date) > new Date());
+}
+
+async function loadRequests(){
+  const { data } = await sb.from('training_requirements')
+    .select('*, employer:profiles!training_requirements_employer_id_fkey(company_name, first_name, last_name)')
+    .eq('worker_id', currentUser.id)
+    .order('created_at', { ascending: false });
+  const reqs = data || [];
+
+  const badge = document.getElementById('nav-req-count');
+  const pending = reqs.filter(r => r.status === 'sent').length;
+  if(pending > 0){ badge.textContent = pending; badge.style.display = 'inline-flex'; }
+
+  renderRequests(reqs);
+}
+
+function hasIt(certName){
+  const lc = certName.toLowerCase();
+  return myCerts.some(c => {
+    const my = c.name.toLowerCase();
+    return my === lc || my.includes(lc) || lc.includes(my);
+  });
+}
+
+function hasCore(coreCert){
+  const myLower = myCerts.map(c => c.name.toLowerCase());
+  return coreCert.aliases.some(alias => myLower.some(my => my === alias || my.includes(alias) || alias.includes(my)));
+}
+
+function renderISN(){
+  const grid = document.getElementById('isn-grid');
+  const hasList = CORE_CERTS.map(c => ({ ...c, has: hasCore(c) }));
+  const haveCount = hasList.filter(c => c.has).length;
+  const pct = Math.round((haveCount / CORE_CERTS.length) * 100);
+
+  document.getElementById('isn-pct').textContent = pct + '%';
+  document.getElementById('isn-ring').style.setProperty('--pct', pct + '%');
+
+  let title, sub, statusCls, statusLabel;
+  if(pct === 100){
+    title = "You're fully ISN-Ready";
+    sub = "All core safety tickets are valid. You're ready to be hired by major operators on ISNetworld.";
+    statusCls = 'ok';
+    statusLabel = '✓ Compliant';
+  } else if(pct >= 60){
+    title = `Almost there — ${CORE_CERTS.length - haveCount} ticket${CORE_CERTS.length - haveCount === 1 ? '' : 's'} away`;
+    sub = "You have most of the core safety tickets. Finishing the remaining ones will unlock all major operator postings.";
+    statusCls = 'warn';
+    statusLabel = 'Partial';
+  } else {
+    title = `Get ${CORE_CERTS.length - haveCount} more tickets to be ISN-Ready`;
+    sub = "ISN-compliant workers are hired faster. Most major operators require all 8 core safety tickets before site access.";
+    statusCls = 'danger';
+    statusLabel = 'Not Ready';
+  }
+  document.getElementById('isn-title').textContent = title;
+  document.getElementById('isn-sub').textContent = sub;
+  const statusEl = document.getElementById('isn-status');
+  statusEl.textContent = statusLabel;
+  statusEl.className = 'isn-status ' + statusCls;
+
+  grid.innerHTML = hasList.map(c => `
+    <div class="isn-item ${c.has ? 'has' : ''}">
+      <div class="isn-item-ico">
+        ${c.has
+          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>'
+          : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+        }
+      </div>
+      <div class="isn-item-text">${c.name}</div>
+    </div>
+  `).join('');
+
+  // CTA
+  if(pct < 100){
+    const missing = hasList.filter(c => !c.has).slice(0,3).map(c => c.name).join(', ');
+    document.getElementById('isn-cta-text').innerHTML = `<strong>Missing:</strong> ${missing}${hasList.filter(c=>!c.has).length > 3 ? '…' : ''}`;
+    document.getElementById('isn-cta').style.display = 'flex';
+  } else {
+    document.getElementById('isn-cta').style.display = 'none';
+  }
+}
+
+function renderRequests(reqs){
+  const list = document.getElementById('requests-list');
+  if(reqs.length === 0){
+    list.innerHTML = `<div class="empty">
+      <p>No training requests yet</p>
+      <span>When an employer wants you to complete specific training before hire, it'll appear here.</span>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = reqs.map(r => {
+    const employer = r.employer || {};
+    const company = employer.company_name || ((employer.first_name || '') + ' ' + (employer.last_name || '')).trim() || 'Employer';
+    const requested = r.required_certs || [];
+    const completed = requested.filter(hasIt);
+    const stillNeed = requested.filter(c => !hasIt(c));
+    const status = stillNeed.length === 0 ? 'completed' : (r.status || 'sent');
+
+    return `<div class="req-row">
+      <div class="req-top">
+        <div>
+          <div class="req-from">${company}</div>
+          <div class="req-from-sub">${r.job_name || 'Upcoming project'} · Requested ${timeAgo(r.created_at)}</div>
+        </div>
+        <span class="req-status ${status}">${status === 'completed' ? '✓ All Complete' : `${completed.length}/${requested.length} done`}</span>
+      </div>
+      <div class="req-certs">
+        ${requested.map(c => `<span class="req-cert ${hasIt(c) ? 'have' : 'missing'}">${c}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderProviders(){
+  const list = document.getElementById('providers-list');
+  list.innerHTML = PROVIDERS.map(p => `
+    <div class="provider-row">
+      <div class="prov-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.65 3.36 3 6 3s6-1.35 6-3v-5"/></svg>
+      </div>
+      <div class="prov-info">
+        <div class="prov-name">${p.name}</div>
+        <div class="prov-desc">${p.desc}</div>
+        <div class="prov-tags">${p.tags.map(t => `<span class="prov-tag">${t}</span>`).join('')}</div>
+      </div>
+      <a href="${p.url}" target="_blank" rel="noopener" class="prov-link">
+        Visit
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+  `).join('');
+}
+
+function timeAgo(dateStr){
+  if(!dateStr) return 'recently';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if(mins < 1) return 'just now';
+  if(mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if(hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if(days < 30) return days + 'd ago';
+  return new Date(dateStr).toLocaleDateString('en-CA', { month:'short', day:'numeric' });
+}
+
+function toggleUserMenu(e){
+  e.stopPropagation();
+  const menu = document.getElementById('user-menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+async function signOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('user-menu');
+  if(menu && !e.target.closest('.sb-user')) menu.style.display = 'none';
+});
+
+init();
+</script>
+</body>
+</html>
