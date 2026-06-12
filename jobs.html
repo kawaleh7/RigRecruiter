@@ -378,14 +378,17 @@ async function loadData(){
   // My saved jobs
   await loadSavedJobs();
 
-  // All active jobs with employer profile (for company name)
+  // All active jobs with employer profile (for company name + verification)
   const { data: jobs } = await sb
     .from('jobs')
-    .select('*, employer:profiles!jobs_employer_id_fkey(company_name, first_name, last_name, city, province)')
+    .select('*, employer:profiles!jobs_employer_id_fkey(company_name, first_name, last_name, city, province, verification_status)')
     .eq('status', 'active')
     .order('published_at', { ascending: false });
 
-  allJobs = (jobs || []).map(job => ({
+  // VERIFICATION ENFORCEMENT: workers only see jobs from approved employers
+  const verifiedJobs = (jobs || []).filter(j => j.employer && j.employer.verification_status === 'approved');
+
+  allJobs = verifiedJobs.map(job => ({
     ...job,
     matchPct: calculateMatch(job.required_certs || []),
     appliedRecord: myApplications.find(a => a.job_id === job.id) || null

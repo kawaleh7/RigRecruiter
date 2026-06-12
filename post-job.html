@@ -655,10 +655,7 @@ async function init(){
   }
 
   if(profile.verification_status === 'pending' && !profile.is_admin){
-    if(!confirm('Your employer account is still pending verification. You can save a draft, but workers won\'t see your posting until you\'re approved.\n\nContinue anyway?')){
-      window.location.href = 'employer-dashboard.html';
-      return;
-    }
+    alert('Heads up: your employer account is awaiting verification (usually under 24 hours).\n\nYou can build your posting and save it as a draft now — publishing unlocks the moment you\'re approved.');
   }
 
   // Pre-fill company defaults
@@ -987,6 +984,14 @@ async function saveDraft(silent = false){
 }
 
 async function publishJob(){
+  // VERIFICATION ENFORCEMENT: only approved employers can publish
+  if(currentProfile.verification_status !== 'approved' && !currentProfile.is_admin){
+    alert('Your employer account is awaiting verification by our team.\n\nYour job has been saved as a draft — the moment you\'re approved, come back and hit Publish. Verification usually takes less than 24 hours.');
+    await saveDraft();
+    window.location.href = 'postings.html';
+    return;
+  }
+
   if(!validateStep(1) || !validateStep(2) || !validateStep(3)) return;
   if(!formData.description || formData.description.length < 50){
     if(!confirm('Your description is short. Postings with detailed descriptions get 3× more qualified applicants. Publish anyway?')) return;

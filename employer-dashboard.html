@@ -252,6 +252,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
     <p id="greet-msg">Loading your dashboard…</p>
   </div>
 
+  <!-- VERIFICATION STATUS BANNER (shown only when not approved) -->
+  <div id="verif-banner" style="display:none;margin-bottom:22px;padding:16px 20px;border-radius:11px;border:1px solid;align-items:flex-start;gap:13px">
+    <svg id="verif-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>
+      <div id="verif-title" style="font-size:.92rem;font-weight:800;margin-bottom:3px"></div>
+      <div id="verif-msg" style="font-size:.82rem;line-height:1.5;font-weight:500"></div>
+    </div>
+  </div>
+
   <div class="topbar-actions">
     <a href="post-job.html" class="btn btn-blue">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -329,6 +338,24 @@ async function init(){
 
   if(profile.role !== 'employer'){ window.location.href = 'dashboard.html'; return; }
   if(profile.is_admin){ window.location.href = 'admin.html'; return; }
+
+  // VERIFICATION STATUS BANNER
+  const banner = document.getElementById('verif-banner');
+  if(profile.verification_status === 'pending'){
+    banner.style.display = 'flex';
+    banner.style.background = '#fefce8';
+    banner.style.borderColor = '#fde68a';
+    banner.style.color = '#a16207';
+    document.getElementById('verif-title').textContent = 'Account verification in progress';
+    document.getElementById('verif-msg').textContent = 'Our team is reviewing your company details — usually under 24 hours. You can build job postings and save drafts now; publishing unlocks the moment you\'re approved.';
+  } else if(profile.verification_status === 'rejected'){
+    banner.style.display = 'flex';
+    banner.style.background = '#fef2f2';
+    banner.style.borderColor = '#fda4af';
+    banner.style.color = '#b91c1c';
+    document.getElementById('verif-title').textContent = 'Verification not approved';
+    document.getElementById('verif-msg').textContent = (profile.verification_note ? 'Reason: ' + profile.verification_note + '. ' : '') + 'Update your company information in Settings → Company, then contact us to re-review.';
+  }
 
   const companyName = profile.company_name || ((profile.first_name || '') + ' ' + (profile.last_name || '')).trim();
   const display = companyName || currentUser.email.split('@')[0];
