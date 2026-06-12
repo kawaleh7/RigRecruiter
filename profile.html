@@ -489,6 +489,19 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
             </select>
           </div>
           <div class="field">
+            <label>Trade Level</label>
+            <select id="edit-level">
+              <option value="">Select…</option>
+                <option>1st Year Apprentice</option>
+                <option>2nd Year Apprentice</option>
+                <option>3rd Year Apprentice</option>
+                <option>4th Year Apprentice</option>
+                <option>Journeyman</option>
+                <option>Red Seal Journeyman</option>
+                <option>Not in a trade program</option>
+            </select>
+          </div>
+          <div class="field">
             <label>Experience (years)</label>
             <input type="number" id="edit-experience" min="0" max="60">
           </div>
@@ -606,7 +619,7 @@ async function loadProfile(){
 
   if(profile.role === 'worker'){
     const exp = profile.experience_years ? `${profile.experience_years} year${profile.experience_years === 1 ? '' : 's'} experience` : 'New on RigPass';
-    document.getElementById('ph-role').textContent = `${profile.trade || 'Worker'} · ${exp}`;
+    document.getElementById('ph-role').textContent = [profile.trade || 'Worker', profile.trade_level, exp].filter(Boolean).join(' · ');
   } else {
     document.getElementById('ph-role').textContent = profile.company_name || 'Employer';
   }
@@ -829,6 +842,7 @@ function openEditModal(){
     document.getElementById('worker-only-fields').style.display = 'block';
     document.getElementById('employer-only-fields').style.display = 'none';
     document.getElementById('edit-trade').value = currentProfile.trade || '';
+    document.getElementById('edit-level').value = currentProfile.trade_level || '';
     document.getElementById('edit-experience').value = currentProfile.experience_years || '';
     document.getElementById('edit-availability').value = currentProfile.availability || '';
     document.getElementById('edit-pay-min').value = currentProfile.expected_pay_min || '';
@@ -863,6 +877,7 @@ async function saveProfile(){
 
   if(currentProfile.role === 'worker'){
     updates.trade = document.getElementById('edit-trade').value || null;
+    updates.trade_level = document.getElementById('edit-level').value || null;
     const exp = document.getElementById('edit-experience').value;
     updates.experience_years = exp ? parseInt(exp) : null;
     updates.availability = document.getElementById('edit-availability').value || null;

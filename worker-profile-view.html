@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RigPass — Worker Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a;min-height:100vh}
+:root{
+  --blue:#1e3a8a;--blue-mid:#1e40af;--blue-lt:#dbeafe;--blue-border:#93c5fd;--navy:#0a1228;
+  --border:#e2e8f0;--text:#0f172a;--muted:#475569;--light:#94a3b8;
+  --green:#166534;--green-bg:#f0fdf4;--red:#991b1b;--red-bg:#fef2f2;
+  --amber:#92400e;--amber-bg:#fefce8;--gold:#b8923a;--gold-border:#c9963a;
+}
+
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand-logo{width:32px;height:32px;background:var(--blue);border-radius:8px;display:grid;place-items:center}
+.brand-logo svg{width:15px;height:15px;fill:#fff}
+.brand-text{font-size:1rem;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.brand-text span{color:var(--blue)}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:7px}
+.back-link:hover{background:#f1f5f9;color:var(--text)}
+
+.container{max-width:960px;margin:24px auto;padding:0 24px}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);
+  border-radius:16px;padding:32px;color:#fff;margin-bottom:18px;position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;inset:0;opacity:.05;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:36px 36px}
+.hero::after{content:'';position:absolute;top:-50px;right:-50px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(184,146,58,.18) 0%,transparent 70%)}
+.hero-inner{position:relative;z-index:2;display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+.hero-avatar{width:80px;height:80px;border-radius:18px;background:var(--gold);color:var(--navy);display:grid;place-items:center;font-size:1.6rem;font-weight:800;flex-shrink:0;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.hero-info{flex:1;min-width:200px}
+.hero-name{font-size:1.55rem;font-weight:800;color:#fff;letter-spacing:-.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:5px}
+.hero-verified{font-size:.66rem;color:#86efac;background:rgba(22,101,52,.3);border:1px solid rgba(134,239,172,.4);padding:3px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px;font-weight:800}
+.hero-role{font-size:1rem;color:rgba(255,255,255,.85);font-weight:600;margin-bottom:12px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:.84rem;color:rgba(255,255,255,.7)}
+.hero-meta span{display:inline-flex;align-items:center;gap:6px}
+
+.hero-actions{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 18px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:700;cursor:pointer;border:1.5px solid transparent;text-decoration:none;transition:all .15s}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:hover{background:#d4a857}
+.btn-white-out{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.25)}
+.btn-white-out:hover{background:rgba(255,255,255,.2)}
+
+/* BODY */
+.body-grid{display:grid;grid-template-columns:1fr 320px;gap:18px}
+@media(max-width:880px){.body-grid{grid-template-columns:1fr}}
+
+.card{background:#fff;border:1.5px solid var(--gold-border);border-radius:12px;padding:22px 24px;margin-bottom:18px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:1rem;font-weight:800;color:var(--text);letter-spacing:-.2px}
+.card-sub{font-size:.74rem;color:var(--muted);margin-top:2px}
+
+.bio{font-size:.9rem;line-height:1.65;color:var(--muted)}
+
+.skill{display:inline-flex;align-items:center;background:var(--blue-lt);color:var(--blue);border:1px solid var(--blue-border);padding:5px 11px;border-radius:6px;font-size:.78rem;font-weight:700;margin:0 5px 5px 0}
+
+/* CERTS */
+.cert-row{display:flex;align-items:center;gap:13px;padding:11px 0;border-top:1px solid #f1f5f9}
+.cert-row:first-child{border-top:none}
+.cert-ico{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;flex-shrink:0}
+.cert-name{font-size:.88rem;font-weight:700;color:var(--text)}
+.cert-meta{font-size:.74rem;color:var(--muted);margin-top:2px}
+.tag{margin-left:auto;padding:3px 10px;border-radius:5px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0}
+.tag.tg{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
+.tag.ty{background:var(--amber-bg);color:var(--amber);border:1px solid #fde047}
+.tag.tr{background:var(--red-bg);color:var(--red);border:1px solid #fda4af}
+
+/* WORK HISTORY */
+.work-item{display:flex;gap:14px;padding:14px 0;border-top:1px solid #f1f5f9}
+.work-item:first-child{border-top:none;padding-top:0}
+.work-ico{width:42px;height:42px;border-radius:9px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:.78rem;font-weight:800;flex-shrink:0}
+.work-title{font-size:.92rem;font-weight:700;color:var(--text)}
+.work-co{font-size:.8rem;color:var(--muted);margin-top:2px}
+.work-dates{font-size:.74rem;color:var(--light);margin-top:2px;font-weight:600}
+.work-desc{font-size:.82rem;color:var(--muted);line-height:1.55;margin-top:6px}
+
+/* SIDE */
+.contact-card{background:linear-gradient(135deg,#1e3a8a 0%,#0a1228 100%);color:#fff;border-color:rgba(184,146,58,.4)}
+.contact-card .card-title{color:#fff}
+.contact-row{padding:10px 0;border-top:1px solid rgba(255,255,255,.08)}
+.contact-row:first-of-type{border-top:none}
+.contact-label{font-size:.7rem;color:rgba(255,255,255,.55);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.contact-value{font-size:.92rem;color:#fff;font-weight:700;word-break:break-all}
+.contact-value a{color:#fcd34d;text-decoration:none}
+.contact-value a:hover{text-decoration:underline}
+
+.locked-card{background:#fef2f2;border:1.5px dashed #fda4af;color:var(--red);padding:18px;border-radius:11px;text-align:center}
+.locked-card svg{margin:0 auto 8px;display:block;color:var(--red);opacity:.6}
+.locked-card .lt{font-size:.86rem;font-weight:800;margin-bottom:4px}
+.locked-card .ls{font-size:.78rem;color:#7f1d1d;line-height:1.45}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.stat-mini{background:var(--off);border:1px solid var(--border);border-radius:9px;padding:11px 12px}
+.stat-mini-label{font-size:.66rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.stat-mini-value{font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:-.2px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="employer-dashboard.html" class="brand">
+    <div class="brand-logo"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+    <span class="brand-text">Rig<span>Pass</span></span>
+  </a>
+  <a href="javascript:history.back()" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </a>
+</div>
+
+<div class="container">
+  <div id="loading" style="text-align:center;padding:80px 22px;color:var(--light)">Loading worker profile...</div>
+  <div id="content" style="display:none"></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const params = new URLSearchParams(window.location.search);
+const workerId = params.get('id');
+
+async function init(){
+  if(!workerId){
+    document.getElementById('loading').innerHTML = '<p style="color:var(--red);font-weight:700">No worker ID provided.</p>';
+    return;
+  }
+
+  // Auth gate: must be employer or admin
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'login.html'; return; }
+
+  const { data: viewerProfile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+  if(!viewerProfile){ window.location.href = 'login.html'; return; }
+
+  const isEmployer = viewerProfile.role === 'employer';
+  const isAdmin = viewerProfile.is_admin;
+  if(!isEmployer && !isAdmin){
+    document.getElementById('loading').innerHTML = '<p style="color:var(--red);font-weight:700">This page is only available to verified employers.</p>';
+    return;
+  }
+
+  const isVerifiedEmployer = isEmployer && viewerProfile.verification_status === 'approved';
+
+  // Fetch worker profile
+  const { data: worker, error } = await sb.from('profiles').select('*').eq('id', workerId).eq('role', 'worker').single();
+  if(error || !worker){
+    document.getElementById('loading').innerHTML = '<p style="color:var(--muted);font-weight:600">Worker profile not found.</p>';
+    return;
+  }
+
+  if(!worker.is_public && !isAdmin){
+    document.getElementById('loading').innerHTML = '<p style="color:var(--muted);font-weight:600">This worker has set their profile to private.</p>';
+    return;
+  }
+
+  // Fetch related data
+  const [certsRes, historyRes] = await Promise.all([
+    sb.from('certifications').select('*').eq('worker_id', workerId).order('expiry_date', { ascending: true }),
+    sb.from('work_history').select('*').eq('worker_id', workerId).order('start_date', { ascending: false })
+  ]);
+
+  const certs = certsRes.data || [];
+  const history = historyRes.data || [];
+
+  renderProfile(worker, certs, history, isVerifiedEmployer || isAdmin);
+}
+
+function renderProfile(worker, certs, history, canSeeContact){
+  const first = worker.first_name || '';
+  const last = worker.last_name || '';
+  const fullName = (first + ' ' + last).trim() || 'Worker';
+  const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || 'WK';
+  const role = [worker.trade || 'Worker', worker.trade_level].filter(Boolean).join(' · ');
+  const expLabel = worker.experience_years ? `${worker.experience_years} year${worker.experience_years === 1 ? '' : 's'} experience` : 'New on RigPass';
+  const loc = [worker.city, worker.province].filter(Boolean).join(', ') || 'Location not set';
+
+  const availMap = {
+    'available_now': 'Available Now',
+    'within_2_weeks': 'Available in 2 weeks',
+    'within_30_days': 'Available in 30 days',
+    'not_available': 'Not currently available'
+  };
+  const avail = availMap[worker.availability] || '—';
+
+  // Cert status counts
+  const validCerts = certs.filter(c => !c.expiry_date || new Date(c.expiry_date) > new Date()).length;
+
+  // Build HTML
+  const html = `
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="hero-avatar">${initials}</div>
+        <div class="hero-info">
+          <div class="hero-name">${fullName}${worker.is_verified ? '<span class="hero-verified">✓ Verified</span>' : ''}</div>
+          <div class="hero-role">${role} · ${expLabel}</div>
+          <div class="hero-meta">
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${loc}</span>
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${avail}</span>
+            ${worker.expected_pay_min ? `<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>$${worker.expected_pay_min}${worker.expected_pay_max ? '–$' + worker.expected_pay_max : '+'}/hr expected</span>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="body-grid">
+      <div>
+        ${worker.bio ? `<div class="card">
+          <div class="card-head"><div class="card-title">About</div></div>
+          <div class="bio">${worker.bio}</div>
+        </div>` : ''}
+
+        ${(worker.skills && worker.skills.length > 0) ? `<div class="card">
+          <div class="card-head"><div class="card-title">Skills & Specializations</div></div>
+          <div>${worker.skills.map(s => `<span class="skill">${s}</span>`).join('')}</div>
+        </div>` : ''}
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Safety Certifications</div>
+              <div class="card-sub">${validCerts} of ${certs.length} currently valid</div>
+            </div>
+          </div>
+          ${certs.length === 0
+            ? '<div style="padding:14px 0;color:var(--light);font-size:.85rem;font-style:italic">No certifications added yet</div>'
+            : certs.map(c => {
+                const days = c.expiry_date ? Math.ceil((new Date(c.expiry_date) - new Date()) / (1000*60*60*24)) : null;
+                const status = days === null ? 'valid' : days < 0 ? 'expired' : days <= 60 ? 'expiring' : 'valid';
+                const tagCls = status === 'valid' ? 'tg' : status === 'expiring' ? 'ty' : 'tr';
+                const label = status === 'valid' ? 'Valid' : status === 'expiring' ? 'Expiring' : 'Expired';
+                const bg = status === 'valid' ? 'var(--green-bg)' : status === 'expiring' ? 'var(--amber-bg)' : 'var(--red-bg)';
+                const stroke = status === 'valid' ? 'var(--green)' : status === 'expiring' ? 'var(--amber)' : 'var(--red)';
+                const expLabel = c.expiry_date
+                  ? (days < 0 ? `Expired ${Math.abs(days)} days ago` : `Expires in ${days} days`)
+                  : 'No expiry date';
+                return `<div class="cert-row">
+                  <div class="cert-ico" style="background:${bg}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <div style="flex:1">
+                    <div class="cert-name">${c.name}</div>
+                    <div class="cert-meta">${expLabel}</div>
+                  </div>
+                  <span class="tag ${tagCls}">${label}</span>
+                </div>`;
+              }).join('')
+          }
+        </div>
+
+        ${history.length > 0 ? `<div class="card">
+          <div class="card-head"><div class="card-title">Work History</div></div>
+          ${history.map((h, idx) => {
+            const COLORS = ['#1e3a8a','#065f46','#0369a1','#475569'];
+            const initials = (h.company || 'CO').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+            const bg = COLORS[idx % COLORS.length];
+            const start = h.start_date ? new Date(h.start_date).toLocaleDateString('en-CA',{month:'short',year:'numeric'}) : '?';
+            const end = h.is_current ? 'Present' : (h.end_date ? new Date(h.end_date).toLocaleDateString('en-CA',{month:'short',year:'numeric'}) : '?');
+            return `<div class="work-item">
+              <div class="work-ico" style="background:${bg}">${initials}</div>
+              <div style="flex:1">
+                <div class="work-title">${h.title}</div>
+                <div class="work-co">${h.company}${h.location ? ' — ' + h.location : ''}</div>
+                <div class="work-dates">${start} – ${end}${h.employment_type ? ' · ' + h.employment_type : ''}</div>
+                ${h.description ? `<div class="work-desc">${h.description}</div>` : ''}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>` : ''}
+      </div>
+
+      <!-- SIDE -->
+      <div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Quick Stats</div></div>
+          <div class="stat-grid">
+            <div class="stat-mini">
+              <div class="stat-mini-label">Experience</div>
+              <div class="stat-mini-value">${worker.experience_years || 0} yr${worker.experience_years === 1 ? '' : 's'}</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-mini-label">Valid Certs</div>
+              <div class="stat-mini-value" style="color:var(--green)">${validCerts}</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-mini-label">Jobs Listed</div>
+              <div class="stat-mini-value">${history.length}</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-mini-label">Skills</div>
+              <div class="stat-mini-value">${(worker.skills || []).length}</div>
+            </div>
+          </div>
+        </div>
+
+        ${canSeeContact
+          ? `<button class="btn btn-blue" style="width:100%;margin-bottom:14px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:700;cursor:pointer;border:none;background:#1e3a8a;color:#fff" onclick="inviteToApply()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Invite to Apply
+            </button>`
+          : ''}
+
+        ${canSeeContact && (worker.show_contact !== false)
+          ? `<div class="card contact-card">
+              <div class="card-head"><div class="card-title">Contact</div></div>
+              <div class="contact-row">
+                <div class="contact-label">Email</div>
+                <div class="contact-value"><a href="mailto:${worker.email}?subject=Job opportunity from RigPass">${worker.email}</a></div>
+              </div>
+              ${worker.phone ? `<div class="contact-row">
+                <div class="contact-label">Phone</div>
+                <div class="contact-value"><a href="tel:${worker.phone}">${worker.phone}</a></div>
+              </div>` : ''}
+              ${worker.resume_url ? `<div class="contact-row">
+                <div class="contact-label">Resume</div>
+                <div class="contact-value"><a href="javascript:viewResume()">Download PDF</a></div>
+              </div>` : ''}
+            </div>`
+          : `<div class="locked-card">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <div class="lt">Contact info hidden</div>
+              <div class="ls">${worker.show_contact === false ? 'This worker has hidden their contact details.' : 'Get your employer account verified to see worker contact information.'}</div>
+            </div>`
+        }
+      </div>
+    </div>
+  `;
+
+  document.getElementById('loading').style.display = 'none';
+  const content = document.getElementById('content');
+  content.innerHTML = html;
+  content.style.display = 'block';
+
+  window._workerResumeUrl = worker.resume_url;
+  window._workerResumeFilename = worker.resume_filename;
+  window._workerId = worker.id;
+  window._workerName = ((worker.first_name || '') + ' ' + (worker.last_name || '')).trim() || 'this worker';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// INVITE TO APPLY
+// ════════════════════════════════════════════════════════════════════
+async function inviteToApply(){
+  const workerId = window._workerId;
+  const workerName = window._workerName;
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session) return;
+
+  const { data: jobs } = await sb.from('jobs')
+    .select('id, title, city')
+    .eq('employer_id', session.user.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+
+  if(!jobs || jobs.length === 0){
+    if(confirm('You have no active job postings to invite ' + workerName + ' to.\n\nPost a job first?')){
+      window.location.href = 'post-job.html';
+    }
+    return;
+  }
+
+  const menu = jobs.map((j, i) => `${i + 1}. ${j.title}${j.city ? ' — ' + j.city : ''}`).join('\n');
+  const pick = prompt(`Invite ${workerName} to which job?\n\n${menu}\n\nEnter the number:`);
+  if(pick === null) return;
+  const idx = parseInt(pick) - 1;
+  if(isNaN(idx) || idx < 0 || idx >= jobs.length){ alert('Invalid choice.'); return; }
+
+  const { error } = await sb.from('invitations').insert({
+    employer_id: session.user.id,
+    worker_id: workerId,
+    job_id: jobs[idx].id,
+    status: 'sent'
+  });
+
+  if(error){
+    if(error.code === '23505'){ alert(workerName + ' has already been invited to that job.'); }
+    else { alert('Error: ' + error.message); }
+    return;
+  }
+  alert(`✓ Invitation sent! "${jobs[idx].title}" will appear at the top of ${workerName}'s job board.`);
+}
+
+async function viewResume(){
+  if(!window._workerResumeUrl){ alert('No resume on file.'); return; }
+  // Generate signed URL
+  const { data, error } = await sb.storage.from('resumes').createSignedUrl(window._workerResumeUrl, 300);
+  if(error || !data?.signedUrl){ alert('Could not generate download link.'); return; }
+  window.open(data.signedUrl, '_blank');
+}
+
+init();
+</script>
+</body>
+</html>

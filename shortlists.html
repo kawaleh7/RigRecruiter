@@ -381,7 +381,7 @@ function render(){
     const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || 'WK';
     const loc = [w.city, w.province].filter(Boolean).join(', ');
     const exp = w.experience_years ? `${w.experience_years} yrs exp` : '';
-    const meta = [w.trade || 'Worker', loc, exp].filter(Boolean).join(' · ');
+    const meta = [w.trade || 'Worker', w.trade_level, loc, exp].filter(Boolean).join(' · ');
     const avail = availMap[w.availability];
     const certs = r.certs.slice(0, 4);
     const moreCount = r.certs.length - certs.length;

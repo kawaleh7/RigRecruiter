@@ -563,7 +563,7 @@ function renderWorkers(){
     const name = (first + ' ' + last).trim() || 'Worker';
     const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || w.email.substring(0,2).toUpperCase();
     const bg = AVATAR_COLORS[idx % AVATAR_COLORS.length];
-    const role = w.trade || 'Worker';
+    const role = [w.trade || 'Worker', w.trade_level].filter(Boolean).join(' · ');
     const expLabel = w.experience_years ? `${w.experience_years} yr${w.experience_years === 1 ? '' : 's'}` : 'New';
     const loc = [w.city, w.province].filter(Boolean).join(', ') || 'Location not set';
     const isShort = shortlist.includes(w.id);
@@ -689,7 +689,7 @@ function renderShortlist(){
         <div class="short-avatar" style="background:${bg}">${initials}</div>
         <div class="short-info">
           <div class="short-name">${name}</div>
-          <div class="short-role">${w.trade || 'Worker'}</div>
+          <div class="short-role">${[w.trade || 'Worker', w.trade_level].filter(Boolean).join(' · ')}</div>
         </div>
         <button class="short-remove" onclick="toggleShortlist('${w.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>`;

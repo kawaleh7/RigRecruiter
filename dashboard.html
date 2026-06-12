@@ -375,6 +375,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
         <option>Labourer</option><option>Other</option>
       </select>
 
+      <label class="ob-label">Trade Level</label>
+      <select class="ob-input" id="ob-level">
+        <option value="">Select…</option>
+                <option>1st Year Apprentice</option>
+                <option>2nd Year Apprentice</option>
+                <option>3rd Year Apprentice</option>
+                <option>4th Year Apprentice</option>
+                <option>Journeyman</option>
+                <option>Red Seal Journeyman</option>
+                <option>Not in a trade program</option>
+      </select>
+
       <label class="ob-label">Years of Experience</label>
       <select class="ob-input" id="ob-exp">
         <option value="">Select…</option>
@@ -528,6 +540,7 @@ async function obFinish(){
     first_name: document.getElementById('ob-first').value.trim() || null,
     last_name: document.getElementById('ob-last').value.trim() || null,
     trade: document.getElementById('ob-trade').value || null,
+    trade_level: document.getElementById('ob-level').value || null,
     city: document.getElementById('ob-city').value.trim() || null,
     province: document.getElementById('ob-province').value || null,
     availability: document.getElementById('ob-avail').value || null

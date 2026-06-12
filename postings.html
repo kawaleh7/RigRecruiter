@@ -576,7 +576,7 @@ async function viewDetail(id){
       const last = w.last_name || '';
       const name = (first + ' ' + last).trim() || 'Anonymous Worker';
       const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || 'WK';
-      const role = w.trade || 'Worker';
+      const role = [w.trade || 'Worker', w.trade_level].filter(Boolean).join(' · ');
       const exp = w.experience_years ? `${w.experience_years} yr${w.experience_years === 1 ? '' : 's'}` : 'New';
       const matchCls = app.matchPct === 100 ? 'full' : app.matchPct >= 50 ? 'partial' : 'low';
       const matchLabel = app.matchPct === 100
