@@ -82,7 +82,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
 .results-info{font-size:.78rem;color:var(--muted);font-weight:600;margin-bottom:12px}
 
 /* USER ROWS */
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:visible}
 .user-row{
   display:grid;grid-template-columns:minmax(200px,1.4fr) minmax(110px,.8fr) minmax(140px,1fr) minmax(150px,1fr) minmax(90px,.7fr) auto;
   gap:14px;align-items:center;padding:14px 22px;border-top:1px solid var(--line-soft);
@@ -268,6 +268,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
 
 </main>
 
+<!-- ACTIONS MODAL — center screen, cannot be clipped -->
+<div id="actions-modal" style="display:none;position:fixed;inset:0;background:rgba(10,18,40,.5);z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:14px;max-width:340px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(10,18,40,.3)">
+    <div style="padding:16px 18px;border-bottom:1px solid var(--line-soft)">
+      <div id="am-name" style="font-size:.96rem;font-weight:800;color:var(--text)">—</div>
+      <div id="am-sub" style="font-size:.76rem;color:var(--muted);margin-top:2px"></div>
+    </div>
+    <div id="am-buttons" style="display:flex;flex-direction:column"></div>
+    <button onclick="closeActions()" style="width:100%;padding:13px;background:var(--line-soft);border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.84rem;font-weight:700;color:var(--text-2);cursor:pointer">Cancel</button>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://nbpyydgqqdozdpexmwlh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_0g2EY2H1H6l93414OVlnlQ_GxqqL_o6';
@@ -350,6 +362,7 @@ function filterUsers(){
   });
 
   document.getElementById('results-info').textContent = `Showing ${filtered.length} of ${allUsers.length} users`;
+  shownUsers = filtered;
   renderTable(filtered);
 }
 
@@ -381,7 +394,7 @@ function renderTable(users){
     return;
   }
 
-  table.innerHTML = users.map(u => {
+  table.innerHTML = users.map((u, idx) => {
     const first = u.first_name || '';
     const last = u.last_name || '';
     const fullName = (first + ' ' + last).trim() || (u.company_name || (u.email || '').split('@')[0]);
@@ -422,22 +435,12 @@ function renderTable(users){
       <div class="ur-plan">${planDisplay(u)}</div>
       <div class="ur-joined cell-meta">${joined}</div>
       <div class="action-menu">
-        <button class="action-btn" onclick="toggleMenu(event,'${u.id}')">Actions ▾</button>
-        <div class="dropdown" id="menu-${u.id}" style="display:none">
-          <button onclick="setPlan('${u.id}','${safeName}','${u.role}','${u.plan || 'free'}')">💳 Set Plan</button>
-          ${!u.is_admin ? `<button onclick="switchRole('${u.id}','${safeName}','${u.role}')">⇄ Switch to ${u.role === 'employer' ? 'Worker' : 'Employer'}</button>` : ''}
-          ${u.role === 'employer' && u.verification_status === 'pending' ? `<button onclick="approveUser('${u.id}','${safeName}')">✓ Approve</button>` : ''}
-          ${u.role === 'employer' && u.verification_status !== 'rejected' ? `<button class="danger" onclick="rejectUser('${u.id}','${safeName}')">✕ Reject</button>` : ''}
-          ${u.suspended
-            ? `<button onclick="unsuspendUser('${u.id}','${safeName}')">↻ Unsuspend</button>`
-            : `<button class="danger" onclick="suspendUser('${u.id}','${safeName}')">⊘ Suspend</button>`}
-          ${!u.is_admin ? `<button onclick="makeAdmin('${u.id}','${safeName}')">⚙ Make Admin</button>` : `<button class="danger" onclick="removeAdmin('${u.id}','${safeName}')">Remove Admin</button>`}
-          <button class="danger" onclick="deleteUser('${u.id}','${safeName}')">🗑 Delete User</button>
-        </div>
+        <button class="action-btn" onclick="openActions(${idx})">Actions ▾</button>
       </div>
     </div>`;
   }).join('');
 }
+let shownUsers = [];
 
 // ════════════════════════════════════════════════════════════════════
 // SET PLAN — manual plan management (works before Stripe exists)
@@ -500,12 +503,53 @@ async function switchRole(id, name, currentRole){
   await loadUsers();
 }
 
-function toggleMenu(e, id){
-  e.stopPropagation();
-  document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
-  const menu = document.getElementById('menu-' + id);
-  if(menu) menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+// ════════════════════════════════════════════════════════════════════
+// ACTIONS MODAL — center-screen, never clipped
+// ════════════════════════════════════════════════════════════════════
+function openActions(idx){
+  const row = shownUsers[idx];
+  if(!row) return;
+  const u = {
+    id: row.id,
+    name: ((row.first_name || '') + ' ' + (row.last_name || '')).trim() || row.company_name || (row.email || '').split('@')[0],
+    role: row.role,
+    plan: row.plan || 'free',
+    is_admin: !!row.is_admin,
+    verification_status: row.verification_status,
+    suspended: !!row.suspended
+  };
+  document.getElementById('am-name').textContent = u.name;
+  const planLabel = PLAN_LABELS[u.plan] || u.plan || 'Free';
+  document.getElementById('am-sub').textContent = (u.is_admin ? 'Admin' : u.role === 'employer' ? 'Employer' : 'Worker') + ' · ' + planLabel;
+
+  const n = u.name.replace(/'/g, "\\'");
+  const btns = [];
+  const item = (label, fn, danger) =>
+    `<button onclick="closeActions();${fn}" style="width:100%;padding:13px 18px;background:#fff;border:none;border-bottom:1px solid var(--line-soft);font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;font-weight:600;color:${danger?'var(--danger)':'var(--text)'};cursor:pointer;text-align:left">${label}</button>`;
+
+  btns.push(item('💳 Set Plan', `setPlan('${u.id}','${n}','${u.role}','${u.plan}')`));
+  if(!u.is_admin) btns.push(item(`⇄ Switch to ${u.role === 'employer' ? 'Worker' : 'Employer'}`, `switchRole('${u.id}','${n}','${u.role}')`));
+  if(u.role === 'employer' && u.verification_status === 'pending') btns.push(item('✓ Approve', `approveUser('${u.id}','${n}')`));
+  if(u.role === 'employer' && u.verification_status !== 'rejected') btns.push(item('✕ Reject', `rejectUser('${u.id}','${n}')`, true));
+  btns.push(u.suspended
+    ? item('↻ Unsuspend', `unsuspendUser('${u.id}','${n}')`)
+    : item('⊘ Suspend', `suspendUser('${u.id}','${n}')`, true));
+  btns.push(!u.is_admin
+    ? item('⚙ Make Admin', `makeAdmin('${u.id}','${n}')`)
+    : item('Remove Admin', `removeAdmin('${u.id}','${n}')`, true));
+  btns.push(item('🗑 Delete User', `deleteUser('${u.id}','${n}')`, true));
+
+  document.getElementById('am-buttons').innerHTML = btns.join('');
+  document.getElementById('actions-modal').style.display = 'flex';
 }
+
+function closeActions(){
+  document.getElementById('actions-modal').style.display = 'none';
+}
+// close on backdrop click
+document.addEventListener('click', (e) => {
+  if(e.target.id === 'actions-modal') closeActions();
+});
 
 async function approveUser(id, name){
   if(!confirm(`Approve "${name}"?`)) return;
@@ -561,10 +605,11 @@ async function signOut(){
   await sb.auth.signOut();
   window.location.href = 'login.html';
 }
-document.addEventListener('click', () => {
-  document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none');
-  const menu = document.getElementById('user-menu');
-  if(menu) menu.style.display = 'none';
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('.sb-user')){
+    const menu = document.getElementById('user-menu');
+    if(menu) menu.style.display = 'none';
+  }
 });
 
 init();
