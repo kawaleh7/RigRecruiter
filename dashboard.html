@@ -427,17 +427,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
       </div>
 
       <label class="ob-label">Are you legally entitled to work in Canada?</label>
-      <select class="ob-input" id="ob-eligibility" onchange="document.getElementById('ob-permit-wrap').style.display = this.value === 'work_permit' ? 'block' : 'none'">
+      <select class="ob-input" id="ob-eligibility">
         <option value="">Select…</option>
-        <option value="citizen">Yes — Canadian Citizen</option>
-        <option value="permanent_resident">Yes — Permanent Resident</option>
-        <option value="work_permit">Yes — Work Permit</option>
+        <option value="yes">Yes</option>
+        <option value="no">Not yet</option>
       </select>
-
-      <div id="ob-permit-wrap" style="display:none">
-        <label class="ob-label">Work Permit Expiry Date</label>
-        <input class="ob-input" id="ob-permit-expiry" type="date">
-      </div>
 
       <label class="ob-label">Availability</label>
       <select class="ob-input" id="ob-avail">
@@ -571,10 +565,6 @@ async function obFinish(){
     document.getElementById('ob-eligibility').style.borderColor = '#b91c1c';
     return;
   }
-  if(document.getElementById('ob-eligibility').value === 'work_permit' && !document.getElementById('ob-permit-expiry').value){
-    document.getElementById('ob-permit-expiry').style.borderColor = '#b91c1c';
-    return;
-  }
   if(!document.getElementById('ob-avail').value){
     document.getElementById('ob-avail').style.borderColor = '#b91c1c';
     return;
@@ -592,10 +582,7 @@ async function obFinish(){
     city: document.getElementById('ob-city').value.trim() || null,
     province: document.getElementById('ob-province').value || null,
     availability: document.getElementById('ob-avail').value || null,
-    work_eligibility: document.getElementById('ob-eligibility').value || null,
-    work_permit_expiry: document.getElementById('ob-eligibility').value === 'work_permit'
-      ? (document.getElementById('ob-permit-expiry').value || null)
-      : null
+    work_eligible: document.getElementById('ob-eligibility').value === 'yes'
   };
   if(exp !== '') updates.experience_years = parseInt(exp);
 

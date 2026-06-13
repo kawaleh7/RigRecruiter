@@ -351,21 +351,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
             </div>
           </div>
 
-          <div class="two-col">
-            <div class="field">
-              <label>Legal Right to Work in Canada</label>
-              <select id="jp-eligibility" onchange="document.getElementById('jp-permit-field').style.display = this.value === 'work_permit' ? 'block' : 'none'">
-                <option value="">Not set</option>
-                <option value="citizen">Canadian Citizen</option>
-                <option value="permanent_resident">Permanent Resident</option>
-                <option value="work_permit">Work Permit</option>
-              </select>
-            </div>
-            <div class="field" id="jp-permit-field" style="display:none">
-              <label>Work Permit Expiry</label>
-              <input type="date" id="jp-permit-expiry">
-              <div class="field-help">Employers see this — keep it current.</div>
-            </div>
+          <div class="field">
+            <label>Are you legally entitled to work in Canada?</label>
+            <select id="jp-eligibility">
+              <option value="">Not set</option>
+              <option value="yes">Yes</option>
+              <option value="no">Not yet</option>
+            </select>
+            <div class="field-help">Employers only see "eligible to work" — never your immigration details.</div>
           </div>
 
           <button class="btn btn-blue" onclick="saveJobPrefs()">Save Job Preferences</button>
@@ -784,11 +777,7 @@ async function init(){
     renderPrefChecks('jp-types',
       ['Full-time','Contract','Part-time','Casual','Turnaround','Apprenticeship'],
       profile.preferred_employment_types || []);
-    document.getElementById('jp-eligibility').value = profile.work_eligibility || '';
-    if(profile.work_eligibility === 'work_permit'){
-      document.getElementById('jp-permit-field').style.display = 'block';
-      document.getElementById('jp-permit-expiry').value = profile.work_permit_expiry || '';
-    }
+    document.getElementById('jp-eligibility').value = profile.work_eligible === true ? 'yes' : profile.work_eligible === false ? 'no' : '';
   }
 
   document.getElementById('t-email-notif').classList.toggle('on', profile.email_notifications !== false);
@@ -826,10 +815,7 @@ async function saveJobPrefs(){
     expected_pay_max: payMax ? parseInt(payMax) : null,
     preferred_provinces: provinces,
     preferred_employment_types: types,
-    work_eligibility: document.getElementById('jp-eligibility').value || null,
-    work_permit_expiry: document.getElementById('jp-eligibility').value === 'work_permit'
-      ? (document.getElementById('jp-permit-expiry').value || null)
-      : null
+    work_eligible: (function(){ const v = document.getElementById('jp-eligibility').value; return v === 'yes' ? true : v === 'no' ? false : null; })()
   };
 
   const msg = document.getElementById('jobprefs-msg');
