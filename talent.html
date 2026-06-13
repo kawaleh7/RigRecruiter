@@ -381,8 +381,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;color:#0f172a
     </div>
   </div>
   <div class="drawer-foot">
+    <button class="btn btn-blue" style="width:100%;margin-bottom:9px" onclick="inviteShortlistToJob()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Invite All to Apply
+    </button>
     <div class="drawer-actions">
-      <button class="btn btn-blue" id="contact-btn" disabled style="opacity:.5">
+      <button class="btn btn-ghost" id="contact-btn" disabled style="opacity:.5">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         Contact All
       </button>
@@ -519,6 +523,55 @@ async function loadWorkers(){
 
   buildFilters();
   renderWorkers();
+}
+
+// ════════════════════════════════════════════════════════════════════
+// INVITE ALL (shortlist drawer) → pick a job, batch invite
+// ════════════════════════════════════════════════════════════════════
+async function inviteShortlistToJob(){
+  if(shortlist.length === 0){
+    alert('Shortlist a few workers first, then invite them all to a job at once.');
+    return;
+  }
+
+  const { data: jobs } = await sb.from('jobs')
+    .select('id, title, city')
+    .eq('employer_id', currentUser.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+
+  if(!jobs || jobs.length === 0){
+    if(confirm('You have no active job postings to invite workers to.\n\nPost a job first?')){
+      window.location.href = 'post-job.html';
+    }
+    return;
+  }
+
+  const menu = jobs.map((j, i) => `${i + 1}. ${j.title}${j.city ? ' — ' + j.city : ''}`).join('\n');
+  const pick = prompt(`Invite ${shortlist.length} shortlisted worker${shortlist.length === 1 ? '' : 's'} to which job?\n\n${menu}\n\nEnter the number:`);
+  if(pick === null) return;
+  const idx = parseInt(pick) - 1;
+  if(isNaN(idx) || idx < 0 || idx >= jobs.length){ alert('Invalid choice.'); return; }
+  const job = jobs[idx];
+
+  const rows = shortlist.map(workerId => ({
+    employer_id: currentUser.id,
+    worker_id: workerId,
+    job_id: job.id,
+    status: 'sent'
+  }));
+
+  const { data: inserted, error } = await sb.from('invitations')
+    .upsert(rows, { onConflict: 'worker_id,job_id', ignoreDuplicates: true })
+    .select();
+
+  if(error){ alert('Error: ' + error.message); return; }
+
+  const sent = (inserted || []).length;
+  const skipped = shortlist.length - sent;
+  alert(`✓ Invited ${sent} worker${sent === 1 ? '' : 's'} to "${job.title}".` +
+    (skipped > 0 ? `\n(${skipped} already invited to this job — skipped.)` : '') +
+    `\n\nIt will appear at the top of their job boards with an "Invited" badge.`);
 }
 
 async function loadShortlist(){
