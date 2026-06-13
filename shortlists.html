@@ -243,6 +243,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
 
   <!-- TOOLBAR -->
   <div class="toolbar">
+    <label style="display:inline-flex;align-items:center;gap:7px;font-size:.8rem;font-weight:700;color:var(--text-2);cursor:pointer;white-space:nowrap">
+      <input type="checkbox" id="select-all" onchange="toggleSelectAll(this.checked)" style="width:16px;height:16px;accent-color:var(--blue)">
+      Select all
+    </label>
     <div class="search-bar">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="search" placeholder="Search by name or trade…" oninput="setFilter(this.value)">
@@ -262,6 +266,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
     <div id="roster-list">
       <div class="empty"><span>Loading roster…</span></div>
     </div>
+  </div>
+
+  <!-- BULK INVITE BAR -->
+  <div id="bulk-bar" style="display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:300;background:var(--navy);color:#fff;border-radius:12px;padding:12px 16px;box-shadow:0 14px 40px rgba(10,18,40,.35);align-items:center;gap:14px;max-width:92vw">
+    <span id="bulk-count" style="font-size:.86rem;font-weight:700;white-space:nowrap">0 selected</span>
+    <button onclick="bulkInvite()" style="padding:9px 16px;border:none;border-radius:8px;background:#fff;color:var(--navy);font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;white-space:nowrap">Invite All to a Job</button>
+    <button onclick="clearSelection()" style="padding:9px 10px;border:none;border-radius:8px;background:transparent;color:#94a3b8;font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer">Cancel</button>
   </div>
 
 </main>
@@ -398,6 +409,7 @@ function render(){
     const moreCount = r.certs.length - certs.length;
 
     return `<div class="worker-row">
+      <input type="checkbox" class="w-select" data-worker-id="${w.id}" data-worker-name="${fullName.replace(/"/g,'&quot;')}" onchange="updateSelection()" style="width:17px;height:17px;accent-color:var(--blue);margin-top:13px;flex-shrink:0;cursor:pointer">
       <div class="w-avatar">${initials}</div>
       <div class="w-info">
         <div class="w-name-row">
@@ -465,6 +477,73 @@ async function inviteToApply(workerId, workerName){
   }
 
   alert(`✓ Invitation sent!\n\n"${job.title}" will appear at the top of ${workerName}'s job board with an "Invited" badge.`);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// BATCH INVITE — select crew, invite all to one job
+// ════════════════════════════════════════════════════════════════════
+function updateSelection(){
+  const checked = document.querySelectorAll('.w-select:checked');
+  const bar = document.getElementById('bulk-bar');
+  document.getElementById('bulk-count').textContent = checked.length + ' selected';
+  bar.style.display = checked.length > 0 ? 'flex' : 'none';
+  const all = document.querySelectorAll('.w-select');
+  document.getElementById('select-all').checked = all.length > 0 && checked.length === all.length;
+}
+
+function toggleSelectAll(on){
+  document.querySelectorAll('.w-select').forEach(cb => cb.checked = on);
+  updateSelection();
+}
+
+function clearSelection(){
+  toggleSelectAll(false);
+}
+
+async function bulkInvite(){
+  const checked = [...document.querySelectorAll('.w-select:checked')];
+  if(checked.length === 0) return;
+
+  const { data: jobs } = await sb.from('jobs')
+    .select('id, title, city')
+    .eq('employer_id', currentUser.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+
+  if(!jobs || jobs.length === 0){
+    if(confirm('You have no active job postings to invite workers to.\n\nPost a job first?')){
+      window.location.href = 'post-job.html';
+    }
+    return;
+  }
+
+  const menu = jobs.map((j, i) => `${i + 1}. ${j.title}${j.city ? ' — ' + j.city : ''}`).join('\n');
+  const pick = prompt(`Invite ${checked.length} worker${checked.length === 1 ? '' : 's'} to which job?\n\n${menu}\n\nEnter the number:`);
+  if(pick === null) return;
+  const idx = parseInt(pick) - 1;
+  if(isNaN(idx) || idx < 0 || idx >= jobs.length){ alert('Invalid choice.'); return; }
+  const job = jobs[idx];
+
+  const rows = checked.map(cb => ({
+    employer_id: currentUser.id,
+    worker_id: cb.dataset.workerId,
+    job_id: job.id,
+    status: 'sent'
+  }));
+
+  // upsert with ignoreDuplicates: already-invited workers are skipped, not errors
+  const { data: inserted, error } = await sb.from('invitations')
+    .upsert(rows, { onConflict: 'worker_id,job_id', ignoreDuplicates: true })
+    .select();
+
+  if(error){ alert('Error: ' + error.message); return; }
+
+  const sent = (inserted || []).length;
+  const skipped = checked.length - sent;
+  alert(`✓ Invited ${sent} worker${sent === 1 ? '' : 's'} to "${job.title}".` +
+    (skipped > 0 ? `\n(${skipped} already invited to this job — skipped.)` : '') +
+    `\n\nThe job will appear at the top of their job boards with an "Invited" badge.`);
+  clearSelection();
 }
 
 async function editNote(shortlistId, currentNote){

@@ -451,6 +451,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#fafbfc;color:#0f172a
       <button class="ob-back" onclick="obShow(2)">← Back</button>
     </div>
 
+    <button onclick="signOut()" style="display:block;margin:18px auto 0;background:none;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;color:#94a3b8;cursor:pointer;text-decoration:underline">Not now? Sign out</button>
+
+    <button onclick="obSignOut()" style="display:block;margin:16px auto 0;background:none;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.76rem;font-weight:600;color:#94a3b8;cursor:pointer;text-decoration:underline">Sign out — I'll finish this later</button>
+
   </div>
 </div>
 
@@ -536,6 +540,11 @@ async function init(){
 // ════════════════════════════════════════════════════════════════════
 // ONBOARDING WIZARD
 // ════════════════════════════════════════════════════════════════════
+async function obSignOut(){
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+
 function obShow(n){
   document.querySelectorAll('.ob-step').forEach(s => s.style.display = 'none');
   document.getElementById('ob-step-' + n).style.display = 'block';
