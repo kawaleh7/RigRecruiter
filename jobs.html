@@ -382,15 +382,27 @@ async function loadData(){
   // My saved jobs
   await loadSavedJobs();
 
-  // All active jobs with employer profile (for company name + verification)
+  // All active jobs
   const { data: jobs } = await sb
     .from('jobs')
-    .select('*, employer:profiles!jobs_employer_id_fkey(company_name, first_name, last_name, city, province, verification_status)')
+    .select('*')
     .eq('status', 'active')
     .order('published_at', { ascending: false });
 
-  // VERIFICATION ENFORCEMENT: workers only see jobs from approved employers
-  const verifiedJobs = (jobs || []).filter(j => j.employer && j.employer.verification_status === 'approved');
+  // Approved employers (separate query — no fragile FK-join name dependency)
+  const empIds = [...new Set((jobs || []).map(j => j.employer_id).filter(Boolean))];
+  let empMap = {};
+  if(empIds.length){
+    const { data: emps } = await sb.from('profiles')
+      .select('id, company_name, first_name, last_name, city, province, verification_status')
+      .in('id', empIds);
+    (emps || []).forEach(e => { empMap[e.id] = e; });
+  }
+
+  // Attach employer info; keep only jobs from APPROVED employers
+  const verifiedJobs = (jobs || [])
+    .map(j => ({ ...j, employer: empMap[j.employer_id] || null }))
+    .filter(j => j.employer && j.employer.verification_status === 'approved');
 
   // Invitations sent to this worker
   const { data: invites } = await sb.from('invitations')
