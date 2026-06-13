@@ -198,22 +198,20 @@ function renderProfile(worker, certs, history, canSeeContact){
   };
   const avail = availMap[worker.availability] || '—';
 
-  // Work eligibility badge
+  // Work eligibility badge — employers see ONLY a binary "eligible to work".
+  // Citizenship/PR/permit category and permit dates are NEVER shown to employers
+  // (human-rights compliance — employers may only ask "legally entitled to work?").
   let eligBadge = '';
-  if(worker.work_eligibility === 'citizen' || worker.work_eligibility === 'permanent_resident'){
-    const label = worker.work_eligibility === 'citizen' ? 'Canadian Citizen' : 'Permanent Resident';
-    eligBadge = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;background:rgba(34,197,94,.16);color:#4ade80;padding:3px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px">✓ ${label} — Eligible to Work</span>`;
-  } else if(worker.work_eligibility === 'work_permit'){
+  const elig = worker.work_eligibility;
+  if(elig === 'citizen' || elig === 'permanent_resident'){
+    eligBadge = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;background:rgba(34,197,94,.16);color:#4ade80;padding:3px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px">✓ Eligible to work in Canada</span>`;
+  } else if(elig === 'work_permit'){
+    // A permit holder is eligible only while the permit is valid.
     const exp = worker.work_permit_expiry ? new Date(worker.work_permit_expiry) : null;
-    const days = exp ? Math.ceil((exp - new Date()) / (1000*60*60*24)) : null;
-    const expStr = exp ? exp.toLocaleDateString('en-CA', {month:'short', day:'numeric', year:'numeric'}) : 'expiry unknown';
-    if(days !== null && days < 0){
-      eligBadge = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;background:rgba(239,68,68,.18);color:#f87171;padding:3px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px">⚠ Work Permit EXPIRED ${expStr}</span>`;
-    } else if(days !== null && days <= 90){
-      eligBadge = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;background:rgba(234,179,8,.18);color:#fbbf24;padding:3px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px">Work Permit — expires ${expStr} (${days}d)</span>`;
-    } else {
-      eligBadge = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;background:rgba(34,197,94,.16);color:#4ade80;padding:3px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px">✓ Work Permit — valid until ${expStr}</span>`;
-    }
+    const expired = exp && exp < new Date();
+    eligBadge = expired
+      ? '' // expired permit → show nothing rather than flag immigration detail
+      : `<span style="display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:800;background:rgba(34,197,94,.16);color:#4ade80;padding:3px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:.4px">✓ Eligible to work in Canada</span>`;
   }
 
   // Cert status counts

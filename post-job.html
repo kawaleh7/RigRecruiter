@@ -890,7 +890,31 @@ function removeScreeningQ(i){
 
 function updateScreeningQ(i, val){
   formData.screeningQuestions[i].q = val;
+  // Flag questions that probe protected characteristics (human-rights compliance)
+  const warn = document.getElementById('sq-warn-' + i);
+  if(warn){
+    warn.style.display = isProhibitedQuestion(val) ? 'block' : 'none';
+  }
   autoSave();
+}
+
+// Detects screening questions that ask about legally protected characteristics.
+// Employers may ask "are you legally entitled to work in Canada?" but NOT about
+// citizenship, origin, religion, age, marital/family status, disability, etc.
+function isProhibitedQuestion(text){
+  const t = (text || '').toLowerCase();
+  if(!t.trim()) return false;
+  // "legally entitled/eligible to work" is the ONE allowed eligibility phrasing
+  if(/(legally|entitled|eligible).*(work|employ)/.test(t) || /(work|employ).*(legally|entitled|eligible)/.test(t)) return false;
+  const flags = [
+    'citizen','citizenship','permanent resident',' pr ','immigration','immigrant','status in canada',
+    'work permit','visa','passport','born','nationality','national origin','where are you from','country of origin','what country',
+    'religion','muslim','christian','church','mosque','pray',
+    'age','how old','year were you born','date of birth','birth date',
+    'married','marital','single','divorced','spouse','children','kids','pregnant','pregnancy','family status',
+    'race','ethnic','ethnicity','colour','disability','disabled','health condition','medical condition'
+  ];
+  return flags.some(f => t.includes(f));
 }
 
 function toggleDealbreaker(i, el){
@@ -901,7 +925,8 @@ function toggleDealbreaker(i, el){
 function renderScreeningQs(){
   const list = document.getElementById('sq-list');
   list.innerHTML = formData.screeningQuestions.map((sq, i) => `
-    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap">
+    <div style="margin-bottom:10px">
+    <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap">
       <input type="text" value="${(sq.q || '').replace(/"/g,'&quot;')}" placeholder="e.g. Do you have your own rig truck?" maxlength="140"
         oninput="updateScreeningQ(${i}, this.value)"
         style="flex:1;min-width:220px;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;outline:none">
@@ -913,6 +938,10 @@ function renderScreeningQs(){
         style="background:transparent;border:none;cursor:pointer;color:var(--light);padding:10px 6px;border-radius:6px" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--light)'">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
+    </div>
+    <div id="sq-warn-${i}" style="display:${isProhibitedQuestion(sq.q) ? 'block' : 'none'};font-size:.74rem;font-weight:700;color:var(--danger);background:var(--danger-soft);border:1px solid #fda4af;border-radius:7px;padding:7px 10px;margin-top:6px;line-height:1.45">
+      ⚠ This looks like it asks about a protected characteristic (citizenship, origin, religion, age, family status, etc.). That's not allowed under human-rights law. To check work eligibility, ask only: "Are you legally entitled to work in Canada?"
+    </div>
     </div>
   `).join('');
   document.getElementById('sq-add').style.display = formData.screeningQuestions.length >= 3 ? 'none' : 'inline-flex';
@@ -1186,6 +1215,14 @@ async function publishJob(){
   }
 
   if(!validateStep(1) || !validateStep(2) || !validateStep(3)) return;
+
+  // Human-rights guard: refuse to publish status/protected-characteristic questions
+  const bad = formData.screeningQuestions.find(sq => sq.q && isProhibitedQuestion(sq.q));
+  if(bad){
+    alert('One of your screening questions asks about a protected characteristic:\n\n"' + bad.q + '"\n\nQuestions about citizenship, national origin, religion, age, or family status aren\'t allowed under human-rights law. To check work eligibility, use only: "Are you legally entitled to work in Canada?"\n\nPlease edit or remove that question before publishing.');
+    goToStep(4);
+    return;
+  }
   if(!formData.description || formData.description.length < 50){
     if(!confirm('Your description is short. Postings with detailed descriptions get 3× more qualified applicants. Publish anyway?')) return;
   }
